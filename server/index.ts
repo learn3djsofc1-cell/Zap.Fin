@@ -1,16 +1,12 @@
 import express from 'express';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
-import pg from 'pg';
+import { pool, initDatabase } from './db.js';
 import authRoutes from './routes/auth.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 const PgSession = connectPgSimple(session);
-
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
 
 if (isProduction) {
   app.set('trust proxy', 1);
@@ -48,9 +44,17 @@ app.get('/api/health', (_req, res) => {
 });
 
 const PORT = parseInt(process.env.API_PORT || '3001', 10);
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`API server running on port ${PORT}`);
+
+async function start() {
+  await initDatabase();
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`API server running on port ${PORT}`);
+  });
+}
+
+start().catch((err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });
 
-export { pool };
 export default app;
