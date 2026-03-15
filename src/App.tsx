@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Send, Lock, RefreshCw, Copy, ChevronDown, MoreHorizontal, Eye, Wifi, ChevronLeft, ArrowRight, Menu, X } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 function AnimatedSection({ children, className, delay = 0, direction = 'up' }: { children: ReactNode; className?: string; delay?: number; direction?: 'up' | 'down' | 'left' | 'right' }) {
   const ref = useRef(null);
@@ -49,7 +50,7 @@ function StaggerChildren({ children, className, staggerDelay = 0.1 }: { children
 
 const staggerItem = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] } },
 };
 
 const ZapLogo = ({ className }: { className?: string }) => (
@@ -86,9 +87,9 @@ function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:block">
-          <button className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 py-2.5 rounded-full font-medium flex items-center gap-2 text-sm transition-colors">
+          <Link to="/app" className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 py-2.5 rounded-full font-medium flex items-center gap-2 text-sm transition-colors">
             Launch App
-          </button>
+          </Link>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -113,9 +114,9 @@ function Navbar() {
               {link.name}
             </a>
           ))}
-          <button className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 text-base transition-colors mt-2 w-full">
+          <Link to="/app" className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 text-base transition-colors mt-2 w-full" onClick={() => setIsMenuOpen(false)}>
             Launch App
-          </button>
+          </Link>
         </div>
       )}
     </nav>
@@ -144,15 +145,16 @@ function HeroLeft() {
         Card control from your<br />
         web dApp dashboard.
       </motion.p>
-      <motion.button
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="mt-8 md:mt-12 bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center justify-center sm:justify-start gap-3 text-base sm:text-lg transition-colors w-full sm:w-auto"
       >
-        <Send size={20} className="fill-[#FF6940]" />
-        Launch Dashboard
-      </motion.button>
+        <Link to="/app" className="mt-8 md:mt-12 bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center justify-center sm:justify-start gap-3 text-base sm:text-lg transition-colors w-full sm:w-auto inline-flex">
+          <Send size={20} className="fill-[#FF6940]" />
+          Launch Dashboard
+        </Link>
+      </motion.div>
     </div>
   );
 }
@@ -965,10 +967,10 @@ function CTAAndFooterSection() {
         </h2>
         </AnimatedSection>
         <AnimatedSection delay={0.15}>
-        <button className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold flex items-center justify-center gap-3 text-base sm:text-lg transition-colors mb-16 sm:mb-24 shadow-xl w-full sm:w-auto">
+        <Link to="/app" className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold flex items-center justify-center gap-3 text-base sm:text-lg transition-colors mb-16 sm:mb-24 shadow-xl w-full sm:w-auto inline-flex">
           <Send size={20} className="fill-[#FF6940]" />
           Launch Dashboard
-        </button>
+        </Link>
         </AnimatedSection>
 
         <StaggerChildren className="w-full grid grid-cols-1 md:grid-cols-2 gap-6" staggerDelay={0.15}>
