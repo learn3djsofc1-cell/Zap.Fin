@@ -579,7 +579,7 @@ function SpendControlSection() {
                 </div>
 
                 {/* Right Column: Limits & Feed */}
-                <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+                <div className="flex-1 flex flex-col gap-4 overflow-hidden min-w-0">
                   {/* Limits */}
                   <div className="bg-[#1A1B1F] rounded-xl p-4 border border-white/5 shrink-0">
                     <div className="flex justify-between items-center mb-3">
@@ -592,23 +592,23 @@ function SpendControlSection() {
                   </div>
 
                   {/* Transaction Feed */}
-                  <div className="bg-[#1A1B1F] rounded-xl p-4 border border-white/5 flex-1 flex flex-col">
+                  <div className="bg-[#1A1B1F] rounded-xl p-4 border border-white/5 flex-1 flex flex-col min-w-0">
                     <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-3 block">Recent Transactions</span>
                     
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between bg-[#0F1014] p-2.5 rounded-lg border border-white/5">
-                        <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-3 min-w-0">
+                      <div className="flex items-center justify-between bg-[#0F1014] p-2.5 rounded-lg border border-white/5 min-w-0 gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
                           <div className="w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center flex-shrink-0">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
                               <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM16.586 16.424C16.38 16.762 15.945 16.865 15.607 16.658C12.809 14.95 9.339 14.546 5.478 15.428C5.101 15.514 4.726 15.276 4.64 14.899C4.554 14.522 4.792 14.147 5.169 14.061C9.397 13.096 13.235 13.551 16.332 15.449C16.67 15.656 16.773 16.086 16.586 16.424ZM17.91 13.338C17.653 13.757 17.108 13.882 16.689 13.624C13.483 11.654 8.859 11.074 5.305 12.152C4.836 12.294 4.337 12.029 4.195 11.56C4.053 11.091 4.318 10.592 4.787 10.45C8.865 9.214 14.004 9.866 17.662 12.119C18.081 12.377 18.206 12.922 17.91 13.338ZM18.054 10.122C14.336 7.912 8.328 7.708 4.855 8.763C4.288 8.935 3.682 8.613 3.51 8.046C3.338 7.479 3.66 6.873 4.227 6.701C8.216 5.489 14.846 5.727 19.13 8.271C19.643 8.576 19.812 9.24 19.507 9.753C19.202 10.266 18.538 10.435 18.054 10.122Z"/>
                             </svg>
                           </div>
-                          <div>
-                            <p className="text-white text-xs font-medium">Spotify</p>
-                            <p className="text-gray-500 text-[10px]">Today, 19:19</p>
+                          <div className="min-w-0">
+                            <p className="text-white text-xs font-medium truncate">Spotify</p>
+                            <p className="text-gray-500 text-[10px] truncate">Today, 19:19</p>
                           </div>
                         </div>
-                        <span className="text-white text-xs font-bold">-14.87 USDC</span>
+                        <span className="text-white text-xs font-bold whitespace-nowrap flex-shrink-0">-14.87 USDC</span>
                       </div>
                     </div>
                   </div>
