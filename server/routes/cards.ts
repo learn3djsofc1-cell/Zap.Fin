@@ -80,9 +80,9 @@ export default function cardRoutes(pool: pg.Pool) {
         'SELECT COUNT(*) FROM cards WHERE user_id = $1',
         [userId]
       );
-      if (parseInt(countResult.rows[0].count, 10) >= 3) {
+      if (parseInt(countResult.rows[0].count, 10) >= 2) {
         await client.query('ROLLBACK');
-        res.status(400).json({ error: 'Maximum of 3 cards allowed' });
+        res.status(400).json({ error: 'Maximum of 2 cards allowed' });
         return;
       }
 

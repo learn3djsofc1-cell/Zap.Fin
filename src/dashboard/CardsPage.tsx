@@ -21,7 +21,7 @@ export default function CardsPage() {
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
   const [revealedCVVs, setRevealedCVVs] = useState<Set<number>>(new Set());
   const [cardError, setCardError] = useState<string | null>(null);
-  const MAX_CARDS = 3;
+  const MAX_CARDS = 2;
 
   const fetchCards = useCallback(async () => {
     try {
@@ -44,7 +44,7 @@ export default function CardsPage() {
   const createCard = async () => {
     setCardError(null);
     if (cards.length >= MAX_CARDS) {
-      setCardError(`Maximum of ${MAX_CARDS} cards allowed`);
+      setCardError(`Maximum of ${MAX_CARDS} cards allowed. Remove an existing card to create a new one.`);
       return;
     }
     setCreating(true);
