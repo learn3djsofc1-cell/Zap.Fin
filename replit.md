@@ -14,6 +14,7 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 - **Backend**: Express 4 with TypeScript (run via tsx)
 - **Database**: PostgreSQL (Replit built-in)
 - **Auth**: express-session + connect-pg-simple (session-based), bcrypt for password hashing
+- **Solana**: @solana/web3.js for wallet keypair generation
 - **AI**: @google/genai (Gemini API key via GEMINI_API_KEY env var)
 
 ## Project Structure
@@ -32,15 +33,18 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 │   │   └── ProtectedRoute.tsx # Redirects to /login if not authenticated
 │   └── dashboard/
 │       ├── DashboardLayout.tsx  # Shared layout: sidebar (desktop), bottom nav (mobile)
-│       ├── OverviewPage.tsx     # /app — Balance, card preview, activity (empty states)
-│       ├── CardsPage.tsx        # /app/cards — Card creation CTA (empty state)
-│       ├── TopupsPage.tsx       # /app/topups — Wallet creation CTA (empty state)
-│       └── ControlsPage.tsx     # /app/controls — Card controls CTA (empty state)
+│       ├── OverviewPage.tsx     # /app — Balance, card preview, wallet address, activity
+│       ├── CardsPage.tsx        # /app/cards — Create/manage Visa cards with show/freeze toggles
+│       ├── TopupsPage.tsx       # /app/topups — Solana wallet creation + top-up UI
+│       └── ControlsPage.tsx     # /app/controls — Per-card freeze/online/contactless toggles
 ├── server/
 │   ├── index.ts            # Express server entry point (port 3001)
+│   ├── db.ts               # Database pool + schema initialization
 │   ├── tsconfig.json       # Separate TS config for server code
 │   └── routes/
-│       └── auth.ts         # Auth API: signup, login, logout, me
+│       ├── auth.ts         # Auth API: signup, login, logout, me
+│       ├── cards.ts        # Cards API: create, list, details, freeze/unfreeze, toggle
+│       └── wallet.ts       # Wallet API: create (Solana keypair), get, confirm
 ├── vite.config.ts          # Vite config with /api proxy to Express
 ├── tsconfig.json           # Frontend TS config (excludes server/)
 └── package.json            # Dependencies and scripts
@@ -58,10 +62,26 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 
 ## API Endpoints
 
+### Auth
 - `POST /api/auth/signup` — Create account (email + password)
 - `POST /api/auth/login` — Sign in (returns user, sets session cookie)
 - `POST /api/auth/logout` — Sign out (destroys session)
 - `GET /api/auth/me` — Get current user (401 if not authenticated)
+
+### Cards
+- `GET /api/cards` — List user's cards (masked numbers)
+- `POST /api/cards/create` — Generate Luhn-valid Visa card (number, CVV, expiry)
+- `GET /api/cards/:id/details` — Full card details (number, CVV) for card owner
+- `PATCH /api/cards/:id/freeze` — Freeze a card
+- `PATCH /api/cards/:id/unfreeze` — Unfreeze a card
+- `PATCH /api/cards/:id/toggle` — Toggle field (frozen, online_payments, contactless)
+
+### Wallet
+- `GET /api/wallet` — Get user's wallet address (no private key)
+- `POST /api/wallet/create` — Generate Solana keypair, return address + private key (one-time)
+- `POST /api/wallet/confirm` — Confirm user has saved private key
+
+### Other
 - `GET /api/health` — Health check
 
 ## Database Schema
@@ -70,6 +90,8 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 - **cards**: id (serial PK), user_id (FK), card_number, cvv, expiry, name, frozen, online_payments, contactless, created_at
 - **wallets**: id (serial PK), user_id (FK unique), address, encrypted_private_key, confirmed, created_at
 - **session**: sid (PK), sess (JSON), expire — managed by connect-pg-simple
+
+Tables are auto-created on server startup via `server/db.ts`.
 
 ## Development
 
@@ -98,7 +120,8 @@ Configured as a **static** site deployment:
 ## Environment Variables
 
 - `DATABASE_URL` — PostgreSQL connection string (auto-set by Replit)
-- `HELIUS_API_KEY` — Helius RPC API key for Solana
-- `COINGECKO_API_KEY` — CoinGecko API key for price data
+- `HELIUS_API_KEY` — Helius RPC API key for Solana (Replit Secret)
+- `COINGECKO_API_KEY` — CoinGecko API key for price data (Replit Secret)
 - `GEMINI_API_KEY` — Gemini AI API key (optional)
-- `SESSION_SECRET` — Express session secret (defaults to dev fallback)
+- `SESSION_SECRET` — Express session secret (required in production, defaults to dev fallback)
+- `WALLET_ENCRYPTION_KEY` — Key for encrypting wallet private keys (falls back to SESSION_SECRET)

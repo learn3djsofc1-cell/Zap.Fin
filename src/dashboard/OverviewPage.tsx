@@ -1,8 +1,58 @@
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDownLeft, CreditCard, Wallet, Plus } from 'lucide-react';
+import { ArrowDownLeft, CreditCard, Wallet, Plus, Loader2, Eye, EyeOff } from 'lucide-react';
+
+interface Card {
+  id: number;
+  card_number_masked: string;
+  card_number_formatted: string;
+  cvv: string;
+  expiry: string;
+  name: string;
+  frozen: boolean;
+}
+
+interface WalletData {
+  id: number;
+  address: string;
+  confirmed: boolean;
+}
 
 export default function OverviewPage() {
   const navigate = useNavigate();
+  const [cards, setCards] = useState<Card[]>([]);
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showNumber, setShowNumber] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [cardsRes, walletRes] = await Promise.all([
+        fetch('/api/cards'),
+        fetch('/api/wallet'),
+      ]);
+      if (cardsRes.ok) setCards(await cardsRes.json());
+      if (walletRes.ok) setWallet(await walletRes.json());
+    } catch (err) {
+      console.error('Failed to fetch overview data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="animate-spin text-[#FF6940]" size={32} />
+      </div>
+    );
+  }
+
+  const firstCard = cards[0];
 
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
@@ -28,17 +78,48 @@ export default function OverviewPage() {
           </div>
         </div>
 
-        <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5 flex flex-col items-center justify-center min-h-[180px]">
-          <CreditCard size={32} className="text-gray-600 mb-3" />
-          <p className="text-gray-400 text-sm text-center mb-4">No cards yet</p>
-          <button
+        {firstCard ? (
+          <div
+            className="rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[180px] cursor-pointer"
             onClick={() => navigate('/app/cards')}
-            className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-2.5 px-5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2"
+            style={{
+              background: firstCard.frozen
+                ? 'linear-gradient(135deg, #3a3a4a 0%, #2a2a3a 100%)'
+                : 'linear-gradient(135deg, #FF6940 0%, #FF8F6B 30%, #FF6940 60%, #E55527 100%)',
+            }}
           >
-            <Plus size={16} />
-            Create Visa Card
-          </button>
-        </div>
+            <div className="flex items-center justify-between">
+              <span className="text-white/90 text-xs font-medium">{firstCard.name}</span>
+              <span className="text-white font-bold text-sm tracking-wider">VISA</span>
+            </div>
+            <div className="mt-auto">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-white text-sm font-mono tracking-widest">
+                  {showNumber ? firstCard.card_number_formatted : firstCard.card_number_masked}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowNumber(!showNumber); }}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  {showNumber ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+              <span className="text-white/60 text-xs">{firstCard.expiry}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5 flex flex-col items-center justify-center min-h-[180px]">
+            <CreditCard size={32} className="text-gray-600 mb-3" />
+            <p className="text-gray-400 text-sm text-center mb-4">No cards yet</p>
+            <button
+              onClick={() => navigate('/app/cards')}
+              className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-2.5 px-5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Create Visa Card
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -76,16 +157,30 @@ export default function OverviewPage() {
 
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
             <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Wallet</span>
-            <div className="flex flex-col items-center py-4">
-              <Wallet size={24} className="text-gray-600 mb-2" />
-              <p className="text-gray-500 text-sm">No wallet created</p>
-              <button
-                onClick={() => navigate('/app/topups')}
-                className="text-[#FF6940] text-xs font-bold mt-2 hover:underline"
-              >
-                Create Solana Wallet
-              </button>
-            </div>
+            {wallet ? (
+              <div className="flex flex-col gap-2">
+                <code className="text-green-400 text-xs break-all font-mono bg-[#0A0B0E] rounded-lg p-3">
+                  {wallet.address}
+                </code>
+                <button
+                  onClick={() => navigate('/app/topups')}
+                  className="text-[#FF6940] text-xs font-bold mt-1 hover:underline"
+                >
+                  Go to Top-ups
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center py-4">
+                <Wallet size={24} className="text-gray-600 mb-2" />
+                <p className="text-gray-500 text-sm">No wallet created</p>
+                <button
+                  onClick={() => navigate('/app/topups')}
+                  className="text-[#FF6940] text-xs font-bold mt-2 hover:underline"
+                >
+                  Create Solana Wallet
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
