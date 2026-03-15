@@ -180,12 +180,8 @@ function HeroRight() {
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#E50914] flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4">
-                        <path d="M5.398 0C5.398 0 5.398 16.634 5.398 18.006C5.398 19.534 5.882 20.09 6.652 20.09C7.078 20.09 7.47 19.96 7.862 19.768L8.422 21.7C7.768 22.064 6.816 22.328 5.82 22.328C3.788 22.328 2.812 21.164 2.812 18.534V0H5.398Z" fill="white"/>
-                        <path d="M5.398 0H8.274L13.546 14.89V0H16.132V22H13.802L8.274 6.476V22H5.398V0Z" fill="white" fillOpacity="0.9"/>
-                        <path d="M16.132 0H18.718V18.534C18.718 21.164 19.694 22.328 21.726 22.328C22.722 22.328 23.334 22.064 23.988 21.7L23.428 19.768C23.036 19.96 22.644 20.09 22.218 20.09C21.448 20.09 20.964 19.534 20.964 18.006C20.964 16.634 20.964 0 20.964 0" fill="white" fillOpacity="0.65"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+                      <img src="/netflix.png" alt="Netflix" className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <div className="text-white text-xs font-medium">Netflix Subscription</div>
@@ -196,11 +192,8 @@ function HeroRight() {
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#2775CA] flex items-center justify-center">
-                      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
-                        <circle cx="16" cy="16" r="16" fill="#2775CA"/>
-                        <path d="M20.4 18.4C20.4 15.8 18.8 14.8 15.6 14.4C13.4 14 12.8 13.4 12.8 12.2C12.8 11 13.6 10.2 15.2 10.2C16.6 10.2 17.4 10.8 17.8 12C17.8 12.2 18 12.2 18.2 12.2L19.8 12C20 12 20.2 11.8 20.2 11.6C19.6 9.6 18.2 8.4 16.2 8.2V6.6C16.2 6.4 16 6.2 15.8 6.2H14.8C14.6 6.2 14.4 6.4 14.4 6.6V8.2C11.8 8.6 10.2 10.2 10.2 12.4C10.2 14.8 11.8 15.8 15 16.2C17 16.6 17.8 17 17.8 18.4C17.8 19.8 16.6 20.6 15.2 20.6C13.2 20.6 12.4 19.6 12.2 18.4C12.2 18.2 12 18 11.8 18L10.2 18.2C10 18.2 9.8 18.4 9.8 18.6C10.2 20.8 11.6 22.2 14.4 22.6V24.2C14.4 24.4 14.6 24.6 14.8 24.6H15.8C16 24.6 16.2 24.4 16.2 24.2V22.6C18.8 22.2 20.4 20.6 20.4 18.4Z" fill="white"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+                      <img src="/usdc.png" alt="USDC" className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <div className="text-white text-xs font-medium">USDC Top-up</div>
