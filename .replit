@@ -34,6 +34,10 @@ localPort = 3001
 externalPort = 3001
 
 [[ports]]
+localPort = 3099
+externalPort = 3002
+
+[[ports]]
 localPort = 5000
 externalPort = 80
 
@@ -42,9 +46,10 @@ localPort = 5001
 externalPort = 3000
 
 [deployment]
-deploymentTarget = "static"
-build = ["npm", "run", "build"]
+deploymentTarget = "autoscale"
+build = ["bash", "-c", "npm run build && npx tsc --outDir dist-server --rootDir . --esModuleInterop --module nodenext --moduleResolution nodenext --target es2022 --skipLibCheck --resolveJsonModule server/index.ts"]
 publicDir = "dist"
+run = ["node", "dist-server/server/index.js"]
 
 [userenv]
 
