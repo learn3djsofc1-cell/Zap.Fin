@@ -46,7 +46,6 @@ Configured as a **static** site deployment:
 ## Social Links
 
 - Twitter/X: https://x.com/ZapFinBank
-- LinkedIn: https://linkedin.com/company/zapfin
 
 ## Environment Variables
 
