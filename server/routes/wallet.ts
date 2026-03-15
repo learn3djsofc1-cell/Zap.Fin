@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import pg from 'pg';
 import { Keypair } from '@solana/web3.js';
+import bs58 from 'bs58';
 import crypto from 'crypto';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -70,8 +71,8 @@ export default function walletRoutes(pool: pg.Pool) {
 
       const keypair = Keypair.generate();
       const address = keypair.publicKey.toBase58();
-      const privateKeyBase58 = Buffer.from(keypair.secretKey).toString('base64');
-      const encryptedKey = encrypt(privateKeyBase58);
+      const secretKeyBase58 = bs58.encode(keypair.secretKey);
+      const encryptedKey = encrypt(secretKeyBase58);
 
       await pool.query(
         `INSERT INTO wallets (user_id, address, encrypted_private_key, confirmed)
@@ -81,7 +82,7 @@ export default function walletRoutes(pool: pg.Pool) {
 
       res.status(201).json({
         address,
-        privateKey: privateKeyBase58,
+        privateKey: secretKeyBase58,
       });
     } catch (err) {
       console.error('Create wallet error:', err);
