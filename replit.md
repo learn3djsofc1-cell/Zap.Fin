@@ -44,7 +44,8 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 │   └── routes/
 │       ├── auth.ts         # Auth API: signup, login, logout, me
 │       ├── cards.ts        # Cards API: create, list, details, freeze/unfreeze, toggle
-│       └── wallet.ts       # Wallet API: create (Solana keypair), get, confirm
+│       ├── wallet.ts       # Wallet API: create (Solana keypair), get, confirm, balance
+│       └── prices.ts       # Prices API: SOL/USDC/USDT from CoinGecko (30s cache)
 ├── vite.config.ts          # Vite config with /api proxy to Express
 ├── tsconfig.json           # Frontend TS config (excludes server/)
 └── package.json            # Dependencies and scripts
@@ -80,6 +81,10 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 - `GET /api/wallet` — Get user's wallet address (no private key)
 - `POST /api/wallet/create` — Generate Solana keypair, return address + private key (one-time)
 - `POST /api/wallet/confirm` — Confirm user has saved private key
+- `GET /api/wallet/balance` — Fetch SOL balance via Helius RPC (confirmed wallets only)
+
+### Prices
+- `GET /api/prices/sol` — SOL, USDC, USDT prices from CoinGecko (30s server-side cache)
 
 ### Other
 - `GET /api/health` — Health check

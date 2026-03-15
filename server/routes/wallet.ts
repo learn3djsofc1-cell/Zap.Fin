@@ -89,6 +89,53 @@ export default function walletRoutes(pool: pg.Pool) {
     }
   });
 
+  router.get('/balance', async (req: Request, res: Response) => {
+    const userId = requireAuth(req, res);
+    if (!userId) return;
+
+    try {
+      const walletResult = await pool.query(
+        'SELECT address FROM wallets WHERE user_id = $1 AND confirmed = TRUE',
+        [userId]
+      );
+
+      if (walletResult.rows.length === 0) {
+        res.status(404).json({ error: 'No confirmed wallet found' });
+        return;
+      }
+
+      const address = walletResult.rows[0].address;
+      const heliusKey = process.env.HELIUS_API_KEY;
+      const rpcUrl = heliusKey
+        ? `https://mainnet.helius-rpc.com/?api-key=${heliusKey}`
+        : 'https://api.mainnet-beta.solana.com';
+
+      const rpcResponse = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'getBalance',
+          params: [address],
+        }),
+      });
+
+      if (!rpcResponse.ok) {
+        throw new Error(`Helius RPC error: ${rpcResponse.status}`);
+      }
+
+      const rpcData = await rpcResponse.json();
+      const lamports = rpcData.result?.value ?? 0;
+      const sol = lamports / 1e9;
+
+      res.json({ address, lamports, sol });
+    } catch (err) {
+      console.error('Balance fetch error:', err);
+      res.status(502).json({ error: 'Failed to fetch balance' });
+    }
+  });
+
   router.post('/confirm', async (req: Request, res: Response) => {
     const userId = requireAuth(req, res);
     if (!userId) return;

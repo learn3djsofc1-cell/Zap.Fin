@@ -16,10 +16,20 @@ interface WalletData {
   confirmed: boolean;
 }
 
+interface Balance {
+  sol: number;
+}
+
+interface Prices {
+  sol: number;
+}
+
 export default function OverviewPage() {
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
   const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [balance, setBalance] = useState<Balance | null>(null);
+  const [prices, setPrices] = useState<Prices | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -29,7 +39,18 @@ export default function OverviewPage() {
         fetch('/api/wallet'),
       ]);
       if (cardsRes.ok) setCards(await cardsRes.json());
-      if (walletRes.ok) setWallet(await walletRes.json());
+      if (walletRes.ok) {
+        const w = await walletRes.json();
+        setWallet(w);
+        if (w?.confirmed) {
+          const [balRes, priceRes] = await Promise.all([
+            fetch('/api/wallet/balance'),
+            fetch('/api/prices/sol'),
+          ]);
+          if (balRes.ok) setBalance(await balRes.json());
+          if (priceRes.ok) setPrices(await priceRes.json());
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch overview data:', err);
     } finally {
@@ -50,6 +71,9 @@ export default function OverviewPage() {
   }
 
   const firstCard = cards[0];
+  const solBalance = balance?.sol ?? 0;
+  const solPrice = prices?.sol ?? 0;
+  const usdBalance = solBalance * solPrice;
 
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
@@ -60,10 +84,20 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
         <div className="lg:col-span-2 bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
           <span className="text-gray-400 text-sm font-medium">Total Balance</span>
-          <div className="mt-3 mb-6">
-            <span className="text-4xl sm:text-5xl font-bold text-white">$0</span>
-            <span className="text-2xl sm:text-3xl text-gray-400">.00</span>
+          <div className="mt-3 mb-1">
+            <span className="text-4xl sm:text-5xl font-bold text-white">
+              ${Math.floor(usdBalance).toLocaleString()}
+            </span>
+            <span className="text-2xl sm:text-3xl text-gray-400">
+              .{(usdBalance % 1).toFixed(2).slice(2)}
+            </span>
           </div>
+          {wallet?.confirmed && (
+            <span className="text-gray-500 text-sm block mb-4">
+              {solBalance.toFixed(4)} SOL {solPrice > 0 && `@ $${solPrice.toFixed(2)}`}
+            </span>
+          )}
+          {!wallet?.confirmed && <div className="mb-4" />}
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/app/topups')}
@@ -95,7 +129,12 @@ export default function OverviewPage() {
                   {firstCard.card_number_masked}
                 </span>
               </div>
-              <span className="text-white/60 text-xs">{firstCard.expiry}</span>
+              <div className="flex items-center justify-between">
+                <span className="text-white/60 text-xs">{firstCard.expiry}</span>
+                {cards.length > 1 && (
+                  <span className="text-white/50 text-xs">+{cards.length - 1} more</span>
+                )}
+              </div>
             </div>
           </div>
         ) : (
@@ -148,8 +187,14 @@ export default function OverviewPage() {
 
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
             <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Wallet</span>
-            {wallet ? (
+            {wallet?.confirmed ? (
               <div className="flex flex-col gap-2">
+                <div className="flex items-baseline justify-between mb-1">
+                  <span className="text-white font-bold text-lg">{solBalance.toFixed(4)} SOL</span>
+                  {solPrice > 0 && (
+                    <span className="text-gray-400 text-xs">${usdBalance.toFixed(2)}</span>
+                  )}
+                </div>
                 <code className="text-green-400 text-xs break-all font-mono bg-[#0A0B0E] rounded-lg p-3">
                   {wallet.address}
                 </code>

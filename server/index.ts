@@ -5,6 +5,7 @@ import { pool, initDatabase } from './db.js';
 import authRoutes from './routes/auth.js';
 import cardRoutes from './routes/cards.js';
 import walletRoutes from './routes/wallet.js';
+import priceRoutes from './routes/prices.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
@@ -42,6 +43,7 @@ app.use(session({
 app.use('/api/auth', authRoutes(pool));
 app.use('/api/cards', cardRoutes(pool));
 app.use('/api/wallet', walletRoutes(pool));
+app.use('/api/prices', priceRoutes());
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
