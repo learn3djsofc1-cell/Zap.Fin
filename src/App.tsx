@@ -415,11 +415,8 @@ function TopUpSection() {
                     <label className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2 block">Select Asset</label>
                     <div className="flex items-center justify-between bg-[#0F1014] p-3 rounded-lg border border-white/5 cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-[#26A17B] rounded-full flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14.5 9V7H9.5V9H11V17H13V9H14.5Z" fill="white"/>
-                            <path d="M12 11C14.2091 11 16 10.3284 16 9.5C16 8.67157 14.2091 8 12 8C9.79086 8 8 8.67157 8 9.5C8 10.3284 9.79086 11 12 11Z" stroke="white" strokeWidth="1.5"/>
-                          </svg>
+                        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0">
+                          <img src="/usdt.png" alt="USDT" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-white text-sm font-bold">USDT <span className="text-gray-500 font-normal">Tether</span></span>
                       </div>
