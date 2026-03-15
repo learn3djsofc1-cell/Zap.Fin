@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CreditCard, ArrowUpCircle, Shield, Menu, X, ChevronLeft } from 'lucide-react';
+import { LayoutDashboard, CreditCard, ArrowUpCircle, Shield, LogOut } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
 
 const ZapLogo = ({ className }: { className?: string }) => (
   <img src="/logo.png" alt="Zap.Fin" className={`${className || ''} rounded-lg`} />
@@ -14,31 +14,25 @@ const navItems = [
 ];
 
 export default function DashboardLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const userInitials = user?.email
+    ? user.email.substring(0, 2).toUpperCase()
+    : '??';
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0B0E] flex flex-col md:flex-row">
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <aside className={`
-        fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-[#111215] border-r border-white/5 flex flex-col shrink-0
-        transform transition-transform duration-200 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0
-      `}>
+      <aside className="hidden md:flex sticky top-0 left-0 z-50 h-screen w-64 bg-[#111215] border-r border-white/5 flex-col shrink-0">
         <div className="p-5 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <ZapLogo className="w-8 h-8" />
             <span className="text-white font-bold text-lg tracking-tight">Zap.Fin</span>
-          </button>
-          <button className="md:hidden text-gray-400 p-1" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
-            <X size={20} />
           </button>
         </div>
 
@@ -48,7 +42,6 @@ export default function DashboardLayout() {
               key={item.path}
               to={item.path}
               end={item.end}
-              onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive
@@ -71,11 +64,11 @@ export default function DashboardLayout() {
 
         <div className="p-4 border-t border-white/5">
           <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-500 hover:text-gray-300 text-xs font-medium transition-colors w-full px-3 py-2"
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-500 hover:text-red-400 text-xs font-medium transition-colors w-full px-3 py-2"
           >
-            <ChevronLeft size={14} />
-            Back to Website
+            <LogOut size={14} />
+            Logout
           </button>
         </div>
       </aside>
@@ -83,13 +76,6 @@ export default function DashboardLayout() {
       <div className="flex-1 flex flex-col min-h-screen">
         <header className="sticky top-0 z-30 bg-[#0A0B0E]/80 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
-              className="md:hidden text-gray-400 hover:text-white p-1.5 -ml-1"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar menu"
-            >
-              <Menu size={22} />
-            </button>
             <button onClick={() => navigate('/')} className="md:hidden flex items-center gap-2">
               <ZapLogo className="w-6 h-6" />
               <span className="text-white font-bold text-sm">Zap.Fin</span>
@@ -97,16 +83,25 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="bg-[#1A1B1F] px-3 py-1.5 rounded-full text-xs text-gray-300 border border-white/5 font-mono">
-              0x1234...5678
+            {user && (
+              <div className="bg-[#1A1B1F] px-3 py-1.5 rounded-full text-xs text-gray-300 border border-white/5 font-mono truncate max-w-[200px]">
+                {user.email}
+              </div>
+            )}
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6940] to-[#D95A36] flex items-center justify-center shrink-0">
+              <span className="text-black text-xs font-bold">{userInitials}</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6940] to-[#D95A36] flex items-center justify-center">
-              <span className="text-black text-xs font-bold">JD</span>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="md:hidden text-gray-400 hover:text-red-400 p-1.5 transition-colors"
+              aria-label="Logout"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto pb-24 md:pb-8">
           <Outlet />
         </main>
       </div>

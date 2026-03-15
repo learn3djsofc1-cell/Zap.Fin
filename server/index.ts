@@ -1,0 +1,56 @@
+import express from 'express';
+import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
+import pg from 'pg';
+import authRoutes from './routes/auth.js';
+
+const isProduction = process.env.NODE_ENV === 'production';
+const app = express();
+const PgSession = connectPgSimple(session);
+
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
+app.use(express.json());
+
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret && isProduction) {
+  console.error('FATAL: SESSION_SECRET must be set in production');
+  process.exit(1);
+}
+
+app.use(session({
+  store: new PgSession({
+    pool,
+    tableName: 'session',
+    createTableIfMissing: true,
+  }),
+  secret: sessionSecret || 'zap-fin-dev-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: isProduction,
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    sameSite: 'lax',
+  },
+}));
+
+app.use('/api/auth', authRoutes(pool));
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+const PORT = parseInt(process.env.API_PORT || '3001', 10);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API server running on port ${PORT}`);
+});
+
+export { pool };
+export default app;
