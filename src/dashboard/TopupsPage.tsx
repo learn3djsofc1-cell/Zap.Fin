@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 
 const assets = [
@@ -11,10 +11,22 @@ export default function TopupsPage() {
   const [amount, setAmount] = useState('500.00');
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const asset = assets[selectedAsset];
   const numAmount = parseFloat(amount) || 0;
   const fee = 1.50;
   const received = Math.max(0, numAmount - fee);
+
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showDropdown]);
 
   const handlePercentage = (pct: number) => {
     const balance = 1286.34;
@@ -35,7 +47,7 @@ export default function TopupsPage() {
         <div className="lg:col-span-3 flex flex-col gap-4 sm:gap-6">
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
             <label className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Select Asset</label>
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-full flex items-center justify-between bg-[#0A0B0E] p-4 rounded-xl border border-white/5 hover:border-white/10 transition-colors"

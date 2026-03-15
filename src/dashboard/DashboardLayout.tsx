@@ -97,7 +97,7 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="bg-[#1A1B1F] px-3 py-1.5 rounded-full text-xs text-gray-300 border border-white/5 font-mono hidden sm:block">
+            <div className="bg-[#1A1B1F] px-3 py-1.5 rounded-full text-xs text-gray-300 border border-white/5 font-mono">
               0x1234...5678
             </div>
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6940] to-[#D95A36] flex items-center justify-center">
