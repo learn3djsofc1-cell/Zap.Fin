@@ -72,18 +72,32 @@ export default function cardRoutes(pool: pg.Pool) {
     const userId = requireAuth(req, res);
     if (!userId) return;
 
+    const client = await pool.connect();
     try {
+      await client.query('BEGIN');
+      await client.query('SELECT pg_advisory_xact_lock($1)', [userId]);
+      const countResult = await client.query(
+        'SELECT COUNT(*) FROM cards WHERE user_id = $1',
+        [userId]
+      );
+      if (parseInt(countResult.rows[0].count, 10) >= 3) {
+        await client.query('ROLLBACK');
+        res.status(400).json({ error: 'Maximum of 3 cards allowed' });
+        return;
+      }
+
       const name = req.body.name || 'Virtual Card';
       const cardNumber = generateLuhnValidVisa();
       const cvv = generateCVV();
       const expiry = generateExpiry();
 
-      const result = await pool.query(
+      const result = await client.query(
         `INSERT INTO cards (user_id, card_number, cvv, expiry, name)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, card_number, cvv, expiry, name, frozen, online_payments, contactless, created_at`,
         [userId, cardNumber, cvv, expiry, name]
       );
+      await client.query('COMMIT');
 
       const card = result.rows[0];
       res.status(201).json({
@@ -92,8 +106,11 @@ export default function cardRoutes(pool: pg.Pool) {
         card_number_formatted: formatCardNumber(card.card_number),
       });
     } catch (err) {
+      await client.query('ROLLBACK');
       console.error('Create card error:', err);
       res.status(500).json({ error: 'Internal server error' });
+    } finally {
+      client.release();
     }
   });
 

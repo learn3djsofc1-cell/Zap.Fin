@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Plus, Eye, EyeOff, Snowflake, Loader2 } from 'lucide-react';
+import { CreditCard, Plus, Eye, EyeOff, Snowflake, Loader2, AlertCircle } from 'lucide-react';
 
 interface Card {
   id: number;
@@ -20,6 +20,8 @@ export default function CardsPage() {
   const [creating, setCreating] = useState(false);
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
   const [revealedCVVs, setRevealedCVVs] = useState<Set<number>>(new Set());
+  const [cardError, setCardError] = useState<string | null>(null);
+  const MAX_CARDS = 3;
 
   const fetchCards = useCallback(async () => {
     try {
@@ -40,6 +42,11 @@ export default function CardsPage() {
   }, [fetchCards]);
 
   const createCard = async () => {
+    setCardError(null);
+    if (cards.length >= MAX_CARDS) {
+      setCardError(`Maximum of ${MAX_CARDS} cards allowed`);
+      return;
+    }
     setCreating(true);
     try {
       const res = await fetch('/api/cards/create', {
@@ -49,9 +56,13 @@ export default function CardsPage() {
       });
       if (res.ok) {
         await fetchCards();
+      } else {
+        const data = await res.json();
+        setCardError(data.error || 'Failed to create card');
       }
     } catch (err) {
       console.error('Failed to create card:', err);
+      setCardError('Failed to create card');
     } finally {
       setCreating(false);
     }
@@ -131,17 +142,28 @@ export default function CardsPage() {
 
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">My Cards</h1>
-        <button
-          onClick={createCard}
-          disabled={creating}
-          className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-6 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
-        >
-          {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-          {creating ? 'Creating...' : 'Add Card'}
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">My Cards</h1>
+          <span className="text-gray-500 text-xs mt-1 block">{cards.length}/{MAX_CARDS} cards</span>
+        </div>
+        {cards.length < MAX_CARDS && (
+          <button
+            onClick={createCard}
+            disabled={creating}
+            className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-6 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {creating ? 'Creating...' : 'Add Card'}
+          </button>
+        )}
       </div>
+      {cardError && (
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+          <AlertCircle size={16} className="text-red-400 shrink-0" />
+          <span className="text-red-400 text-sm">{cardError}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {cards.map(card => (

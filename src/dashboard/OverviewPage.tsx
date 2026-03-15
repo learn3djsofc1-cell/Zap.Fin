@@ -214,7 +214,7 @@ export default function OverviewPage() {
                     <span className="text-gray-400 text-xs">${usdBalance.toFixed(2)}</span>
                   )}
                 </div>
-                <code className="text-green-400 text-xs break-all font-mono bg-[#0A0B0E] rounded-lg p-3">
+                <code className="text-[#FF6940] text-xs break-all font-mono bg-[#0A0B0E] rounded-lg p-3">
                   {wallet.address}
                 </code>
                 <button

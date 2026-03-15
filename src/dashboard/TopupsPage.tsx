@@ -182,7 +182,7 @@ export default function TopupsPage() {
             <span className="text-white font-bold">Wallet Address</span>
           </div>
           <div className="bg-[#0A0B0E] rounded-xl p-4 flex items-center justify-between gap-3">
-            <code className="text-green-400 text-sm break-all flex-1 font-mono">{walletAddress}</code>
+            <code className="text-[#FF6940] text-sm break-all flex-1 font-mono">{walletAddress}</code>
             <button
               onClick={() => copyToClipboard(walletAddress, 'address')}
               className="text-gray-400 hover:text-white transition-colors shrink-0"
@@ -270,7 +270,7 @@ export default function TopupsPage() {
             <span className="text-white font-bold">Wallet Address</span>
           </div>
           <div className="bg-[#0A0B0E] rounded-xl p-4">
-            <code className="text-green-400 text-sm break-all font-mono">{wallet.address}</code>
+            <code className="text-[#FF6940] text-sm break-all font-mono">{wallet.address}</code>
           </div>
         </div>
         <div className="bg-[#111215] rounded-2xl p-6 border border-yellow-500/20 mb-6">
@@ -345,7 +345,7 @@ export default function TopupsPage() {
             )}
 
             <div className="bg-[#0A0B0E] rounded-xl p-3 mt-4 flex items-center justify-between gap-3">
-              <code className="text-green-400 text-xs break-all flex-1 font-mono">{wallet.address}</code>
+              <code className="text-[#FF6940] text-xs break-all flex-1 font-mono">{wallet.address}</code>
               <button
                 onClick={() => copyToClipboard(wallet.address, 'address')}
                 className="text-gray-400 hover:text-white transition-colors shrink-0"
@@ -354,12 +354,12 @@ export default function TopupsPage() {
               </button>
             </div>
             <a
-              href={`https://explorer.solana.com/address/${wallet.address}`}
+              href={`https://solscan.io/account/${wallet.address}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#FF6940] text-xs font-medium hover:underline flex items-center gap-1 mt-2"
             >
-              View on Solana Explorer <ExternalLink size={12} />
+              View on Solscan <ExternalLink size={12} />
             </a>
           </div>
 
@@ -384,7 +384,7 @@ export default function TopupsPage() {
                   className="flex-1 bg-transparent text-white text-2xl font-bold outline-none placeholder-gray-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="bg-[#1A1B1F] px-3 py-2 rounded-lg flex items-center gap-2 border border-white/10">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500" />
+                  <img src="/sol-logo.png" alt="SOL" className="w-5 h-5 rounded-full" />
                   <span className="text-white text-sm font-bold">SOL</span>
                 </div>
               </div>
@@ -430,7 +430,7 @@ export default function TopupsPage() {
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
-                    <div className="w-4 h-4 rounded-full bg-blue-500" />
+                    <img src="/usdc-logo.png" alt="USDC" className="w-4 h-4 rounded-full" />
                     USDC
                   </button>
                   <button
@@ -441,7 +441,7 @@ export default function TopupsPage() {
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
-                    <div className="w-4 h-4 rounded-full bg-green-500" />
+                    <img src="/usdt-logo.png" alt="USDT" className="w-4 h-4 rounded-full" />
                     USDT
                   </button>
                 </div>
@@ -472,9 +472,9 @@ export default function TopupsPage() {
             <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Live Prices</span>
             {prices ? (
               <div className="flex flex-col gap-3">
-                <PriceRow label="SOL / USD" value={`$${solPrice.toFixed(2)}`} color="from-purple-500 to-blue-500" />
-                <PriceRow label="USDC / USD" value={`$${prices.usdc.toFixed(4)}`} color="from-blue-400 to-blue-600" />
-                <PriceRow label="USDT / USD" value={`$${prices.usdt.toFixed(4)}`} color="from-green-400 to-green-600" />
+                <PriceRow label="SOL / USD" value={`$${solPrice.toFixed(2)}`} icon="/sol-logo.png" />
+                <PriceRow label="USDC / USD" value={`$${prices.usdc.toFixed(4)}`} icon="/usdc-logo.png" />
+                <PriceRow label="USDT / USD" value={`$${prices.usdt.toFixed(4)}`} icon="/usdt-logo.png" />
               </div>
             ) : (
               <div className="flex items-center justify-center py-4">
@@ -539,11 +539,11 @@ export default function TopupsPage() {
   );
 }
 
-function PriceRow({ label, value, color }: { label: string; value: string; color: string }) {
+function PriceRow({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${color}`} />
+        <img src={icon} alt="" className="w-5 h-5 rounded-full" />
         <span className="text-gray-300 text-sm">{label}</span>
       </div>
       <span className="text-white text-sm font-bold">{value}</span>
