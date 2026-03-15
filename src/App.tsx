@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { Send, Lock, RefreshCw, Copy, ChevronDown, MoreHorizontal, Eye, Wifi, ChevronLeft, ArrowRight, Menu, X } from 'lucide-react';
 
 const ZapLogo = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <rect width="100" height="100" rx="20" fill="#0F1014" />
-    <path d="M 18 22 L 82 22 L 58 50 L 82 50 L 82 78 L 18 78 L 42 50 L 18 50 Z" fill="#FF6940" />
-  </svg>
+  <img src="/logo.png" alt="Zap.Fin" className={`${className || ''} rounded-lg`} />
 );
 
 function Navbar() {
