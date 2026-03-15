@@ -3,10 +3,9 @@ import { CreditCard, Plus, Eye, EyeOff, Snowflake, Loader2 } from 'lucide-react'
 
 interface Card {
   id: number;
-  card_number: string;
   card_number_masked: string;
-  card_number_formatted: string;
-  cvv: string;
+  card_number_formatted?: string;
+  cvv?: string;
   expiry: string;
   name: string;
   frozen: boolean;
@@ -82,7 +81,11 @@ export default function CardsPage() {
       const res = await fetch(`/api/cards/${cardId}/details`);
       if (res.ok) {
         const detail = await res.json();
-        setCards(prev => prev.map(c => c.id === cardId ? { ...c, ...detail, card_number_formatted: detail.card_number_formatted } : c));
+        setCards(prev => prev.map(c => c.id === cardId ? {
+          ...c,
+          card_number_formatted: detail.card_number_formatted,
+          cvv: detail.cvv,
+        } : c));
         setRevealedCards(prev => new Set(prev).add(cardId));
         setRevealedCVVs(prev => new Set(prev).add(cardId));
       }

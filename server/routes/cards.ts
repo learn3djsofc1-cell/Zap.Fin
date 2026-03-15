@@ -53,14 +53,13 @@ export default function cardRoutes(pool: pg.Pool) {
 
     try {
       const result = await pool.query(
-        `SELECT id, card_number, expiry, name, frozen, online_payments, contactless, created_at
+        `SELECT id, RIGHT(card_number, 4) as last_four, expiry, name, frozen, online_payments, contactless, created_at
          FROM cards WHERE user_id = $1 ORDER BY created_at DESC`,
         [userId]
       );
       const cards = result.rows.map(c => ({
         ...c,
-        card_number_masked: '**** **** **** ' + c.card_number.slice(-4),
-        card_number_formatted: formatCardNumber(c.card_number),
+        card_number_masked: '**** **** **** ' + c.last_four,
       }));
       res.json(cards);
     } catch (err) {
