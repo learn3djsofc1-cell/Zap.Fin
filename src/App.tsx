@@ -1,5 +1,56 @@
 import { useState } from 'react';
 import { Send, Lock, RefreshCw, Copy, ChevronDown, MoreHorizontal, Eye, Wifi, ChevronLeft, ArrowRight, Menu, X } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { useRef, type ReactNode } from 'react';
+
+function AnimatedSection({ children, className, delay = 0, direction = 'up' }: { children: ReactNode; className?: string; delay?: number; direction?: 'up' | 'down' | 'left' | 'right' }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+
+  const directionMap = {
+    up: { y: 60, x: 0 },
+    down: { y: -60, x: 0 },
+    left: { x: 60, y: 0 },
+    right: { x: -60, y: 0 },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, ...directionMap[direction] }}
+      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, ...directionMap[direction] }}
+      transition={{ duration: 0.7, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function StaggerChildren({ children, className, staggerDelay = 0.1 }: { children: ReactNode; className?: string; staggerDelay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-60px' });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? 'visible' : 'hidden'}
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: staggerDelay } },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },
+};
 
 const ZapLogo = ({ className }: { className?: string }) => (
   <img src="/logo.png" alt="Zap.Fin" className={`${className || ''} rounded-lg`} />
@@ -74,26 +125,46 @@ function Navbar() {
 function HeroLeft() {
   return (
     <div className="w-full lg:w-[55%] z-10 pt-10 lg:pt-20">
-      <h1 className="text-[40px] sm:text-[56px] md:text-[72px] lg:text-[84px] font-extrabold leading-[1.05] tracking-tight text-[#0F1014]">
+      <motion.h1
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+        className="text-[40px] sm:text-[56px] md:text-[72px] lg:text-[84px] font-extrabold leading-[1.05] tracking-tight text-[#0F1014]"
+      >
         INSTANT CRYPTO<br />
         TOP-UPS &<br />
         GLOBAL SPENDING
-      </h1>
-      <p className="text-[20px] sm:text-[24px] md:text-[32px] font-normal text-[#0F1014] mt-6 md:mt-8 leading-[1.2]">
+      </motion.h1>
+      <motion.p
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+        className="text-[20px] sm:text-[24px] md:text-[32px] font-normal text-[#0F1014] mt-6 md:mt-8 leading-[1.2]"
+      >
         Card control from your<br />
         web dApp dashboard.
-      </p>
-      <button className="mt-8 md:mt-12 bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center justify-center sm:justify-start gap-3 text-base sm:text-lg transition-colors w-full sm:w-auto">
+      </motion.p>
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mt-8 md:mt-12 bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center justify-center sm:justify-start gap-3 text-base sm:text-lg transition-colors w-full sm:w-auto"
+      >
         <Send size={20} className="fill-[#FF6940]" />
         Launch Dashboard
-      </button>
+      </motion.button>
     </div>
   );
 }
 
 function HeroRight() {
   return (
-    <div className="relative w-full lg:w-[45%] h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0 flex justify-center items-center pointer-events-none">
+    <motion.div
+      initial={{ opacity: 0, x: 80 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.9, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+      className="relative w-full lg:w-[45%] h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0 flex justify-center items-center pointer-events-none"
+    >
       <div className="relative w-[600px] h-[400px] flex justify-center items-center transform scale-[0.55] sm:scale-[0.75] lg:scale-100">
       {/* Yellow Circle Background */}
       <div className="absolute w-[300px] h-[300px] lg:w-[450px] lg:h-[450px] bg-[#FF6940] rounded-full right-[-5%] lg:right-[-10%] top-1/2 -translate-y-1/2 z-0"></div>
@@ -208,18 +279,18 @@ function HeroRight() {
         </div>
       </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 function GetCardSection() {
   return (
     <section id="cards" className="max-w-7xl mx-auto px-6 py-24 lg:py-32">
-      <div className="text-center mb-16">
+      <AnimatedSection className="text-center mb-16">
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">Zap.Fin is a web dApp that turns crypto into everyday spending. Issue virtual or metal Visa-compatible cards, top up instantly from your wallet, and manage everything from a single dashboard no separate apps required.</p>
-      </div>
+      </AnimatedSection>
       <div className="flex flex-col lg:flex-row items-center">
-      <div className="w-full lg:w-1/2 relative flex justify-center items-center h-[300px] sm:h-[400px] lg:h-[500px]">
+      <AnimatedSection direction="left" className="w-full lg:w-1/2 relative flex justify-center items-center h-[300px] sm:h-[400px] lg:h-[500px]">
         <div className="relative w-[600px] h-[400px] flex justify-center items-center transform scale-[0.55] sm:scale-[0.75] lg:scale-100">
         
         {/* Web App Dashboard Mockup for Cards */}
@@ -332,16 +403,16 @@ function GetCardSection() {
           </div>
         </div>
         </div>
-      </div>
+      </AnimatedSection>
 
-      <div className="w-full lg:w-1/2 lg:pl-24 mt-8 sm:mt-16 lg:mt-0 text-center lg:text-left">
+      <AnimatedSection direction="right" delay={0.2} className="w-full lg:w-1/2 lg:pl-24 mt-8 sm:mt-16 lg:mt-0 text-center lg:text-left">
         <h2 className="text-[40px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-extrabold leading-[1.1] tracking-tight text-[#0F1014]">
           VIRTUAL & PHYSICAL CARDS
         </h2>
         <p className="text-[20px] sm:text-[24px] md:text-[28px] font-normal text-gray-800 mt-6 leading-[1.3] max-w-lg mx-auto lg:mx-0">
           Issue virtual cards instantly for online use or request metal cards for premium access.
         </p>
-      </div>
+      </AnimatedSection>
       </div>
     </section>
   );
@@ -350,13 +421,12 @@ function GetCardSection() {
 function TopUpSection() {
   return (
     <section id="topups" className="max-w-7xl mx-auto px-6 py-24 lg:py-32">
-      <div className="text-center mb-16">
+      <AnimatedSection className="text-center mb-16">
         <h2 className="text-3xl font-bold text-gray-400 mb-4">Instant Top-ups</h2>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">Convert crypto to card balance in one flow using integrated on-chain swaps and relays.</p>
-      </div>
+      </AnimatedSection>
       <div className="flex flex-col-reverse lg:flex-row items-center">
-      {/* Left Content */}
-      <div className="w-full lg:w-1/2 lg:pr-16 text-center lg:text-right mt-8 sm:mt-16 lg:mt-0">
+      <AnimatedSection direction="left" className="w-full lg:w-1/2 lg:pr-16 text-center lg:text-right mt-8 sm:mt-16 lg:mt-0">
         <h2 className="text-[40px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-extrabold leading-[1.1] tracking-tight text-[#0F1014]">
           INSTANT CRYPTO<br />
           TOP-UPS
@@ -364,10 +434,9 @@ function TopUpSection() {
         <p className="text-[20px] sm:text-[24px] md:text-[28px] font-normal text-gray-800 mt-6 leading-[1.3] mx-auto lg:ml-auto lg:mr-0 max-w-lg">
           Select wallet, choose amount, preview conversion and fees, confirm - balance updates instantly.
         </p>
-      </div>
+      </AnimatedSection>
 
-      {/* Right Content - Web App Dashboard Mockup */}
-      <div className="w-full lg:w-1/2 relative flex justify-center items-center h-[300px] sm:h-[400px] lg:h-[500px]">
+      <AnimatedSection direction="right" delay={0.2} className="w-full lg:w-1/2 relative flex justify-center items-center h-[300px] sm:h-[400px] lg:h-[500px]">
         <div className="relative w-[600px] h-[400px] flex justify-center items-center transform scale-[0.55] sm:scale-[0.75] lg:scale-100">
         
         {/* Web App Dashboard Mockup for Top-ups */}
@@ -478,7 +547,7 @@ function TopUpSection() {
           </div>
         </div>
         </div>
-      </div>
+      </AnimatedSection>
       </div>
     </section>
   );
@@ -487,13 +556,12 @@ function TopUpSection() {
 function SpendControlSection() {
   return (
     <section id="controls" className="max-w-7xl mx-auto px-6 py-24 lg:py-32">
-      <div className="text-center mb-16">
+      <AnimatedSection className="text-center mb-16">
         <h2 className="text-3xl font-bold text-gray-400 mb-4">Card Controls & Feed</h2>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">Full card lifecycle management in-browser: limits, freezes, merchant controls, statements, and exports.</p>
-      </div>
+      </AnimatedSection>
       <div className="flex flex-col lg:flex-row items-center">
-      {/* Left Content - Web App Dashboard Mockup */}
-      <div className="w-full lg:w-1/2 relative flex justify-center items-center h-[300px] sm:h-[400px] lg:h-[500px] mb-8 sm:mb-16 lg:mb-0">
+      <AnimatedSection direction="left" className="w-full lg:w-1/2 relative flex justify-center items-center h-[300px] sm:h-[400px] lg:h-[500px] mb-8 sm:mb-16 lg:mb-0">
         <div className="relative w-[600px] h-[400px] flex justify-center items-center transform scale-[0.55] sm:scale-[0.75] lg:scale-100">
         
         {/* Web App Dashboard Mockup for Controls & Feed */}
@@ -618,10 +686,9 @@ function SpendControlSection() {
           </div>
         </div>
         </div>
-      </div>
+      </AnimatedSection>
 
-      {/* Right Content */}
-      <div className="w-full lg:w-1/2 lg:pl-24 text-center lg:text-left">
+      <AnimatedSection direction="right" delay={0.2} className="w-full lg:w-1/2 lg:pl-24 text-center lg:text-left">
         <h2 className="text-[40px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-extrabold leading-[1.1] tracking-tight text-[#0F1014]">
           SPEND WITH FULL<br />
           CONTROL
@@ -629,7 +696,7 @@ function SpendControlSection() {
         <p className="text-[20px] sm:text-[24px] md:text-[28px] font-normal text-gray-800 mt-6 leading-[1.3] max-w-lg mx-auto lg:mx-0">
           Freeze/unfreeze, set per-merchant limits, enable contactless/online spending toggles, and schedule recurring top-ups.
         </p>
-      </div>
+      </AnimatedSection>
       </div>
     </section>
   );
@@ -639,17 +706,17 @@ function OtherFeaturesSection() {
   return (
     <section id="features" className="bg-black py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-12 sm:mb-16">
+        <AnimatedSection className="text-center mb-12 sm:mb-16">
           <p className="text-lg sm:text-xl text-gray-500 max-w-3xl mx-auto mb-8">Everything you need to manage your crypto spending securely and efficiently.</p>
           <h2 className="text-[40px] sm:text-[48px] md:text-[56px] lg:text-[64px] font-extrabold leading-[1.1] tracking-tight text-white">
             Other Features
           </h2>
-        </div>
+        </AnimatedSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.12}>
           
           {/* Cashback and Rewards (Tall Card) */}
-          <div className="bg-gradient-to-br from-[#FF6940] to-[#0F1014] rounded-[32px] p-8 flex flex-col lg:row-span-2 relative overflow-hidden border border-[#FF6940]/20">
+          <motion.div variants={staggerItem} className="bg-gradient-to-br from-[#FF6940] to-[#0F1014] rounded-[32px] p-8 flex flex-col lg:row-span-2 relative overflow-hidden border border-[#FF6940]/20">
             <div className="w-16 h-16 bg-[#FF6940] rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-[#FF6940]/30">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 12V22H4V12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -751,10 +818,10 @@ function OtherFeaturesSection() {
               {/* Fade out bottom */}
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0F1014] to-transparent pointer-events-none"></div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Auditable Receipts */}
-          <div className="bg-gradient-to-br from-[#0F1014] to-[#FF6940]/40 rounded-[32px] p-8 border border-[#FF6940]/20">
+          <motion.div variants={staggerItem} className="bg-gradient-to-br from-[#0F1014] to-[#FF6940]/40 rounded-[32px] p-8 border border-[#FF6940]/20">
             <div className="w-16 h-16 bg-[#FF6940] rounded-2xl flex items-center justify-center mb-8">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -767,10 +834,10 @@ function OtherFeaturesSection() {
             <p className="text-[#9CA3AF] leading-relaxed">
               Exportable proof bundles linking each top-up or payment to its on-chain evidence.
             </p>
-          </div>
+          </motion.div>
 
           {/* Developer APIs */}
-          <div className="bg-gradient-to-bl from-[#0F1014] to-[#FF6940]/40 rounded-[32px] p-8 border border-[#FF6940]/20">
+          <motion.div variants={staggerItem} className="bg-gradient-to-bl from-[#0F1014] to-[#FF6940]/40 rounded-[32px] p-8 border border-[#FF6940]/20">
             <div className="w-16 h-16 bg-[#FF6940] rounded-2xl flex items-center justify-center mb-8">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M16 18L22 12L16 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -781,10 +848,10 @@ function OtherFeaturesSection() {
             <p className="text-[#9CA3AF] leading-relaxed">
               SDKs and webhooks for merchants, payroll, and treasury integrations.
             </p>
-          </div>
+          </motion.div>
 
           {/* Security & Compliance (Wide Card) */}
-          <div className="bg-gradient-to-r from-[#FF6940]/30 to-[#0F1014] rounded-[32px] p-8 lg:col-span-2 flex flex-col md:flex-row gap-8 border border-[#FF6940]/20 overflow-hidden">
+          <motion.div variants={staggerItem} className="bg-gradient-to-r from-[#FF6940]/30 to-[#0F1014] rounded-[32px] p-8 lg:col-span-2 flex flex-col md:flex-row gap-8 border border-[#FF6940]/20 overflow-hidden">
             <div className="flex-1">
               <div className="w-16 h-16 bg-[#FF6940] rounded-2xl flex items-center justify-center mb-8">
                 <Lock size={32} className="text-white" />
@@ -822,10 +889,10 @@ function OtherFeaturesSection() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Global Spending */}
-          <div className="bg-gradient-to-l from-[#FF6940]/30 to-[#0F1014] rounded-[32px] p-8 lg:col-span-2 flex flex-col md:flex-row items-center gap-8 border border-[#FF6940]/20 overflow-hidden">
+          <motion.div variants={staggerItem} className="bg-gradient-to-l from-[#FF6940]/30 to-[#0F1014] rounded-[32px] p-8 lg:col-span-2 flex flex-col md:flex-row items-center gap-8 border border-[#FF6940]/20 overflow-hidden">
             <div className="flex-1">
               <div className="w-16 h-16 bg-[#FF6940] rounded-2xl flex items-center justify-center mb-8">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -849,10 +916,10 @@ function OtherFeaturesSection() {
                 }}></div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Fee-Subsidized Flows */}
-          <div className="bg-gradient-to-tl from-[#FF6940]/40 to-[#0F1014] rounded-[32px] p-8 border border-[#FF6940]/20">
+          <motion.div variants={staggerItem} className="bg-gradient-to-tl from-[#FF6940]/40 to-[#0F1014] rounded-[32px] p-8 border border-[#FF6940]/20">
             <div className="w-16 h-16 bg-[#FF6940] rounded-2xl flex items-center justify-center mb-8">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2V22" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -863,11 +930,11 @@ function OtherFeaturesSection() {
             <p className="text-[#9CA3AF] leading-relaxed text-sm">
               Optional sponsored-transaction rails to reduce user friction for small purchases.
             </p>
-          </div>
+          </motion.div>
 
-        </div>
+        </StaggerChildren>
 
-        {/* Web dApp Banner */}
+        <AnimatedSection delay={0.3}>
         <div className="mt-12 bg-[#1C1A1E] rounded-[32px] md:rounded-full py-6 px-6 sm:px-8 flex flex-col md:flex-row items-center justify-center gap-4 border border-white/5 text-center">
           <span className="text-white text-xl sm:text-2xl md:text-3xl font-bold">All features are available directly in your</span>
           <div className="flex items-center gap-2">
@@ -881,6 +948,7 @@ function OtherFeaturesSection() {
             <span className="text-[#FF6940] text-xl sm:text-2xl md:text-3xl font-bold">Web dApp Dashboard</span>
           </div>
         </div>
+        </AnimatedSection>
 
       </div>
     </section>
@@ -890,7 +958,6 @@ function OtherFeaturesSection() {
 function CTAAndFooterSection() {
   return (
     <section className="bg-[#FF6940] relative overflow-hidden pt-24 pb-8">
-      {/* Background Circular Text */}
       <div className="absolute top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1400px] h-[1400px] pointer-events-none opacity-[0.06] z-0">
         <svg viewBox="0 0 1000 1000" className="w-full h-full animate-[spin_60s_linear_infinite]">
           <path id="textPath" d="M 500, 500 m -320, 0 a 320,320 0 1,1 640,0 a 320,320 0 1,1 -640,0" fill="transparent" />
@@ -903,17 +970,21 @@ function CTAAndFooterSection() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col items-center">
+        <AnimatedSection>
         <h2 className="text-[32px] sm:text-[40px] md:text-[56px] font-extrabold text-[#0F1014] text-center mb-8 tracking-tight">
           Are you Ready? Join now!
         </h2>
+        </AnimatedSection>
+        <AnimatedSection delay={0.15}>
         <button className="bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold flex items-center justify-center gap-3 text-base sm:text-lg transition-colors mb-16 sm:mb-24 shadow-xl w-full sm:w-auto">
           <Send size={20} className="fill-[#FF6940]" />
           Launch Dashboard
         </button>
+        </AnimatedSection>
 
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+        <StaggerChildren className="w-full grid grid-cols-1 md:grid-cols-2 gap-6" staggerDelay={0.15}>
           {/* Left Card */}
-          <div className="bg-white rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-14 flex flex-col justify-between min-h-[350px] sm:min-h-[450px] shadow-sm">
+          <motion.div variants={staggerItem} className="bg-white rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-14 flex flex-col justify-between min-h-[350px] sm:min-h-[450px] shadow-sm">
             <h3 className="text-[48px] sm:text-[56px] md:text-[72px] font-extrabold leading-[1.05] tracking-tight text-[#0F1014]">
               Store,<br/>spend,<br/>exchange.
             </h3>
@@ -925,19 +996,30 @@ function CTAAndFooterSection() {
               </div>
               <p className="text-[15px] font-medium text-gray-900">©2026 All Rights Reserved, Zap.Fin.</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column */}
-          <div className="flex flex-col gap-6">
+          <motion.div variants={staggerItem} className="flex flex-col gap-6">
             {/* Support Card */}
             <div className="bg-white rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-14 flex-1 shadow-sm">
               <h3 className="text-[32px] sm:text-[40px] md:text-[48px] font-extrabold text-[#0F1014] mb-6 sm:mb-10 tracking-tight">Support</h3>
               <p className="text-[17px] sm:text-[19px] text-gray-900 mb-6 sm:mb-10 font-medium leading-relaxed">
                 Visit our <a href="#" className="underline underline-offset-4 decoration-2 hover:text-black transition-colors">Help Center</a> for answers and support.
               </p>
-              <p className="text-[17px] sm:text-[19px] text-gray-900 font-medium">
-                Join us in <a href="#" className="underline underline-offset-4 decoration-2 hover:text-black transition-colors">Telegram</a>
-              </p>
+              <div className="flex items-center gap-4">
+                <a href="https://x.com/ZapFinBank" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[17px] sm:text-[19px] text-gray-900 font-medium underline underline-offset-4 decoration-2 hover:text-black transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  Twitter
+                </a>
+                <a href="https://linkedin.com/company/zapfin" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[17px] sm:text-[19px] text-gray-900 font-medium underline underline-offset-4 decoration-2 hover:text-black transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  LinkedIn
+                </a>
+              </div>
             </div>
 
             {/* Links Card */}
@@ -945,8 +1027,8 @@ function CTAAndFooterSection() {
               <a href="#" className="text-[17px] font-semibold text-gray-900 underline underline-offset-4 decoration-2 hover:text-black transition-colors">Terms of use</a>
               <a href="#" className="text-[17px] font-semibold text-gray-900 underline underline-offset-4 decoration-2 hover:text-black transition-colors">Privacy Policy</a>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </StaggerChildren>
 
         {/* Footer text */}
         <div className="w-full flex flex-col md:flex-row justify-between items-center mt-16 text-[13px] font-medium text-black/40 text-center md:text-left gap-4 px-4">
@@ -973,12 +1055,6 @@ export default function App() {
       <OtherFeaturesSection />
       <CTAAndFooterSection />
       
-      {/* Floating chat icon bottom right */}
-      <div className="fixed bottom-8 right-8 w-14 h-14 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center cursor-pointer z-50 border border-gray-100">
-        <div className="w-6 h-6 bg-[#0F1014] rounded-sm relative">
-            <div className="absolute bottom-[-4px] right-[-4px] w-0 h-0 border-l-[6px] border-l-transparent border-t-[6px] border-t-[#0F1014] border-r-[6px] border-r-transparent transform -rotate-45"></div>
-        </div>
-      </div>
     </div>
   );
 }
