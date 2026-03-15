@@ -7,7 +7,7 @@
     "dev": "tsx server/index.ts & vite",
     "dev:server": "tsx server/index.ts",
     "dev:client": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc --outDir dist-server --rootDir . --esModuleInterop --module nodenext --moduleResolution nodenext --target es2022 --skipLibCheck --resolveJsonModule server/index.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
@@ -39,6 +39,9 @@
     "react-router-dom": "^7.13.1",
     "three": "^0.183.2",
     "vite": "^6.2.0"
+  },
+  "overrides": {
+    "camera-controls": "2.9.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
