@@ -592,11 +592,10 @@ function SpendControlSection() {
                   </div>
 
                   {/* Transaction Feed */}
-                  <div className="bg-[#1A1B1F] rounded-xl p-4 border border-white/5 flex-1 flex flex-col overflow-hidden">
+                  <div className="bg-[#1A1B1F] rounded-xl p-4 border border-white/5 flex-1 flex flex-col">
                     <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-3 block">Recent Transactions</span>
                     
-                    <div className="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
-                      {/* Spotify */}
+                    <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between bg-[#0F1014] p-2.5 rounded-lg border border-white/5">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center flex-shrink-0">
@@ -610,36 +609,6 @@ function SpendControlSection() {
                           </div>
                         </div>
                         <span className="text-white text-xs font-bold">-14.87 USDC</span>
-                      </div>
-                      
-                      {/* Airbnb */}
-                      <div className="flex items-center justify-between bg-[#0F1014] p-2.5 rounded-lg border border-white/5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-[#FF5A5F] rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 2.03125C11.625 2.03125 11.25 2.17188 10.9688 2.45312L2.53125 10.8906C1.96875 11.4531 1.96875 12.3906 2.53125 12.9531L3.59375 14.0156C3.875 14.2969 4.34375 14.2969 4.625 14.0156L5.6875 12.9531C5.96875 12.6719 5.96875 12.2031 5.6875 11.9219L4.625 10.8594L12 3.48438L19.375 10.8594L18.3125 11.9219C18.0312 12.2031 18.0312 12.6719 18.3125 12.9531L19.375 14.0156C19.6562 14.2969 20.125 14.2969 20.4062 14.0156L21.4688 12.9531C22.0312 12.3906 22.0312 11.4531 21.4688 10.8906L13.0312 2.45312C12.75 2.17188 12.375 2.03125 12 2.03125ZM12 6.25C9.9375 6.25 8.25 7.9375 8.25 10C8.25 12.0625 9.9375 13.75 12 13.75C14.0625 13.75 15.75 12.0625 15.75 10C15.75 7.9375 14.0625 6.25 12 6.25ZM12 7.75C13.2656 7.75 14.25 8.73438 14.25 10C14.25 11.2656 13.2656 12.25 12 12.25C10.7344 12.25 9.75 11.2656 9.75 10C9.75 8.73438 10.7344 7.75 12 7.75ZM6.75 12.5C5.90625 12.5 5.25 13.1562 5.25 14C5.25 16.8594 7.21875 19.3125 9.9375 20.0625C10.5938 20.25 11.2969 20.3438 12 20.3438C12.7031 20.3438 13.4062 20.25 14.0625 20.0625C16.7812 19.3125 18.75 16.8594 18.75 14C18.75 13.1562 18.0938 12.5 17.25 12.5C16.4062 12.5 15.75 13.1562 15.75 14C15.75 15.6875 14.625 17.1562 13.0312 17.6562C12.7031 17.75 12.3594 17.8125 12 17.8125C11.6406 17.8125 11.2969 17.75 10.9688 17.6562C9.375 17.1562 8.25 15.6875 8.25 14C8.25 13.1562 7.59375 12.5 6.75 12.5Z"/>
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-white text-xs font-medium">Airbnb</p>
-                            <p className="text-gray-500 text-[10px]">Yesterday, 17:45</p>
-                          </div>
-                        </div>
-                        <span className="text-white text-xs font-bold">-290.30 USDC</span>
-                      </div>
-                      
-                      {/* Zara */}
-                      <div className="flex items-center justify-between bg-[#0F1014] p-2.5 rounded-lg border border-white/5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-black font-serif font-bold text-[8px] tracking-tighter">ZARA</span>
-                          </div>
-                          <div>
-                            <p className="text-white text-xs font-medium">Zara</p>
-                            <p className="text-gray-500 text-[10px]">Yesterday, 11:17</p>
-                          </div>
-                        </div>
-                        <span className="text-white text-xs font-bold">-73.37 USDC</span>
                       </div>
                     </div>
                   </div>
