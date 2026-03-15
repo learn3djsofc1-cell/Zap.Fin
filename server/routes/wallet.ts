@@ -3,7 +3,13 @@ import pg from 'pg';
 import { Keypair } from '@solana/web3.js';
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.WALLET_ENCRYPTION_KEY || process.env.SESSION_SECRET || 'zap-fin-dev-wallet-key-32chars!!';
+const isProduction = process.env.NODE_ENV === 'production';
+const ENCRYPTION_KEY = process.env.WALLET_ENCRYPTION_KEY || process.env.SESSION_SECRET || (isProduction ? '' : 'zap-fin-dev-wallet-key-32chars!!');
+
+if (isProduction && !ENCRYPTION_KEY) {
+  console.error('FATAL: WALLET_ENCRYPTION_KEY or SESSION_SECRET must be set in production');
+  process.exit(1);
+}
 
 function encrypt(text: string): string {
   const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);

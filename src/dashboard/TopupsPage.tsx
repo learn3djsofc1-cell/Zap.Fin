@@ -200,6 +200,51 @@ export default function TopupsPage() {
     );
   }
 
+  if (!wallet.confirmed) {
+    return (
+      <div className="max-w-2xl mx-auto pb-20 md:pb-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8">Confirm Your Wallet</h1>
+        <div className="bg-[#111215] rounded-2xl p-6 border border-white/5 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Wallet size={20} className="text-[#FF6940]" />
+            <span className="text-white font-bold">Wallet Address</span>
+          </div>
+          <div className="bg-[#0A0B0E] rounded-xl p-4">
+            <code className="text-green-400 text-sm break-all font-mono">{wallet.address}</code>
+          </div>
+        </div>
+        <div className="bg-[#111215] rounded-2xl p-6 border border-yellow-500/20 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle size={20} className="text-yellow-400" />
+            <span className="text-yellow-400 font-bold">Confirmation Required</span>
+          </div>
+          <p className="text-gray-400 text-sm mb-4">
+            Your wallet was created but you haven't confirmed that you saved the private key. The private key cannot be shown again. If you have it saved, confirm below to continue.
+          </p>
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF6940] focus:ring-[#FF6940] focus:ring-offset-0 accent-[#FF6940]"
+            />
+            <span className="text-white text-sm font-medium">
+              I have securely saved my private key
+            </span>
+          </label>
+        </div>
+        <button
+          onClick={confirmWallet}
+          disabled={!confirmed || confirming}
+          className="w-full bg-[#FF6940] hover:bg-[#E55E39] text-black py-3.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF6940]/20"
+        >
+          {confirming ? <Loader2 size={18} className="animate-spin" /> : null}
+          {confirming ? 'Confirming...' : 'Confirm & Continue'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
