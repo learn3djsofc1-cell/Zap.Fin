@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDownLeft, CreditCard, Wallet, Plus, Loader2, Eye, EyeOff } from 'lucide-react';
+import { ArrowDownLeft, CreditCard, Wallet, Plus, Loader2 } from 'lucide-react';
 
 interface Card {
   id: number;
   card_number_masked: string;
-  card_number_formatted: string;
-  cvv: string;
   expiry: string;
   name: string;
   frozen: boolean;
@@ -23,7 +21,6 @@ export default function OverviewPage() {
   const [cards, setCards] = useState<Card[]>([]);
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showNumber, setShowNumber] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -95,14 +92,8 @@ export default function OverviewPage() {
             <div className="mt-auto">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-white text-sm font-mono tracking-widest">
-                  {showNumber ? firstCard.card_number_formatted : firstCard.card_number_masked}
+                  {firstCard.card_number_masked}
                 </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowNumber(!showNumber); }}
-                  className="text-white/60 hover:text-white transition-colors"
-                >
-                  {showNumber ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
               </div>
               <span className="text-white/60 text-xs">{firstCard.expiry}</span>
             </div>
