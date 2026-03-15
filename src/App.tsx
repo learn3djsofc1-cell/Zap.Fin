@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Lock, RefreshCw, Copy, ChevronDown, MoreHorizontal, Eye, Wifi, ChevronLeft, ArrowRight, Menu, X } from 'lucide-react';
+import { Send, Lock, RefreshCw, Copy, Check, ChevronDown, MoreHorizontal, Eye, Wifi, ChevronLeft, ArrowRight, Menu, X } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -124,6 +124,24 @@ function Navbar() {
 }
 
 function HeroLeft() {
+  const [caCopied, setCaCopied] = useState(false);
+  const CA = '9ABFVNCk4SDrM2GwjHDMMio7NvF2VcMBGHEUwTQgpump';
+
+  const copyCA = async () => {
+    try {
+      await navigator.clipboard.writeText(CA);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = CA;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setCaCopied(true);
+    setTimeout(() => setCaCopied(false), 2000);
+  };
+
   return (
     <div className="w-full lg:w-[55%] z-10 pt-10 lg:pt-20">
       <motion.h1
@@ -149,8 +167,27 @@ function HeroLeft() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="mt-6 md:mt-8"
       >
-        <Link to="/app" className="mt-8 md:mt-12 bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center justify-center sm:justify-start gap-3 text-base sm:text-lg transition-colors w-full sm:w-auto inline-flex">
+        <div className="bg-[#0F1014] rounded-2xl p-4 inline-block w-full sm:w-auto">
+          <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">CA</span>
+          <div className="flex items-center gap-3">
+            <code className="text-[#FF6940] text-xs sm:text-sm font-mono break-all">{CA}</code>
+            <button
+              onClick={copyCA}
+              className="text-gray-400 hover:text-white transition-colors shrink-0"
+            >
+              {caCopied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <Link to="/app" className="mt-6 md:mt-8 bg-[#0F1014] hover:bg-black text-[#FF6940] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center justify-center sm:justify-start gap-3 text-base sm:text-lg transition-colors w-full sm:w-auto inline-flex">
           <Send size={20} className="fill-[#FF6940]" />
           Launch Dashboard
         </Link>
