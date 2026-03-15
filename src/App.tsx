@@ -666,10 +666,8 @@ function SpendControlSection() {
                     <div className="flex flex-col gap-3 min-w-0">
                       <div className="flex items-center justify-between bg-[#0F1014] p-2.5 rounded-lg border border-white/5 min-w-0 gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM16.586 16.424C16.38 16.762 15.945 16.865 15.607 16.658C12.809 14.95 9.339 14.546 5.478 15.428C5.101 15.514 4.726 15.276 4.64 14.899C4.554 14.522 4.792 14.147 5.169 14.061C9.397 13.096 13.235 13.551 16.332 15.449C16.67 15.656 16.773 16.086 16.586 16.424ZM17.91 13.338C17.653 13.757 17.108 13.882 16.689 13.624C13.483 11.654 8.859 11.074 5.305 12.152C4.836 12.294 4.337 12.029 4.195 11.56C4.053 11.091 4.318 10.592 4.787 10.45C8.865 9.214 14.004 9.866 17.662 12.119C18.081 12.377 18.206 12.922 17.91 13.338ZM18.054 10.122C14.336 7.912 8.328 7.708 4.855 8.763C4.288 8.935 3.682 8.613 3.51 8.046C3.338 7.479 3.66 6.873 4.227 6.701C8.216 5.489 14.846 5.727 19.13 8.271C19.643 8.576 19.812 9.24 19.507 9.753C19.202 10.266 18.538 10.435 18.054 10.122Z"/>
-                            </svg>
+                          <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden">
+                            <img src="/spotify.png" alt="Spotify" className="w-full h-full object-cover" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-white text-xs font-medium truncate">Spotify</p>
@@ -743,10 +741,8 @@ function OtherFeaturesSection() {
                 {/* Apple */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM15.5 16.5C14.5 17.5 13.5 17.5 12 17.5C10.5 17.5 9.5 17.5 8.5 16.5C7.5 15.5 7.5 14.5 7.5 13C7.5 11.5 7.5 10.5 8.5 9.5C9.5 8.5 10.5 8.5 12 8.5C13.5 8.5 14.5 8.5 15.5 9.5C16.5 10.5 16.5 11.5 16.5 13C16.5 14.5 16.5 15.5 15.5 16.5Z"/>
-                      </svg>
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden p-1.5">
+                      <img src="/apple.png" alt="Apple" className="w-full h-full object-contain" />
                     </div>
                     <span className="text-white text-sm font-medium">Apple Gift Card $100</span>
                   </div>
@@ -758,10 +754,8 @@ function OtherFeaturesSection() {
                 {/* Airbnb */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-[#FF5A5F] rounded-full flex items-center justify-center">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2.03125C11.625 2.03125 11.25 2.17188 10.9688 2.45312L2.53125 10.8906C1.96875 11.4531 1.96875 12.3906 2.53125 12.9531L3.59375 14.0156C3.875 14.2969 4.34375 14.2969 4.625 14.0156L5.6875 12.9531C5.96875 12.6719 5.96875 12.2031 5.6875 11.9219L4.625 10.8594L12 3.48438L19.375 10.8594L18.3125 11.9219C18.0312 12.2031 18.0312 12.6719 18.3125 12.9531L19.375 14.0156C19.6562 14.2969 20.125 14.2969 20.4062 14.0156L21.4688 12.9531C22.0312 12.3906 22.0312 11.4531 21.4688 10.8906L13.0312 2.45312C12.75 2.17188 12.375 2.03125 12 2.03125ZM12 6.25C9.9375 6.25 8.25 7.9375 8.25 10C8.25 12.0625 9.9375 13.75 12 13.75C14.0625 13.75 15.75 12.0625 15.75 10C15.75 7.9375 14.0625 6.25 12 6.25ZM12 7.75C13.2656 7.75 14.25 8.73438 14.25 10C14.25 11.2656 13.2656 12.25 12 12.25C10.7344 12.25 9.75 11.2656 9.75 10C9.75 8.73438 10.7344 7.75 12 7.75ZM6.75 12.5C5.90625 12.5 5.25 13.1562 5.25 14C5.25 16.8594 7.21875 19.3125 9.9375 20.0625C10.5938 20.25 11.2969 20.3438 12 20.3438C12.7031 20.3438 13.4062 20.25 14.0625 20.0625C16.7812 19.3125 18.75 16.8594 18.75 14C18.75 13.1562 18.0938 12.5 17.25 12.5C16.4062 12.5 15.75 13.1562 15.75 14C15.75 15.6875 14.625 17.1562 13.0312 17.6562C12.7031 17.75 12.3594 17.8125 12 17.8125C11.6406 17.8125 11.2969 17.75 10.9688 17.6562C9.375 17.1562 8.25 15.6875 8.25 14C8.25 13.1562 7.59375 12.5 6.75 12.5Z"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <img src="/airbnb.png" alt="Airbnb" className="w-full h-full object-cover" />
                     </div>
                     <span className="text-white text-sm font-medium">Airbnb</span>
                   </div>
@@ -773,10 +767,8 @@ function OtherFeaturesSection() {
                 {/* Spotify */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM16.586 16.424C16.38 16.762 15.945 16.865 15.607 16.658C12.809 14.95 9.339 14.546 5.478 15.428C5.101 15.514 4.726 15.276 4.64 14.899C4.554 14.522 4.792 14.147 5.169 14.061C9.397 13.096 13.235 13.551 16.332 15.449C16.67 15.656 16.773 16.086 16.586 16.424ZM17.91 13.338C17.653 13.757 17.108 13.882 16.689 13.624C13.483 11.654 8.859 11.074 5.305 12.152C4.836 12.294 4.337 12.029 4.195 11.56C4.053 11.091 4.318 10.592 4.787 10.45C8.865 9.214 14.004 9.866 17.662 12.119C18.081 12.377 18.206 12.922 17.91 13.338ZM18.054 10.122C14.336 7.912 8.328 7.708 4.855 8.763C4.288 8.935 3.682 8.613 3.51 8.046C3.338 7.479 3.66 6.873 4.227 6.701C8.216 5.489 14.846 5.727 19.13 8.271C19.643 8.576 19.812 9.24 19.507 9.753C19.202 10.266 18.538 10.435 18.054 10.122Z"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <img src="/spotify.png" alt="Spotify" className="w-full h-full object-cover" />
                     </div>
                     <span className="text-white text-sm font-medium">Spotify Premium</span>
                   </div>
@@ -788,8 +780,8 @@ function OtherFeaturesSection() {
                 {/* Netflix */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center border border-gray-800">
-                      <span className="text-[#E50914] font-bold text-lg leading-none">N</span>
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <img src="/netflix.png" alt="Netflix" className="w-full h-full object-cover" />
                     </div>
                     <span className="text-white text-sm font-medium">Netflix 1 month</span>
                   </div>
@@ -801,11 +793,8 @@ function OtherFeaturesSection() {
                 {/* Telegram */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-[#2AABEE] rounded-full flex items-center justify-center">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 2L11 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                      <img src="/telegram.jpg" alt="Telegram" className="w-full h-full object-cover" />
                     </div>
                     <span className="text-white text-sm font-medium">Telegram Premium</span>
                   </div>

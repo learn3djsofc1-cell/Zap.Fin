@@ -42,6 +42,7 @@ Configured as a **static** site deployment:
 
 - `logo.png` — Zap.Fin logo (favicon + navbar + inline)
 - `netflix.png`, `usdc.png`, `usdt.png` — Brand logos used in dashboard mockups
+- `spotify.png`, `airbnb.png`, `apple.png`, `telegram.jpg` — Brand logos used in Rewards & Referrals card
 
 ## Social Links
 
