@@ -152,6 +152,25 @@ export default function OverviewPage() {
         )}
       </div>
 
+      {cards.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
+          <div className="bg-[#111215] rounded-2xl p-5 border border-white/5">
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">Cards</span>
+            <span className="text-2xl font-bold text-white">{cards.length}</span>
+            <span className="text-gray-500 text-xs ml-1">active</span>
+          </div>
+          <div className="bg-[#111215] rounded-2xl p-5 border border-white/5">
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">SOL Balance</span>
+            <span className="text-2xl font-bold text-white">{solBalance.toFixed(2)}</span>
+            <span className="text-gray-500 text-xs ml-1">SOL</span>
+          </div>
+          <div className="bg-[#111215] rounded-2xl p-5 border border-white/5 col-span-2 sm:col-span-1">
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">USD Value</span>
+            <span className="text-2xl font-bold text-white">${usdBalance.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
           <span className="text-white text-lg font-bold mb-5 block">Recent Activity</span>
