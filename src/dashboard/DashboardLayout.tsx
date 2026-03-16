@@ -1,6 +1,7 @@
-import { NavLink, Outlet, Link } from 'react-router-dom';
-import { LayoutDashboard, Bot, ArrowLeftRight, ShieldCheck, Menu, X } from 'lucide-react';
+import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Bot, ArrowLeftRight, ShieldCheck, Menu, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../lib/AuthContext';
 
 const navItems = [
   { to: '/app', icon: LayoutDashboard, label: 'Overview', end: true },
@@ -16,6 +17,13 @@ const linkClass = (isActive: boolean) =>
 
 export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-[#08090C] font-sans flex">
@@ -36,12 +44,19 @@ export default function DashboardLayout() {
           ))}
         </nav>
         <div className="p-4 border-t border-white/[0.04]">
-          <Link to="/docs" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all">
-            Documentation
-          </Link>
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all">
-            Back to Home
-          </Link>
+          {user && (
+            <div className="px-4 py-2 mb-2">
+              <span className="text-white text-sm font-medium block truncate">{user.name}</span>
+              <span className="text-gray-500 text-xs block truncate">{user.email}</span>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
@@ -84,8 +99,19 @@ export default function DashboardLayout() {
                 ))}
               </nav>
               <div className="p-4 border-t border-white/[0.04]">
-                <Link to="/docs" className="block text-gray-400 hover:text-white text-sm font-medium py-2 px-4" onClick={() => setMobileOpen(false)}>Documentation</Link>
-                <Link to="/" className="block text-gray-400 hover:text-white text-sm font-medium py-2 px-4" onClick={() => setMobileOpen(false)}>Back to Home</Link>
+                {user && (
+                  <div className="px-4 py-2 mb-2">
+                    <span className="text-white text-sm font-medium block truncate">{user.name}</span>
+                    <span className="text-gray-500 text-xs block truncate">{user.email}</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => { setMobileOpen(false); handleLogout(); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
+                >
+                  <LogOut size={18} />
+                  <span>Logout</span>
+                </button>
               </div>
             </div>
           </div>

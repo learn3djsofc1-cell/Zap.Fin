@@ -64,14 +64,14 @@ function Navbar() {
         </div>
         <div className="hidden md:flex items-center gap-3">
           <Link to="/docs" className="text-gray-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">Docs</Link>
-          <Link to="/app" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF6940]/20">Launch App</Link>
+          <Link to="/login" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF6940]/20">Launch App</Link>
         </div>
         <button className="md:hidden text-white p-1.5" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         {open && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 w-full bg-[#0D0E12] border-b border-white/5 shadow-2xl md:hidden flex flex-col px-5 py-4 gap-3 z-50">
             {links.map((l) => (<a key={l.name} href={l.href} className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>{l.name}</a>))}
             <Link to="/docs" className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>Docs</Link>
-            <Link to="/app" className="bg-[#FF6940] text-white px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>Launch App</Link>
+            <Link to="/login" className="bg-[#FF6940] text-white px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>Launch App</Link>
           </motion.div>
         )}
       </div>

@@ -32,17 +32,29 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 /
 ├── index.html              # HTML entry point with SEO meta, OG/Twitter cards, structured data
 ├── src/
-│   ├── main.tsx            # React entry with BrowserRouter, Routes (/, /docs, /app/*)
+│   ├── main.tsx            # React entry with BrowserRouter, Routes, AuthProvider, ToastProvider
 │   ├── App.tsx             # Landing page
 │   ├── index.css           # Global styles, animations, scrollbar
+│   ├── auth/
+│   │   ├── LoginPage.tsx   # /login - Sign in form
+│   │   └── SignupPage.tsx  # /signup - Registration form
+│   ├── lib/
+│   │   ├── api.ts          # Centralized API client with JWT auth, auto-redirect on 401
+│   │   ├── AuthContext.tsx  # Auth context/provider + ProtectedRoute component
+│   │   └── toast.tsx       # Toast notification system (success/error/warning/info)
+│   ├── components/
+│   │   ├── Modal.tsx       # Reusable modal dialog
+│   │   ├── ConfirmDialog.tsx # Delete confirmation dialog
+│   │   ├── Skeleton.tsx    # Loading skeleton components
+│   │   └── EmptyState.tsx  # Empty state placeholder
 │   ├── docs/
 │   │   └── DocsPage.tsx    # /docs - Full platform documentation
 │   └── dashboard/
-│       ├── DashboardLayout.tsx  # Sidebar + bottom nav layout with Outlet
-│       ├── OverviewPage.tsx     # /app - Agent stats + recent activity table
-│       ├── AgentsPage.tsx       # /app/agents - Agent management
-│       ├── TransactionsPage.tsx # /app/transactions - Transaction history
-│       └── PoliciesPage.tsx     # /app/policies - Policy management
+│       ├── DashboardLayout.tsx  # Sidebar + bottom nav layout with Outlet, logout
+│       ├── OverviewPage.tsx     # /app - Agent stats + recent activity (real API)
+│       ├── AgentsPage.tsx       # /app/agents - Full CRUD agent management (real API)
+│       ├── TransactionsPage.tsx # /app/transactions - Transaction list + create (real API)
+│       └── PoliciesPage.tsx     # /app/policies - Full CRUD policy management (real API)
 ├── public/
 │   ├── moltfin-logo.png    # Lobster mascot logo
 │   ├── solana-logo.png     # Partner logo
@@ -54,9 +66,10 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 │   ├── db.ts               # PostgreSQL connection pool (pg)
 │   ├── schema.ts           # Database schema initialization (users, agents, transactions, policies)
 │   ├── auth.ts             # Auth routes (/api/auth/*) + JWT middleware
+│   ├── validate.ts         # ID validation helpers
 │   ├── routes/
 │   │   ├── agents.ts       # CRUD /api/agents
-│   │   ├── transactions.ts # CRUD /api/transactions
+│   │   ├── transactions.ts # GET+POST /api/transactions (immutable records)
 │   │   ├── policies.ts     # CRUD /api/policies
 │   │   └── overview.ts     # GET /api/overview (aggregated stats)
 │   └── tsconfig.json       # Server TS config
@@ -78,10 +91,12 @@ All tables enforce user_id isolation — users can only access their own data.
 
 - `/` Landing page (marketing site)
 - `/docs` Platform documentation
-- `/app` Dashboard overview
-- `/app/agents` Agent management
-- `/app/transactions` Transaction history
-- `/app/policies` Policy management
+- `/login` Sign in page
+- `/signup` Registration page
+- `/app` Dashboard overview (protected - requires auth)
+- `/app/agents` Agent management (protected)
+- `/app/transactions` Transaction history (protected)
+- `/app/policies` Policy management (protected)
 
 ## API Endpoints
 
@@ -100,6 +115,13 @@ All tables enforce user_id isolation — users can only access their own data.
 - `PATCH /api/policies/:id` Update policy (requires auth)
 - `DELETE /api/policies/:id` Delete policy (requires auth)
 - `GET /api/overview` Dashboard stats + recent activity (requires auth)
+
+## Auth System
+
+- JWT stored in localStorage key `moltfin_token` with 7-day expiry
+- API client auto-injects Authorization header and redirects to /login on 401
+- ProtectedRoute component wraps /app/* routes, redirecting unauthenticated users
+- Passwords hashed with bcryptjs (10 rounds)
 
 ## Development
 

@@ -1,97 +1,11 @@
-import { ShieldCheck, Plus, Check, X as XIcon, DollarSign, Users, Clock } from 'lucide-react';
-
-const policies = [
-  {
-    id: 'pol_001',
-    name: 'Standard Trading Policy',
-    agents: ['trading_bot_01', 'market_maker_03'],
-    agentCount: 2,
-    status: 'active',
-    rules: {
-      maxPerTransaction: 500,
-      dailyLimit: 5000,
-      monthlyLimit: 100000,
-      allowedMerchants: ['*'],
-      requireMultiSig: false,
-      multiSigThreshold: 0,
-      allowedCurrencies: ['USDC'],
-    },
-    created: 'Feb 28, 2026',
-    lastTriggered: '2 min ago',
-  },
-  {
-    id: 'pol_002',
-    name: 'High-Value Transfer Policy',
-    agents: ['compliance_bot'],
-    agentCount: 1,
-    status: 'active',
-    rules: {
-      maxPerTransaction: 50000,
-      dailyLimit: 200000,
-      monthlyLimit: 2000000,
-      allowedMerchants: ['reserve_acct', 'treasury_pool', 'cold_storage'],
-      requireMultiSig: true,
-      multiSigThreshold: 2,
-      allowedCurrencies: ['USDC'],
-    },
-    created: 'Feb 15, 2026',
-    lastTriggered: '45 min ago',
-  },
-  {
-    id: 'pol_003',
-    name: 'Operations Expense Policy',
-    agents: ['ops_agent_07', 'data_buyer_09'],
-    agentCount: 2,
-    status: 'active',
-    rules: {
-      maxPerTransaction: 1000,
-      dailyLimit: 3000,
-      monthlyLimit: 25000,
-      allowedMerchants: ['cloud_provider', 'api_provider', 'data_feed_svc'],
-      requireMultiSig: false,
-      multiSigThreshold: 0,
-      allowedCurrencies: ['USDC'],
-    },
-    created: 'Mar 10, 2026',
-    lastTriggered: '23 min ago',
-  },
-  {
-    id: 'pol_004',
-    name: 'Rebalancing Policy',
-    agents: ['rebalancer_02', 'yield_optimizer'],
-    agentCount: 2,
-    status: 'active',
-    rules: {
-      maxPerTransaction: 10000,
-      dailyLimit: 50000,
-      monthlyLimit: 500000,
-      allowedMerchants: ['*'],
-      requireMultiSig: false,
-      multiSigThreshold: 0,
-      allowedCurrencies: ['USDC', 'SOL'],
-    },
-    created: 'Mar 5, 2026',
-    lastTriggered: '15 min ago',
-  },
-  {
-    id: 'pol_005',
-    name: 'Payment Routing Policy',
-    agents: ['payment_router'],
-    agentCount: 1,
-    status: 'active',
-    rules: {
-      maxPerTransaction: 5000,
-      dailyLimit: 100000,
-      monthlyLimit: 1000000,
-      allowedMerchants: ['*'],
-      requireMultiSig: false,
-      multiSigThreshold: 0,
-      allowedCurrencies: ['USDC'],
-    },
-    created: 'Mar 1, 2026',
-    lastTriggered: '1 min ago',
-  },
-];
+import { useEffect, useState } from 'react';
+import { ShieldCheck, Plus, DollarSign, Users, Clock, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { api } from '../lib/api';
+import { useToast } from '../lib/toast';
+import { CardSkeleton } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
+import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 function formatNumber(n: number): string {
   if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
@@ -99,104 +13,396 @@ function formatNumber(n: number): string {
   return `$${n}`;
 }
 
+function timeAgo(date: string): string {
+  const now = Date.now();
+  const then = new Date(date).getTime();
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
 export default function PoliciesPage() {
+  const { toast } = useToast();
+  const [policies, setPolicies] = useState<any[]>([]);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editPolicy, setEditPolicy] = useState<any>(null);
+  const [deletePolicy, setDeletePolicy] = useState<any>(null);
+  const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const [formName, setFormName] = useState('');
+  const [formMaxPerTx, setFormMaxPerTx] = useState('500');
+  const [formDailyLimit, setFormDailyLimit] = useState('5000');
+  const [formMonthlyLimit, setFormMonthlyLimit] = useState('100000');
+  const [formMultiSig, setFormMultiSig] = useState(false);
+  const [formMultiSigThreshold, setFormMultiSigThreshold] = useState('2');
+  const [formMerchants, setFormMerchants] = useState('');
+  const [formCurrencies, setFormCurrencies] = useState<string[]>(['USDC']);
+  const [formAgentIds, setFormAgentIds] = useState<number[]>([]);
+
+  const fetchPolicies = () => {
+    api.policies.list()
+      .then((data) => setPolicies(data.policies))
+      .catch(() => toast('error', 'Failed to load policies'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchPolicies(); }, []);
+
+  const openCreate = () => {
+    setFormName(''); setFormMaxPerTx('500'); setFormDailyLimit('5000'); setFormMonthlyLimit('100000');
+    setFormMultiSig(false); setFormMultiSigThreshold('2'); setFormMerchants(''); setFormCurrencies(['USDC']); setFormAgentIds([]);
+    api.agents.list().then((d) => setAgents(d.agents)).catch(() => {});
+    setShowCreate(true);
+  };
+
+  const openEdit = (policy: any) => {
+    setFormName(policy.name);
+    setFormMaxPerTx(String(parseFloat(policy.max_per_tx) || 0));
+    setFormDailyLimit(String(parseFloat(policy.daily_limit) || 0));
+    setFormMonthlyLimit(String(parseFloat(policy.monthly_limit) || 0));
+    setFormMultiSig(!!policy.multi_sig);
+    setFormMultiSigThreshold(String(policy.multi_sig_threshold || 2));
+    setFormMerchants((policy.allowed_merchants || []).join(', '));
+    setFormCurrencies(policy.allowed_currencies || ['USDC']);
+    setFormAgentIds(policy.assigned_agent_ids || []);
+    api.agents.list().then((d) => setAgents(d.agents)).catch(() => {});
+    setEditPolicy(policy);
+    setMenuOpen(null);
+  };
+
+  const handleSave = async () => {
+    if (!formName.trim()) { toast('error', 'Policy name is required'); return; }
+    setSaving(true);
+    try {
+      const body = {
+        name: formName.trim(),
+        maxPerTx: parseFloat(formMaxPerTx) || 0,
+        dailyLimit: parseFloat(formDailyLimit) || 0,
+        monthlyLimit: parseFloat(formMonthlyLimit) || 0,
+        multiSig: formMultiSig,
+        multiSigThreshold: formMultiSig ? parseInt(formMultiSigThreshold) || 2 : 1,
+        allowedMerchants: formMerchants.trim() ? formMerchants.split(',').map(m => m.trim()).filter(Boolean) : [],
+        allowedCurrencies: formCurrencies,
+        assignedAgentIds: formAgentIds,
+      };
+
+      if (editPolicy) {
+        await api.policies.update(editPolicy.id, body);
+        toast('success', 'Policy updated');
+      } else {
+        await api.policies.create(body);
+        toast('success', 'Policy created');
+      }
+      setShowCreate(false); setEditPolicy(null);
+      fetchPolicies();
+    } catch (err: any) {
+      toast('error', err.message || 'Failed to save policy');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletePolicy) return;
+    setDeleting(true);
+    try {
+      await api.policies.delete(deletePolicy.id);
+      toast('success', 'Policy deleted');
+      setDeletePolicy(null);
+      fetchPolicies();
+    } catch (err: any) {
+      toast('error', err.message || 'Failed to delete policy');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const toggleCurrency = (c: string) => {
+    setFormCurrencies((prev) =>
+      prev.includes(c) ? (prev.length > 1 ? prev.filter(x => x !== c) : prev) : [...prev, c]
+    );
+  };
+
+  const toggleAgentId = (id: number) => {
+    setFormAgentIds((prev) =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Policies</h1>
-          <p className="text-gray-500 text-sm mt-1">{policies.length} active policies</p>
+          <p className="text-gray-500 text-sm mt-1">
+            {loading ? 'Loading...' : `${policies.length} ${policies.length === 1 ? 'policy' : 'policies'}`}
+          </p>
         </div>
-        <button className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
+        <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
           <Plus size={16} /> Create Policy
         </button>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {policies.map((policy) => (
-          <div key={policy.id} className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] hover:border-[#FF6940]/10 transition-colors overflow-hidden">
-            <div className="p-5 sm:p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#FF6940]/8 flex items-center justify-center">
-                    <ShieldCheck size={18} className="text-[#FF6940]" />
+      {loading ? (
+        <div className="flex flex-col gap-4">
+          {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+      ) : policies.length === 0 ? (
+        <EmptyState
+          icon={<ShieldCheck size={28} />}
+          title="No policies yet"
+          description="Create spending policies to enforce limits and controls on your agents."
+          action={
+            <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
+              <Plus size={16} /> Create Policy
+            </button>
+          }
+        />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {policies.map((policy) => (
+            <div key={policy.id} className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] hover:border-[#FF6940]/10 transition-colors overflow-hidden">
+              <div className="p-5 sm:p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#FF6940]/8 flex items-center justify-center">
+                      <ShieldCheck size={18} className="text-[#FF6940]" />
+                    </div>
+                    <div>
+                      <span className="text-white font-bold text-sm block">{policy.name}</span>
+                      <span className="text-gray-500 text-[10px] font-mono">{policy.policy_id_slug}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-white font-bold text-sm block">{policy.name}</span>
-                    <span className="text-gray-500 text-[10px] font-mono">{policy.id}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 bg-green-500/10 px-2 py-1 rounded-md">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                      <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">{policy.status}</span>
+                    </div>
+                    <div className="relative">
+                      <button className="text-gray-600 hover:text-gray-400 p-1" onClick={() => setMenuOpen(menuOpen === policy.id ? null : policy.id)}>
+                        <MoreVertical size={14} />
+                      </button>
+                      {menuOpen === policy.id && (
+                        <div className="absolute right-0 top-8 bg-[#111318] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20 min-w-[140px]">
+                          <button
+                            onClick={() => openEdit(policy)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/[0.04] transition-colors"
+                          >
+                            <Edit2 size={13} /> Edit
+                          </button>
+                          <button
+                            onClick={() => { setDeletePolicy(policy); setMenuOpen(null); }}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-colors"
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-green-500/10 px-2 py-1 rounded-md">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                    <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">{policy.status}</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                <div className="bg-white/[0.02] rounded-lg p-3">
-                  <div className="flex items-center gap-1 mb-1">
-                    <DollarSign size={10} className="text-gray-600" />
-                    <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Max/TX</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                  <div className="bg-white/[0.02] rounded-lg p-3">
+                    <div className="flex items-center gap-1 mb-1">
+                      <DollarSign size={10} className="text-gray-600" />
+                      <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Max/TX</span>
+                    </div>
+                    <span className="text-white text-sm font-bold">{formatNumber(parseFloat(policy.max_per_tx) || 0)}</span>
                   </div>
-                  <span className="text-white text-sm font-bold">{formatNumber(policy.rules.maxPerTransaction)}</span>
-                </div>
-                <div className="bg-white/[0.02] rounded-lg p-3">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Clock size={10} className="text-gray-600" />
-                    <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Daily</span>
+                  <div className="bg-white/[0.02] rounded-lg p-3">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Clock size={10} className="text-gray-600" />
+                      <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Daily</span>
+                    </div>
+                    <span className="text-white text-sm font-bold">{formatNumber(parseFloat(policy.daily_limit) || 0)}</span>
                   </div>
-                  <span className="text-white text-sm font-bold">{formatNumber(policy.rules.dailyLimit)}</span>
-                </div>
-                <div className="bg-white/[0.02] rounded-lg p-3">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Users size={10} className="text-gray-600" />
-                    <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Agents</span>
+                  <div className="bg-white/[0.02] rounded-lg p-3">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Users size={10} className="text-gray-600" />
+                      <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Agents</span>
+                    </div>
+                    <span className="text-white text-sm font-bold">{(policy.assigned_agent_ids || []).length}</span>
                   </div>
-                  <span className="text-white text-sm font-bold">{policy.agentCount}</span>
+                  <div className="bg-white/[0.02] rounded-lg p-3">
+                    <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider block mb-1">Multi-Sig</span>
+                    {policy.multi_sig ? (
+                      <span className="text-[#FF6940] text-sm font-bold">{policy.multi_sig_threshold} of 3</span>
+                    ) : (
+                      <span className="text-gray-500 text-sm font-bold">Off</span>
+                    )}
+                  </div>
                 </div>
-                <div className="bg-white/[0.02] rounded-lg p-3">
-                  <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider block mb-1">Multi-Sig</span>
-                  {policy.rules.requireMultiSig ? (
-                    <span className="text-[#FF6940] text-sm font-bold">{policy.rules.multiSigThreshold} of 3</span>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">Merchants:</span>
+                  {(policy.allowed_merchants || []).length === 0 ? (
+                    <span className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-medium">None</span>
                   ) : (
-                    <span className="text-gray-500 text-sm font-bold">Off</span>
+                    (policy.allowed_merchants || []).map((m: string) => (
+                      <span key={m} className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-mono">{m}</span>
+                    ))
                   )}
+                  <span className="text-gray-700 text-[10px] mx-1">|</span>
+                  <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">Currencies:</span>
+                  {(policy.allowed_currencies || []).map((c: string) => (
+                    <span key={c} className="bg-[#FF6940]/5 text-[#FF6940] px-2 py-0.5 rounded text-[10px] font-bold">{c}</span>
+                  ))}
                 </div>
               </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">Merchants:</span>
-                {policy.rules.allowedMerchants[0] === '*' ? (
-                  <span className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-medium">All merchants</span>
-                ) : (
-                  policy.rules.allowedMerchants.map((m) => (
-                    <span key={m} className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-mono">{m}</span>
-                  ))
-                )}
-                <span className="text-gray-700 text-[10px] mx-1">|</span>
-                <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">Currencies:</span>
-                {policy.rules.allowedCurrencies.map((c) => (
-                  <span key={c} className="bg-[#FF6940]/5 text-[#FF6940] px-2 py-0.5 rounded text-[10px] font-bold">{c}</span>
-                ))}
+              <div className="border-t border-white/[0.03] px-5 sm:px-6 py-3 flex items-center justify-between bg-white/[0.01]">
+                <span className="text-gray-600 text-xs">Created {timeAgo(policy.created_at)}</span>
               </div>
             </div>
-            <div className="border-t border-white/[0.03] px-5 sm:px-6 py-3 flex items-center justify-between bg-white/[0.01]">
-              <div className="flex items-center gap-4">
-                <span className="text-gray-600 text-xs">Created {policy.created}</span>
-                <span className="text-gray-700">|</span>
-                <span className="text-gray-600 text-xs">Last triggered {policy.lastTriggered}</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {policy.agents.map((a) => (
-                  <span key={a} className="text-gray-500 text-[10px] font-mono bg-white/[0.03] px-1.5 py-0.5 rounded">{a}</span>
-                ))}
-              </div>
+          ))}
+        </div>
+      )}
+
+      <Modal
+        open={showCreate || !!editPolicy}
+        onClose={() => { setShowCreate(false); setEditPolicy(null); }}
+        title={editPolicy ? 'Edit Policy' : 'Create Policy'}
+        maxWidth="max-w-xl"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Policy Name</label>
+            <input
+              type="text"
+              value={formName}
+              onChange={(e) => setFormName(e.target.value)}
+              placeholder="e.g. Standard Trading Policy"
+              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Max/TX ($)</label>
+              <input type="number" min="0" step="1" value={formMaxPerTx} onChange={(e) => setFormMaxPerTx(e.target.value)}
+                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors" />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Daily ($)</label>
+              <input type="number" min="0" step="1" value={formDailyLimit} onChange={(e) => setFormDailyLimit(e.target.value)}
+                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors" />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Monthly ($)</label>
+              <input type="number" min="0" step="1" value={formMonthlyLimit} onChange={(e) => setFormMonthlyLimit(e.target.value)}
+                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors" />
             </div>
           </div>
-        ))}
-      </div>
+
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Allowed Merchants</label>
+            <input
+              type="text"
+              value={formMerchants}
+              onChange={(e) => setFormMerchants(e.target.value)}
+              placeholder="Comma-separated (leave empty for none)"
+              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Currencies</label>
+            <div className="flex gap-2">
+              {['USDC', 'SOL', 'ETH'].map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => toggleCurrency(c)}
+                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                    formCurrencies.includes(c)
+                      ? 'bg-[#FF6940]/15 text-[#FF6940] border border-[#FF6940]/30'
+                      : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <label className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Multi-Sig</label>
+              <button
+                type="button"
+                onClick={() => setFormMultiSig(!formMultiSig)}
+                className={`w-10 h-5 rounded-full transition-colors relative ${formMultiSig ? 'bg-[#FF6940]' : 'bg-white/[0.1]'}`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${formMultiSig ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+            {formMultiSig && (
+              <input
+                type="number"
+                min="2"
+                max="10"
+                value={formMultiSigThreshold}
+                onChange={(e) => setFormMultiSigThreshold(e.target.value)}
+                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+                placeholder="Threshold (e.g. 2)"
+              />
+            )}
+          </div>
+
+          {agents.length > 0 && (
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Assign Agents</label>
+              <div className="flex flex-wrap gap-2">
+                {agents.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => toggleAgentId(a.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      formAgentIds.includes(a.id)
+                        ? 'bg-[#FF6940]/15 text-[#FF6940] border border-[#FF6940]/30'
+                        : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
+                    }`}
+                  >
+                    {a.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              onClick={() => { setShowCreate(false); setEditPolicy(null); }}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-400 hover:text-white transition-colors bg-white/[0.04] hover:bg-white/[0.08]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="bg-[#FF6940] hover:bg-[#E85C38] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+            >
+              {saving ? 'Saving...' : editPolicy ? 'Update' : 'Create'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        open={!!deletePolicy}
+        onClose={() => setDeletePolicy(null)}
+        onConfirm={handleDelete}
+        title="Delete Policy"
+        message={`Are you sure you want to delete "${deletePolicy?.name}"? This action cannot be undone.`}
+        loading={deleting}
+      />
     </div>
   );
 }

@@ -1,39 +1,96 @@
-import { ArrowLeftRight, Search, Filter } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowLeftRight, Search, Filter, Plus } from 'lucide-react';
+import { api } from '../lib/api';
+import { useToast } from '../lib/toast';
+import { TableRowSkeleton } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
+import Modal from '../components/Modal';
 
-const transactions = [
-  { id: 'tx_8f2a3b4c', agent: 'trading_bot_01', type: 'Payment', to: 'vendor_alpha', amount: '$249.99', currency: 'USDC', status: 'Settled', latency: '338ms', time: 'Mar 16, 14:23', hash: '5Kv2...8mFj' },
-  { id: 'tx_7c1b2d3e', agent: 'market_maker_03', type: 'Transfer', to: 'treasury_pool', amount: '$12,500.00', currency: 'USDC', status: 'Settled', latency: '291ms', time: 'Mar 16, 14:15', hash: '3nRq...7xWk' },
-  { id: 'tx_6d3e4f5a', agent: 'rebalancer_02', type: 'Payment', to: 'liquidity_hub', amount: '$3,420.50', currency: 'USDC', status: 'Settled', latency: '356ms', time: 'Mar 16, 14:08', hash: '9pLm...2vBn' },
-  { id: 'tx_5e4f6a7b', agent: 'ops_agent_07', type: 'Payment', to: 'cloud_provider', amount: '$890.00', currency: 'USDC', status: 'Settled', latency: '312ms', time: 'Mar 16, 14:00', hash: '1sYt...6cDx' },
-  { id: 'tx_4a5c7b8d', agent: 'trading_bot_01', type: 'Payment', to: 'data_feed_svc', amount: '$45.00', currency: 'USDC', status: 'Settled', latency: '387ms', time: 'Mar 16, 13:52', hash: '7wEr...4fGh' },
-  { id: 'tx_3b6d8c9e', agent: 'compliance_bot', type: 'Transfer', to: 'reserve_acct', amount: '$50,000.00', currency: 'USDC', status: 'Settled', latency: '298ms', time: 'Mar 16, 13:38', hash: '2qAz...9jKl' },
-  { id: 'tx_2c7e9d0f', agent: 'market_maker_03', type: 'Payment', to: 'exchange_api', amount: '$1,200.00', currency: 'USDC', status: 'Blocked', latency: '-', time: 'Mar 16, 13:31', hash: '-' },
-  { id: 'tx_1d8f0e1a', agent: 'payment_router', type: 'Payment', to: 'merchant_xyz', amount: '$780.00', currency: 'USDC', status: 'Settled', latency: '325ms', time: 'Mar 16, 13:22', hash: '4uIo...8pQr' },
-  { id: 'tx_0e9a1f2b', agent: 'yield_optimizer', type: 'Payment', to: 'defi_protocol', amount: '$5,600.00', currency: 'USDC', status: 'Settled', latency: '341ms', time: 'Mar 16, 13:15', hash: '6vBn...0mXc' },
-  { id: 'tx_fa0b2c3d', agent: 'data_buyer_09', type: 'Payment', to: 'api_provider', amount: '$120.00', currency: 'USDC', status: 'Settled', latency: '367ms', time: 'Mar 16, 13:08', hash: '8wSd...3kLj' },
-  { id: 'tx_eb1c3d4e', agent: 'trading_bot_01', type: 'Transfer', to: 'cold_storage', amount: '$25,000.00', currency: 'USDC', status: 'Settled', latency: '303ms', time: 'Mar 16, 12:55', hash: '0rTy...5nHg' },
-  { id: 'tx_dc2d4e5f', agent: 'rebalancer_02', type: 'Payment', to: 'swap_protocol', amount: '$8,340.00', currency: 'USDC', status: 'Settled', latency: '329ms', time: 'Mar 16, 12:42', hash: '2eWq...7aPo' },
-];
+function timeAgo(date: string): string {
+  const now = Date.now();
+  const then = new Date(date).getTime();
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
 
 export default function TransactionsPage() {
+  const { toast } = useToast();
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'settled' | 'blocked'>('all');
+  const [filter, setFilter] = useState<string>('all');
+  const [showCreate, setShowCreate] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [agents, setAgents] = useState<any[]>([]);
 
-  const filtered = transactions.filter((tx) => {
-    const matchSearch = search === '' || tx.agent.toLowerCase().includes(search.toLowerCase()) || tx.to.toLowerCase().includes(search.toLowerCase()) || tx.id.includes(search);
-    const matchFilter = filter === 'all' || (filter === 'settled' && tx.status === 'Settled') || (filter === 'blocked' && tx.status === 'Blocked');
-    return matchSearch && matchFilter;
-  });
+  const [formAgentId, setFormAgentId] = useState('');
+  const [formRecipient, setFormRecipient] = useState('');
+  const [formAmount, setFormAmount] = useState('');
+  const [formCurrency, setFormCurrency] = useState('USDC');
 
-  const settledCount = transactions.filter(t => t.status === 'Settled').length;
-  const blockedCount = transactions.filter(t => t.status === 'Blocked').length;
+  const fetchTransactions = useCallback(() => {
+    setLoading(true);
+    api.transactions.list({ search: search.trim() || undefined, status: filter, limit: 50 })
+      .then((data) => {
+        setTransactions(data.transactions);
+        setTotal(data.total);
+      })
+      .catch(() => toast('error', 'Failed to load transactions'))
+      .finally(() => setLoading(false));
+  }, [search, filter]);
+
+  useEffect(() => {
+    const timer = setTimeout(fetchTransactions, search ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [fetchTransactions]);
+
+  const openCreate = () => {
+    setFormAgentId(''); setFormRecipient(''); setFormAmount(''); setFormCurrency('USDC');
+    api.agents.list().then((d) => setAgents(d.agents)).catch(() => {});
+    setShowCreate(true);
+  };
+
+  const handleCreate = async () => {
+    if (!formRecipient.trim()) { toast('error', 'Recipient is required'); return; }
+    if (!formAmount || isNaN(Number(formAmount)) || Number(formAmount) <= 0) { toast('error', 'Valid amount is required'); return; }
+
+    setSaving(true);
+    try {
+      await api.transactions.create({
+        agentId: formAgentId ? parseInt(formAgentId) : undefined,
+        recipient: formRecipient.trim(),
+        amount: parseFloat(formAmount),
+        currency: formCurrency,
+      });
+      toast('success', 'Transaction created');
+      setShowCreate(false);
+      fetchTransactions();
+    } catch (err: any) {
+      toast('error', err.message || 'Failed to create transaction');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const settledCount = transactions.filter(t => t.status === 'settled').length;
+  const blockedCount = transactions.filter(t => t.status === 'blocked').length;
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Transactions</h1>
-        <p className="text-gray-500 text-sm mt-1">{settledCount} settled, {blockedCount} blocked</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Transactions</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {loading ? 'Loading...' : `${total} total`}
+          </p>
+        </div>
+        <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
+          <Plus size={16} /> New Transaction
+        </button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -43,13 +100,13 @@ export default function TransactionsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by agent, recipient, or ID..."
+            placeholder="Search by agent, recipient, or hash..."
             className="w-full bg-[#0D0E12] border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/30 transition-colors"
           />
         </div>
         <div className="flex items-center gap-2">
           <Filter size={14} className="text-gray-600" />
-          {(['all', 'settled', 'blocked'] as const).map((f) => (
+          {(['all', 'settled', 'blocked', 'pending'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -64,59 +121,137 @@ export default function TransactionsPage() {
       </div>
 
       <div className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] overflow-hidden">
-        <div className="overflow-x-auto">
+        {loading ? (
           <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[#111318]">
-                <th className="text-left text-gray-500 font-medium px-6 py-3 text-xs uppercase tracking-wider">TX ID</th>
-                <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Agent</th>
-                <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden sm:table-cell">Recipient</th>
-                <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Amount</th>
-                <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden md:table-cell">Latency</th>
-                <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Status</th>
-                <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden lg:table-cell">Time</th>
-              </tr>
-            </thead>
             <tbody>
-              {filtered.map((tx) => (
-                <tr key={tx.id} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-3.5">
-                    <span className="text-[#FF6940] text-xs font-mono">{tx.id.slice(0, 11)}</span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className="text-white text-xs font-medium">{tx.agent}</span>
-                  </td>
-                  <td className="px-4 py-3.5 hidden sm:table-cell">
-                    <span className="text-gray-400 text-xs">{tx.to}</span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className="text-white text-xs font-semibold">{tx.amount}</span>
-                  </td>
-                  <td className="px-4 py-3.5 hidden md:table-cell">
-                    <span className="text-gray-400 text-xs font-mono">{tx.latency}</span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                      tx.status === 'Settled' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-                    }`}>
-                      {tx.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5 hidden lg:table-cell">
-                    <span className="text-gray-500 text-xs">{tx.time}</span>
-                  </td>
-                </tr>
-              ))}
+              {Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={6} />)}
             </tbody>
           </table>
-        </div>
-        {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <ArrowLeftRight size={32} className="text-gray-700 mb-3" />
-            <span className="text-gray-500 text-sm">No transactions found</span>
+        ) : transactions.length === 0 ? (
+          <EmptyState
+            icon={<ArrowLeftRight size={28} />}
+            title="No transactions found"
+            description={search || filter !== 'all' ? 'Try adjusting your search or filters.' : 'Transactions will appear here once your agents start transacting.'}
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-[#111318]">
+                  <th className="text-left text-gray-500 font-medium px-6 py-3 text-xs uppercase tracking-wider">TX Hash</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Agent</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden sm:table-cell">Recipient</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Amount</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden md:table-cell">Latency</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden lg:table-cell">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx) => (
+                  <tr key={tx.id} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-3.5">
+                      <span className="text-[#FF6940] text-xs font-mono">{tx.tx_hash?.slice(0, 12) || '-'}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-white text-xs font-medium">{tx.agent_name || '-'}</span>
+                    </td>
+                    <td className="px-4 py-3.5 hidden sm:table-cell">
+                      <span className="text-gray-400 text-xs">{tx.recipient}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-white text-xs font-semibold">${parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </td>
+                    <td className="px-4 py-3.5 hidden md:table-cell">
+                      <span className="text-gray-400 text-xs font-mono">{tx.latency_ms ? `${tx.latency_ms}ms` : '-'}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                        tx.status === 'settled' ? 'bg-green-500/10 text-green-400' :
+                        tx.status === 'blocked' ? 'bg-red-500/10 text-red-400' :
+                        tx.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
+                        'bg-gray-500/10 text-gray-400'
+                      }`}>
+                        {tx.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 hidden lg:table-cell">
+                      <span className="text-gray-500 text-xs">{timeAgo(tx.created_at)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
+
+      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="New Transaction">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Agent (optional)</label>
+            <select
+              value={formAgentId}
+              onChange={(e) => setFormAgentId(e.target.value)}
+              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+            >
+              <option value="">No agent</option>
+              {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Recipient</label>
+            <input
+              type="text"
+              value={formRecipient}
+              onChange={(e) => setFormRecipient(e.target.value)}
+              placeholder="e.g. vendor_alpha"
+              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Amount</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formAmount}
+                onChange={(e) => setFormAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Currency</label>
+              <select
+                value={formCurrency}
+                onChange={(e) => setFormCurrency(e.target.value)}
+                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+              >
+                <option value="USDC">USDC</option>
+                <option value="SOL">SOL</option>
+                <option value="ETH">ETH</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              onClick={() => setShowCreate(false)}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-400 hover:text-white transition-colors bg-white/[0.04] hover:bg-white/[0.08]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={saving}
+              className="bg-[#FF6940] hover:bg-[#E85C38] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+            >
+              {saving ? 'Creating...' : 'Create Transaction'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
