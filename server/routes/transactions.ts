@@ -102,7 +102,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       }
     }
 
-    const validCurrencies = ['USDC', 'SOL', 'ETH'];
+    const validCurrencies = ['USDC', 'SOL', 'ETH', 'USDT'];
     const txCurrency = typeof currency === 'string' && validCurrencies.includes(currency) ? currency : 'USDC';
 
     const validStatuses = ['settled', 'pending', 'blocked', 'failed'];

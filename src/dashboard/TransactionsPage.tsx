@@ -5,6 +5,7 @@ import { useToast } from '../lib/toast';
 import { TableRowSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import CurrencyBadge, { CurrencySelect } from '../components/CurrencyBadge';
 
 const PAGE_SIZE = 20;
 
@@ -172,7 +173,10 @@ export default function TransactionsPage() {
                       <span className="text-gray-400 text-xs">{tx.recipient}</span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-white text-xs font-semibold">${parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-white text-xs font-semibold">{parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        <CurrencyBadge currency={tx.currency || 'USDC'} size="sm" />
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
                       <span className="text-gray-400 text-xs font-mono">{tx.latency_ms ? `${tx.latency_ms}ms` : '-'}</span>
@@ -263,15 +267,7 @@ export default function TransactionsPage() {
             </div>
             <div>
               <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Currency</label>
-              <select
-                value={formCurrency}
-                onChange={(e) => setFormCurrency(e.target.value)}
-                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors"
-              >
-                <option value="USDC">USDC</option>
-                <option value="SOL">SOL</option>
-                <option value="ETH">ETH</option>
-              </select>
+              <CurrencySelect value={formCurrency} onChange={setFormCurrency} />
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 pt-2">

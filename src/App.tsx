@@ -83,6 +83,7 @@ function Navbar() {
 }
 
 function HeroSection() {
+  const { user } = useAuth();
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
   const codeY = useTransform(scrollYProgress, [0, 1], [0, 80]);
@@ -106,9 +107,9 @@ function HeroSection() {
               Molt.Fin provides programmable bank accounts for AI agents. Sub-second settlement, cryptographic spending policies, and native SDK integration. Let your agents hold, send, and manage funds independently.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start items-center">
-              <a href="#get-started" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#FF6940]/20">
-                <Send size={16} /> Get started
-              </a>
+              <Link to={user ? '/app' : '/login'} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#FF6940]/20">
+                <Send size={16} /> Launch App
+              </Link>
               <Link to="/docs" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-1.5 px-5 py-3.5 transition-colors">
                 Read documentation <ArrowRight size={15} />
               </Link>
@@ -358,6 +359,7 @@ function SecuritySection() {
 }
 
 function CTASection() {
+  const { user } = useAuth();
   return (
     <section id="get-started" className="py-24 lg:py-32 bg-[#08090C]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6">
@@ -374,9 +376,9 @@ function CTASection() {
                 Give your AI agents the ability to hold and manage money independently. Join the developers building agent-driven financial operations.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <a href="https://docs.moltfin.app" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF6940]/20">
-                  <Send size={16} /> Get started
-                </a>
+                <Link to={user ? '/app' : '/login'} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF6940]/20">
+                  <Send size={16} /> Launch App
+                </Link>
                 <Link to="/docs" className="bg-white/5 hover:bg-white/10 text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border border-white/10">
                   Read documentation
                 </Link>

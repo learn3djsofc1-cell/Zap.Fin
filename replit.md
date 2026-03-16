@@ -54,7 +54,9 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 │       ├── OverviewPage.tsx     # /app - Agent stats + recent activity (real API)
 │       ├── AgentsPage.tsx       # /app/agents - Full CRUD agent management (real API)
 │       ├── TransactionsPage.tsx # /app/transactions - Transaction list + create (real API)
-│       └── PoliciesPage.tsx     # /app/policies - Full CRUD policy management (real API)
+│       ├── PoliciesPage.tsx     # /app/policies - Full CRUD policy management (real API)
+│       ├── ApiKeysPage.tsx     # /app/api-keys - API key management (create/revoke)
+│       └── IntegrationsPage.tsx # /app/integrations - OpenClaw + Claude integration config
 ├── public/
 │   ├── moltfin-logo.png    # Lobster mascot logo
 │   ├── solana-logo.png     # Partner logo
@@ -84,8 +86,11 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 - **agents**: id (serial PK), user_id (FK), name, agent_id_slug (unique per user), status, purpose, currency, balance, created_at, updated_at
 - **transactions**: id (serial PK), user_id (FK), agent_id (FK nullable), tx_hash, recipient, amount, currency, status, latency_ms, created_at
 - **policies**: id (serial PK), user_id (FK), name, policy_id_slug (unique per user), status, max_per_tx, daily_limit, monthly_limit, multi_sig, multi_sig_threshold, allowed_merchants[], allowed_currencies[], assigned_agent_ids[], created_at, updated_at
+- **api_keys**: id (serial PK), user_id (FK), name, key_hash (bcrypt), key_prefix (first 12 chars), environment (live/test), last_used_at, revoked_at, created_at
+- **integrations**: id (serial PK), user_id (FK), provider (openclaw/claude), status, config (jsonb), connected_at, updated_at
 
 All tables enforce user_id isolation — users can only access their own data.
+Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyBadge component).
 
 ## Routes
 
@@ -94,9 +99,11 @@ All tables enforce user_id isolation — users can only access their own data.
 - `/login` Sign in page
 - `/signup` Registration page
 - `/app` Dashboard overview (protected - requires auth)
-- `/app/agents` Agent management (protected)
+- `/app/agents` Agent account management (protected)
 - `/app/transactions` Transaction history (protected)
-- `/app/policies` Policy management (protected)
+- `/app/policies` Spending policy management (protected)
+- `/app/api-keys` API key management (protected)
+- `/app/integrations` Integration configuration (protected)
 
 ## API Endpoints
 
@@ -115,6 +122,13 @@ All tables enforce user_id isolation — users can only access their own data.
 - `PATCH /api/policies/:id` Update policy (requires auth)
 - `DELETE /api/policies/:id` Delete policy (requires auth)
 - `GET /api/overview` Dashboard stats + recent activity (requires auth)
+- `GET /api/api-keys` List user's API keys (requires auth)
+- `POST /api/api-keys` Create API key (requires auth, returns key once)
+- `DELETE /api/api-keys/:id` Revoke API key (requires auth)
+- `GET /api/integrations` List user's integrations (requires auth)
+- `POST /api/integrations/:provider/connect` Connect integration (requires auth)
+- `POST /api/integrations/:provider/disconnect` Disconnect integration (requires auth)
+- `PATCH /api/integrations/:provider/config` Update integration config (requires auth)
 
 ## Auth System
 

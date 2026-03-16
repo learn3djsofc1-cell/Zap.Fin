@@ -1,13 +1,15 @@
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Bot, ArrowLeftRight, ShieldCheck, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Bot, ArrowLeftRight, ShieldCheck, Key, Plug, Menu, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
 
 const navItems = [
-  { to: '/app', icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/app/agents', icon: Bot, label: 'Agents', end: false },
-  { to: '/app/transactions', icon: ArrowLeftRight, label: 'Transactions', end: false },
-  { to: '/app/policies', icon: ShieldCheck, label: 'Policies', end: false },
+  { to: '/app', icon: LayoutDashboard, label: 'Overview', end: true, group: 'Platform' },
+  { to: '/app/agents', icon: Bot, label: 'Agents', end: false, group: 'Platform' },
+  { to: '/app/transactions', icon: ArrowLeftRight, label: 'Transactions', end: false, group: 'Platform' },
+  { to: '/app/policies', icon: ShieldCheck, label: 'Policies', end: false, group: 'Platform' },
+  { to: '/app/api-keys', icon: Key, label: 'API Keys', end: false, group: 'Developer' },
+  { to: '/app/integrations', icon: Plug, label: 'Integrations', end: false, group: 'Developer' },
 ];
 
 const linkClass = (isActive: boolean) =>
@@ -34,13 +36,17 @@ export default function DashboardLayout() {
             <span className="text-lg font-bold tracking-tight text-white">Molt.Fin</span>
           </Link>
         </div>
-        <nav className="flex-1 p-4 flex flex-col gap-1">
-          <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2">Platform</span>
-          {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => linkClass(isActive)}>
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </NavLink>
+        <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
+          {(['Platform', 'Developer'] as const).map((group) => (
+            <div key={group}>
+              <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-0 block">{group}</span>
+              {navItems.filter((item) => item.group === group).map((item) => (
+                <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => linkClass(isActive)}>
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="p-4 border-t border-white/[0.04]">
@@ -89,13 +95,17 @@ export default function DashboardLayout() {
                   <X size={20} />
                 </button>
               </div>
-              <nav className="flex-1 p-4 flex flex-col gap-1">
-                <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2">Platform</span>
-                {navItems.map((item) => (
-                  <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMobileOpen(false)} className={({ isActive }) => linkClass(isActive)}>
-                    <item.icon size={18} />
-                    <span>{item.label}</span>
-                  </NavLink>
+              <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
+                {(['Platform', 'Developer'] as const).map((group) => (
+                  <div key={group}>
+                    <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-0 block">{group}</span>
+                    {navItems.filter((item) => item.group === group).map((item) => (
+                      <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMobileOpen(false)} className={({ isActive }) => linkClass(isActive)}>
+                        <item.icon size={18} />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
                 ))}
               </nav>
               <div className="p-4 border-t border-white/[0.04]">
@@ -123,13 +133,13 @@ export default function DashboardLayout() {
 
         <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0D0E12]/95 backdrop-blur-xl border-t border-white/[0.04] md:hidden">
           <div className="flex items-center justify-around py-2">
-            {navItems.map((item) => (
+            {navItems.filter(item => item.group === 'Platform').map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-medium transition-colors ${
+                  `flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[10px] font-medium transition-colors ${
                     isActive ? 'text-[#FF6940]' : 'text-gray-500'
                   }`
                 }
@@ -138,6 +148,13 @@ export default function DashboardLayout() {
                 <span>{item.label}</span>
               </NavLink>
             ))}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[10px] font-medium text-gray-500"
+            >
+              <Menu size={20} />
+              <span>More</span>
+            </button>
           </div>
         </nav>
       </div>

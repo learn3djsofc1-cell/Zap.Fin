@@ -45,7 +45,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    const validCurrencies = ['USDC', 'SOL', 'ETH'];
+    const validCurrencies = ['USDC', 'SOL', 'ETH', 'USDT'];
     const agentCurrency = typeof currency === 'string' && validCurrencies.includes(currency) ? currency : 'USDC';
 
     const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');

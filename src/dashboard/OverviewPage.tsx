@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import { StatSkeleton, TableRowSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import { useToast } from '../lib/toast';
+import CurrencyBadge from '../components/CurrencyBadge';
 
 function formatCurrency(n: number): string {
   if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
@@ -38,7 +39,7 @@ export default function OverviewPage() {
   }, []);
 
   const statCards = stats ? [
-    { label: 'Active Agents', value: String(stats.activeAgents), icon: Bot, color: 'text-blue-400', bg: 'bg-blue-400/8' },
+    { label: 'Agent Accounts', value: String(stats.activeAgents), icon: Bot, color: 'text-blue-400', bg: 'bg-blue-400/8' },
     { label: 'Transactions (24h)', value: String(stats.transactions24h), icon: ArrowLeftRight, color: 'text-green-400', bg: 'bg-green-400/8' },
     { label: 'Total Volume', value: formatCurrency(stats.totalVolume), icon: DollarSign, color: 'text-[#FF6940]', bg: 'bg-[#FF6940]/8' },
     { label: 'Avg Settlement', value: stats.avgSettlementMs > 0 ? `${stats.avgSettlementMs}ms` : '-', icon: Timer, color: 'text-purple-400', bg: 'bg-purple-400/8' },
@@ -111,7 +112,10 @@ export default function OverviewPage() {
                       <span className="text-gray-400 text-xs">{tx.recipient}</span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-white text-xs font-semibold">${parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-white text-xs font-semibold">{parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        <CurrencyBadge currency={tx.currency || 'USDC'} size="sm" />
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
                       <span className="text-gray-400 text-xs font-mono">{tx.latency_ms ? `${tx.latency_ms}ms` : '-'}</span>

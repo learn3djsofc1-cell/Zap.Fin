@@ -6,6 +6,7 @@ import { CardSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import CurrencyBadge, { CurrencyToggle } from '../components/CurrencyBadge';
 
 function formatNumber(n: number): string {
   if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
@@ -123,12 +124,6 @@ export default function PoliciesPage() {
     }
   };
 
-  const toggleCurrency = (c: string) => {
-    setFormCurrencies((prev) =>
-      prev.includes(c) ? (prev.length > 1 ? prev.filter(x => x !== c) : prev) : [...prev, c]
-    );
-  };
-
   const toggleAgentId = (id: number) => {
     setFormAgentIds((prev) =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
@@ -139,7 +134,7 @@ export default function PoliciesPage() {
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Policies</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Spending Policies</h1>
           <p className="text-gray-500 text-sm mt-1">
             {loading ? 'Loading...' : `${policies.length} ${policies.length === 1 ? 'policy' : 'policies'}`}
           </p>
@@ -157,7 +152,7 @@ export default function PoliciesPage() {
         <EmptyState
           icon={<ShieldCheck size={28} />}
           title="No policies yet"
-          description="Create spending policies to enforce limits and controls on your agents."
+          description="Create spending policies to enforce limits and controls on your agent accounts."
           action={
             <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
               <Plus size={16} /> Create Policy
@@ -252,7 +247,7 @@ export default function PoliciesPage() {
                   <span className="text-gray-700 text-[10px] mx-1">|</span>
                   <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">Currencies:</span>
                   {(policy.allowed_currencies || []).map((c: string) => (
-                    <span key={c} className="bg-[#FF6940]/5 text-[#FF6940] px-2 py-0.5 rounded text-[10px] font-bold">{c}</span>
+                    <CurrencyBadge key={c} currency={c} size="sm" />
                   ))}
                 </div>
               </div>
@@ -312,23 +307,8 @@ export default function PoliciesPage() {
           </div>
 
           <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Currencies</label>
-            <div className="flex gap-2">
-              {['USDC', 'SOL', 'ETH'].map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => toggleCurrency(c)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-                    formCurrencies.includes(c)
-                      ? 'bg-[#FF6940]/15 text-[#FF6940] border border-[#FF6940]/30'
-                      : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Allowed Currencies</label>
+            <CurrencyToggle selected={formCurrencies} onChange={setFormCurrencies} />
           </div>
 
           <div>

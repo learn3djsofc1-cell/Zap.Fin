@@ -61,7 +61,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
     const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
     const policyIdSlug = `${slug}_${Date.now().toString(36)}`;
 
-    const validCurrencies = ['USDC', 'SOL', 'ETH'];
+    const validCurrencies = ['USDC', 'SOL', 'ETH', 'USDT'];
     const currencies = Array.isArray(allowedCurrencies)
       ? allowedCurrencies.filter((c: string) => validCurrencies.includes(c))
       : ['USDC'];
@@ -208,7 +208,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     }
 
     if (allowedCurrencies !== undefined) {
-      const validCurrencies = ['USDC', 'SOL', 'ETH'];
+      const validCurrencies = ['USDC', 'SOL', 'ETH', 'USDT'];
       if (!Array.isArray(allowedCurrencies)) {
         res.status(400).json({ error: 'Allowed currencies must be an array' });
         return;

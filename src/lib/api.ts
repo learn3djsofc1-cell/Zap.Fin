@@ -94,4 +94,20 @@ export const api = {
   overview: {
     get: () => request<{ stats: any; recentActivity: any[] }>('/overview'),
   },
+  apiKeys: {
+    list: () => request<{ apiKeys: any[] }>('/api-keys'),
+    create: (body: { label: string; environment: string }) =>
+      request<{ apiKey: any; fullKey: string }>('/api-keys', { method: 'POST', body: JSON.stringify(body) }),
+    revoke: (id: number) =>
+      request<{ success: boolean }>(`/api-keys/${id}`, { method: 'DELETE' }),
+  },
+  integrations: {
+    list: () => request<{ integrations: any[] }>('/integrations'),
+    connect: (provider: string, config?: Record<string, any>) =>
+      request<{ integration: any }>(`/integrations/${provider}/connect`, { method: 'POST', body: JSON.stringify({ config }) }),
+    disconnect: (provider: string) =>
+      request<{ integration: any }>(`/integrations/${provider}/disconnect`, { method: 'POST' }),
+    updateConfig: (provider: string, config: Record<string, any>) =>
+      request<{ integration: any }>(`/integrations/${provider}/config`, { method: 'PATCH', body: JSON.stringify({ config }) }),
+  },
 };

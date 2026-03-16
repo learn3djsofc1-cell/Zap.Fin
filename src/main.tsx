@@ -8,6 +8,8 @@ import OverviewPage from './dashboard/OverviewPage.tsx';
 import AgentsPage from './dashboard/AgentsPage.tsx';
 import TransactionsPage from './dashboard/TransactionsPage.tsx';
 import PoliciesPage from './dashboard/PoliciesPage.tsx';
+import ApiKeysPage from './dashboard/ApiKeysPage.tsx';
+import IntegrationsPage from './dashboard/IntegrationsPage.tsx';
 import LoginPage from './auth/LoginPage.tsx';
 import SignupPage from './auth/SignupPage.tsx';
 import { AuthProvider, ProtectedRoute } from './lib/AuthContext.tsx';
@@ -31,6 +33,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="agents" element={<ErrorBoundary><AgentsPage /></ErrorBoundary>} />
                 <Route path="transactions" element={<ErrorBoundary><TransactionsPage /></ErrorBoundary>} />
                 <Route path="policies" element={<ErrorBoundary><PoliciesPage /></ErrorBoundary>} />
+                <Route path="api-keys" element={<ErrorBoundary><ApiKeysPage /></ErrorBoundary>} />
+                <Route path="integrations" element={<ErrorBoundary><IntegrationsPage /></ErrorBoundary>} />
               </Route>
             </Routes>
           </ToastProvider>

@@ -6,6 +6,7 @@ import { CardSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import CurrencyBadge, { CurrencySelect } from '../components/CurrencyBadge';
 
 function timeAgo(date: string): string {
   const now = Date.now();
@@ -108,13 +109,13 @@ export default function AgentsPage() {
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Agents</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Agent Accounts</h1>
           <p className="text-gray-500 text-sm mt-1">
             {loading ? 'Loading...' : `${activeCount} active, ${pausedCount} paused`}
           </p>
         </div>
         <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
-          <Plus size={16} /> Create Agent
+          <Plus size={16} /> Create Agent Account
         </button>
       </div>
 
@@ -125,11 +126,11 @@ export default function AgentsPage() {
       ) : agents.length === 0 ? (
         <EmptyState
           icon={<Bot size={28} />}
-          title="No agents yet"
-          description="Create your first AI agent to start managing autonomous transactions."
+          title="No agent accounts yet"
+          description="Create your first AI agent account — a programmable bank account for autonomous financial operations."
           action={
             <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
-              <Plus size={16} /> Create Agent
+              <Plus size={16} /> Create Agent Account
             </button>
           }
         />
@@ -193,7 +194,10 @@ export default function AgentsPage() {
                       <Wallet size={10} className="text-gray-600" />
                       <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Balance</span>
                     </div>
-                    <span className="text-white text-sm font-bold">${parseFloat(agent.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-white text-sm font-bold">{parseFloat(agent.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      <CurrencyBadge currency={agent.currency || 'USDC'} size="sm" />
+                    </div>
                   </div>
                   <div className="bg-white/[0.02] rounded-lg p-3">
                     <div className="flex items-center gap-1.5 mb-1">
@@ -216,16 +220,16 @@ export default function AgentsPage() {
       <Modal
         open={showCreate || !!editAgent}
         onClose={() => { setShowCreate(false); setEditAgent(null); }}
-        title={editAgent ? 'Edit Agent' : 'Create Agent'}
+        title={editAgent ? 'Edit Agent Account' : 'Create Agent Account'}
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Name</label>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Agent Name</label>
             <input
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
-              placeholder="e.g. trading_bot_01"
+              placeholder="e.g. payment_processor_01"
               className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
             />
           </div>
@@ -234,23 +238,15 @@ export default function AgentsPage() {
             <textarea
               value={formPurpose}
               onChange={(e) => setFormPurpose(e.target.value)}
-              placeholder="What does this agent do?"
+              placeholder="Describe what this agent account is used for"
               rows={3}
               className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors resize-none"
             />
           </div>
           {!editAgent && (
             <div>
-              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Currency</label>
-              <select
-                value={formCurrency}
-                onChange={(e) => setFormCurrency(e.target.value)}
-                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors"
-              >
-                <option value="USDC">USDC</option>
-                <option value="SOL">SOL</option>
-                <option value="ETH">ETH</option>
-              </select>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Account Currency</label>
+              <CurrencySelect value={formCurrency} onChange={setFormCurrency} />
             </div>
           )}
           <div className="flex items-center justify-end gap-3 pt-2">
