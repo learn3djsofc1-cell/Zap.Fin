@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Lock, Zap, Globe, Shield, CreditCard, Wallet, Menu, X, Send, BarChart3, Bell, TrendingUp, Sparkles, ArrowUpRight, Layers, Repeat } from 'lucide-react';
+import { ArrowRight, Check, Lock, Zap, Globe, Shield, CreditCard, Wallet, Menu, X, Send, BarChart3, Bell, TrendingUp, Sparkles, ArrowUpRight, Layers, Repeat, Copy } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -68,6 +68,16 @@ function Navbar() {
 }
 
 function HeroSection() {
+  const [caCopied, setCaCopied] = useState(false);
+  const CA = '9aQaewctzLanp5U4XQNqgiSxf6aHatsG1fBwoucKpump';
+
+  const handleCopyCA = () => {
+    navigator.clipboard.writeText(CA).then(() => {
+      setCaCopied(true);
+      setTimeout(() => setCaCopied(false), 2000);
+    });
+  };
+
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#FFF5F5] via-white to-white z-0" />
@@ -76,8 +86,19 @@ function HeroSection() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-12 pb-20 lg:pt-20 lg:pb-28 relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-14 lg:mb-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 bg-[#FF5550]/8 border border-[#FF5550]/15 text-[#FF5550] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full mb-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 bg-[#FF5550]/8 border border-[#FF5550]/15 text-[#FF5550] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full mb-4">
             <Sparkles size={14} /> Built on Solana
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }} className="mb-6">
+            <button onClick={handleCopyCA} className="group inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200/80 border border-gray-200 rounded-full px-4 py-2 transition-all cursor-pointer">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">CA</span>
+              <span className="text-[11px] sm:text-xs font-mono text-gray-600 truncate max-w-[180px] sm:max-w-none">{CA}</span>
+              {caCopied ? (
+                <Check size={13} className="text-green-500 shrink-0" />
+              ) : (
+                <Copy size={13} className="text-gray-400 group-hover:text-[#FF5550] shrink-0 transition-colors" />
+              )}
+            </button>
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 35 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.05, ease: [0.22, 1, 0.36, 1] }} className="text-[36px] sm:text-[50px] md:text-[64px] lg:text-[72px] font-extrabold leading-[1.06] tracking-tight text-[#1A1A1A] mb-6">
             Spend crypto like cash.<br className="hidden sm:block" /> <span className="text-[#FF5550]">Anywhere.</span>
