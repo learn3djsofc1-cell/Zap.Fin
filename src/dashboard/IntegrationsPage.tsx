@@ -5,9 +5,20 @@ import { useToast } from '../lib/toast';
 import { CardSkeleton } from '../components/Skeleton';
 import Modal from '../components/Modal';
 
+interface Integration {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  status: 'connected' | 'disconnected';
+  config: Record<string, string> | null;
+  configFields: string[];
+  connected_at: string | null;
+}
+
 const PROVIDER_ICONS: Record<string, string> = {
-  openclaw: '🦞',
-  claude: '🤖',
+  openclaw: '\uD83E\uDD9E',
+  claude: '\uD83E\uDD16',
 };
 
 const PROVIDER_DOCS: Record<string, string> = {
@@ -17,9 +28,9 @@ const PROVIDER_DOCS: Record<string, string> = {
 
 export default function IntegrationsPage() {
   const { toast } = useToast();
-  const [integrations, setIntegrations] = useState<any[]>([]);
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [loading, setLoading] = useState(true);
-  const [configModal, setConfigModal] = useState<any>(null);
+  const [configModal, setConfigModal] = useState<Integration | null>(null);
   const [connecting, setConnecting] = useState<string | null>(null);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
 
@@ -38,8 +49,9 @@ export default function IntegrationsPage() {
       await api.integrations.connect(provider, {});
       toast('success', 'Integration connected');
       fetchIntegrations();
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to connect');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to connect';
+      toast('error', message);
     } finally {
       setConnecting(null);
     }
@@ -51,14 +63,15 @@ export default function IntegrationsPage() {
       await api.integrations.disconnect(provider);
       toast('success', 'Integration disconnected');
       fetchIntegrations();
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to disconnect');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to disconnect';
+      toast('error', message);
     } finally {
       setConnecting(null);
     }
   };
 
-  const openConfig = (integration: any) => {
+  const openConfig = (integration: Integration) => {
     const vals: Record<string, string> = {};
     (integration.configFields || []).forEach((f: string) => {
       vals[f] = integration.config?.[f] || '';
@@ -78,8 +91,9 @@ export default function IntegrationsPage() {
       toast('success', 'Configuration saved');
       setConfigModal(null);
       fetchIntegrations();
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to save configuration');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save configuration';
+      toast('error', message);
     }
   };
 
@@ -102,7 +116,7 @@ export default function IntegrationsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-[#FF6940]/8 flex items-center justify-center text-2xl">
-                      {PROVIDER_ICONS[integration.id] || '🔌'}
+                      {PROVIDER_ICONS[integration.id] || '\uD83D\uDD0C'}
                     </div>
                     <div>
                       <span className="text-white font-bold text-base block">{integration.name}</span>

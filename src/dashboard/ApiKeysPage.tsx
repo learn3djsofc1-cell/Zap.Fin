@@ -7,6 +7,16 @@ import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 
+interface ApiKey {
+  id: number;
+  label: string;
+  key_prefix: string;
+  environment: 'live' | 'test';
+  last_used_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+}
+
 function timeAgo(date: string): string {
   const now = Date.now();
   const then = new Date(date).getTime();
@@ -19,14 +29,14 @@ function timeAgo(date: string): string {
 
 export default function ApiKeysPage() {
   const { toast } = useToast();
-  const [keys, setKeys] = useState<any[]>([]);
+  const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [revokeKey, setRevokeKey] = useState<any>(null);
+  const [revokeKey, setRevokeKey] = useState<ApiKey | null>(null);
   const [saving, setSaving] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState<number | string | null>(null);
 
   const [formLabel, setFormLabel] = useState('');
   const [formEnv, setFormEnv] = useState<'live' | 'test'>('live');
@@ -41,7 +51,7 @@ export default function ApiKeysPage() {
   useEffect(() => { fetchKeys(); }, []);
 
   const openCreate = () => {
-    setFormLabel(''); setFormEnv('live'); setNewKey(null); setCopied(false);
+    setFormLabel(''); setFormEnv('live'); setNewKey(null); setCopiedId(null);
     setShowCreate(true);
   };
 
@@ -53,8 +63,9 @@ export default function ApiKeysPage() {
       setNewKey(data.fullKey);
       fetchKeys();
       toast('success', 'API key created');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to create API key');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create API key';
+      toast('error', message);
     } finally {
       setSaving(false);
     }
@@ -68,18 +79,20 @@ export default function ApiKeysPage() {
       toast('success', 'API key revoked');
       setRevokeKey(null);
       fetchKeys();
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to revoke API key');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to revoke API key';
+      toast('error', message);
     } finally {
       setRevoking(false);
     }
   };
 
-  const copyKey = async (key: string) => {
+  const copyToClipboard = async (text: string, id: number | string) => {
     try {
-      await navigator.clipboard.writeText(key);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      toast('success', 'Copied to clipboard');
+      setTimeout(() => setCopiedId(null), 2000);
     } catch {
       toast('error', 'Failed to copy');
     }
@@ -140,7 +153,7 @@ export default function ApiKeysPage() {
                   </div>
                   <div>
                     <span className="text-white font-bold text-sm block">{k.label}</span>
-                    <span className="text-gray-500 text-[10px] font-mono">{k.key_prefix}</span>
+                    <span className="text-gray-500 text-[10px] font-mono">{k.key_prefix}...</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -149,6 +162,13 @@ export default function ApiKeysPage() {
                   }`}>
                     {k.environment}
                   </span>
+                  <button
+                    onClick={() => copyToClipboard(k.key_prefix, k.id)}
+                    className="text-gray-600 hover:text-white p-1.5 transition-colors"
+                    title="Copy key prefix"
+                  >
+                    {copiedId === k.id ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                  </button>
                   <button
                     onClick={() => setRevokeKey(k)}
                     className="text-gray-600 hover:text-red-400 p-1.5 transition-colors"
@@ -199,10 +219,10 @@ export default function ApiKeysPage() {
             <div className="bg-[#111318] rounded-xl px-4 py-3 flex items-center gap-3 border border-white/[0.06]">
               <code className="text-[#FF6940] text-xs font-mono flex-1 break-all select-all">{newKey}</code>
               <button
-                onClick={() => copyKey(newKey)}
+                onClick={() => copyToClipboard(newKey, 'new-key')}
                 className="shrink-0 text-gray-400 hover:text-white transition-colors"
               >
-                {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                {copiedId === 'new-key' ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
               </button>
             </div>
             <div className="flex justify-end">
