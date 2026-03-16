@@ -1,6 +1,6 @@
-# WispTap
+# Molt.Fin
 
-A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. Features a marketing landing page, authentication, and a full dashboard application for managing crypto cards, wallets, and top-ups.
+AI-agent banking infrastructure platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page with documentation — no dashboard or authentication system.
 
 ## Tech Stack
 
@@ -8,108 +8,47 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 - **Build Tool**: Vite 6
 - **Routing**: React Router DOM v7 (client-side SPA routing)
 - **Styling**: Tailwind CSS v4 (via @tailwindcss/vite)
-- **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations)
-- **3D**: React Three Fiber + Three.js
+- **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations, parallax code mockup)
 - **Icons**: Lucide React
 - **Font**: Outfit (Google Fonts) — set as --font-sans in index.css
-- **Backend**: Express 4 with TypeScript (run via tsx)
-- **Database**: PostgreSQL (Replit built-in)
-- **Auth**: express-session + connect-pg-simple (session-based), bcrypt for password hashing
-- **Solana**: @solana/web3.js for wallet keypair generation
-- **AI**: @google/genai (Gemini API key via GEMINI_API_KEY env var)
+- **Backend**: Express 4 with TypeScript (run via tsx) — health endpoint + static serve only
 
 ## Brand
 
-- **Name**: WispTap
-- **Main Accent**: #FF5550
-- **Background**: #FFFFFF (landing), #0A0B0E/#111215 (dashboard dark theme)
+- **Name**: Molt.Fin
+- **Main Accent**: #FF6940
+- **Background**: #08090C (hero/features), #0D0E12 (cards/sections)
 - **Font**: Outfit (Google Fonts)
-- **Logo**: public/logo.png
-- **Domain**: wisptap.xyz
-- **Twitter/X**: https://x.com/WispTapX
+- **Token**: $MOLTFIN (CA: 2vetyaB6FTKnWnRPwnq7iG8R3bgQW6TxAAik5nyXpump)
 
 ## Project Structure
 
 ```
 /
-├── index.html              # HTML entry point with full SEO meta tags
+├── index.html              # HTML entry point with SEO meta, OG/Twitter cards, structured data
 ├── src/
-│   ├── main.tsx            # React entry with BrowserRouter, AuthProvider, Routes
-│   ├── App.tsx             # Landing page (Hero with dashboard mockup, HowItWorks, CardsShowcase, Funding, Security, Platform panels, dark gradient footer)
-│   ├── index.css           # Global styles
-│   ├── auth/
-│   │   ├── AuthContext.tsx  # AuthProvider + useAuth hook (login/signup/logout/me)
-│   │   ├── LoginPage.tsx    # /login — Email + password sign in
-│   │   ├── SignupPage.tsx   # /signup — Account creation with confirm password
-│   │   └── ProtectedRoute.tsx # Redirects to /login if not authenticated
-│   ├── docs/
-│       │   └── DocsPage.tsx       # /docs — Comprehensive platform documentation with sidebar TOC
-│   └── dashboard/
-│       ├── DashboardLayout.tsx  # Shared layout: sidebar (desktop), bottom nav (mobile)
-│       ├── OverviewPage.tsx     # /app — Balance, card preview, wallet address, activity
-│       ├── CardsPage.tsx        # /app/cards — Create/manage Visa cards with show/freeze toggles
-│       ├── TopupsPage.tsx       # /app/topups — Solana wallet creation + top-up UI
-│       └── ControlsPage.tsx     # /app/controls — Per-card freeze/online/contactless toggles
+│   ├── main.tsx            # React entry with BrowserRouter, Routes (/ and /docs only)
+│   ├── App.tsx             # Landing page: Navbar, Hero (parallax code mockup + CA copy), Features (6 cards), Protocol (settlement flow), Developers (metrics + quickstart), Security (4 cards), CTA, Footer
+│   ├── index.css           # Global styles, animations (float, slide-up, fade-scale, pulse-glow, shimmer, gradient-shift), scrollbar
+│   └── docs/
+│       └── DocsPage.tsx    # /docs — Full platform documentation (overview, getting started, agent accounts, settlement, policies, SDK reference, FAQ)
 ├── server/
-│   ├── index.ts            # Express server entry point (port 3001)
-│   ├── db.ts               # Database pool + schema initialization
-│   ├── tsconfig.json       # Separate TS config for server code
-│   └── routes/
-│       ├── auth.ts         # Auth API: signup, login, logout, me
-│       ├── cards.ts        # Cards API: create, list, details, freeze/unfreeze, toggle
-│       ├── wallet.ts       # Wallet API: create (Solana keypair), get, confirm, balance
-│       └── prices.ts       # Prices API: SOL/USDC/USDT from CoinGecko (30s cache)
+│   ├── index.ts            # Express server: /api/health + static dist serve
+│   ├── db.ts               # Empty (no database needed)
+│   └── tsconfig.json       # Server TS config
 ├── vite.config.ts          # Vite config with /api proxy to Express
-├── tsconfig.json           # Frontend TS config (excludes server/)
+├── tsconfig.json           # Frontend TS config
 └── package.json            # Dependencies and scripts
 ```
 
 ## Routes
 
-- `/` — Landing page (marketing site, public)
-- `/login` — Login page (public)
-- `/signup` — Signup page (public)
-- `/app` — Dashboard Overview (protected, requires auth)
-- `/app/cards` — My Cards (protected)
-- `/app/topups` — Top-up Balance / Wallet (protected)
-- `/app/controls` — Card Controls (protected)
+- `/` — Landing page (marketing site)
+- `/docs` — Platform documentation
 
 ## API Endpoints
 
-### Auth
-- `POST /api/auth/signup` — Create account (email + password)
-- `POST /api/auth/login` — Sign in (returns user, sets session cookie)
-- `POST /api/auth/logout` — Sign out (destroys session)
-- `GET /api/auth/me` — Get current user (401 if not authenticated)
-
-### Cards
-- `GET /api/cards` — List user's cards (masked numbers)
-- `POST /api/cards/create` — Generate Luhn-valid Visa card (number, CVV, expiry)
-- `GET /api/cards/:id/details` — Full card details (number, CVV) for card owner
-- `PATCH /api/cards/:id/freeze` — Freeze a card
-- `PATCH /api/cards/:id/unfreeze` — Unfreeze a card
-- `PATCH /api/cards/:id/toggle` — Toggle field (frozen, online_payments, contactless)
-
-### Wallet
-- `GET /api/wallet` — Get user's wallet address (no private key)
-- `POST /api/wallet/create` — Generate Solana keypair, return address + private key (one-time)
-- `POST /api/wallet/confirm` — Confirm user has saved private key
-- `GET /api/wallet/balance` — Fetch SOL balance via Helius RPC (confirmed wallets only)
-
-### Prices
-- `GET /api/prices/sol` — SOL, USDC, USDT prices from CoinGecko (30s server-side cache)
-
-### Other
 - `GET /api/health` — Health check
-
-## Database Schema
-
-- **users**: id (serial PK), email (unique), password_hash, created_at
-- **cards**: id (serial PK), user_id (FK), card_number, cvv, expiry, name, frozen, online_payments, contactless, created_at
-- **wallets**: id (serial PK), user_id (FK unique), address, encrypted_private_key, confirmed, created_at
-- **session**: sid (PK), sess (JSON), expire — managed by connect-pg-simple
-
-Tables are auto-created on server startup via `server/db.ts`.
 
 ## Development
 
@@ -123,23 +62,15 @@ Tables are auto-created on server startup via `server/db.ts`.
 Configured as a **static** site deployment:
 - Build command: `npm run build`
 - Public directory: `dist`
-- Note: Production deployment requires separate Express server hosting
 
-## Brand Assets (public/)
+## Animation System
 
-- `logo.png` — WispTap logo (favicon + navbar + inline)
-- `netflix.png`, `usdc.png`, `usdt.png` — Brand logos used in dashboard mockups
-- `spotify.png`, `airbnb.png`, `apple.png`, `telegram.jpg` — Brand logos used in Rewards & Referrals card
-
-## Social Links
-
-- Twitter/X: https://x.com/WispTapX
+The landing page uses scroll-triggered animations built on Framer Motion:
+- **RevealOnScroll**: Directional (up/down/left/right) fade+translate with `useInView`
+- **ScaleReveal**: Scale-up fade with `useInView`
+- **StaggerWrap**: Staggered children reveal using `motion` variants
+- **Hero parallax**: `useScroll` + `useTransform` for code mockup vertical offset
 
 ## Environment Variables
 
-- `DATABASE_URL` — PostgreSQL connection string (auto-set by Replit)
-- `HELIUS_API_KEY` — Helius RPC API key for Solana (Replit Secret)
-- `COINGECKO_API_KEY` — CoinGecko API key for price data (Replit Secret)
-- `GEMINI_API_KEY` — Gemini AI API key (optional)
-- `SESSION_SECRET` — Express session secret (required in production, defaults to dev fallback)
-- `WALLET_ENCRYPTION_KEY` — Key for encrypting wallet private keys (falls back to SESSION_SECRET)
+No secrets required. The app is a static marketing site with no database or external API dependencies.

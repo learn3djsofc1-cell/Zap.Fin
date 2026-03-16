@@ -29,13 +29,23 @@ html, body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 85, 80, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(255, 85, 80, 0.25); }
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 105, 64, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(255, 105, 64, 0.25); }
 }
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
 }
 
 .animate-slide-up {
@@ -55,8 +65,9 @@ html, body {
   animation: shimmer 3s linear infinite;
 }
 
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
 }
 
 ::-webkit-scrollbar {
