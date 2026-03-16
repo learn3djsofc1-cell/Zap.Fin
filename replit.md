@@ -11,7 +11,10 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 - **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations, parallax code mockup)
 - **Icons**: Lucide React
 - **Font**: Outfit (Google Fonts) set as --font-sans in index.css
-- **Backend**: Express 4 with TypeScript (run via tsx) for health endpoint + static serve only
+- **Backend**: Express 4 with TypeScript (run via tsx)
+- **Database**: PostgreSQL (Replit built-in)
+- **Auth**: JWT (jsonwebtoken) + bcryptjs for password hashing
+- **DB Driver**: pg (node-postgres) with connection pooling
 
 ## Brand
 
@@ -30,16 +33,16 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 ├── index.html              # HTML entry point with SEO meta, OG/Twitter cards, structured data
 ├── src/
 │   ├── main.tsx            # React entry with BrowserRouter, Routes (/, /docs, /app/*)
-│   ├── App.tsx             # Landing page: Navbar, Hero (parallax code mockup), Features (6 cards), Protocol (settlement flow), Developers (metrics + quickstart), Security (4 cards), CTA, Footer
+│   ├── App.tsx             # Landing page
 │   ├── index.css           # Global styles, animations, scrollbar
 │   ├── docs/
 │   │   └── DocsPage.tsx    # /docs - Full platform documentation
 │   └── dashboard/
 │       ├── DashboardLayout.tsx  # Sidebar + bottom nav layout with Outlet
 │       ├── OverviewPage.tsx     # /app - Agent stats + recent activity table
-│       ├── AgentsPage.tsx       # /app/agents - Agent cards with status, balance, tx count
-│       ├── TransactionsPage.tsx # /app/transactions - Searchable/filterable tx table
-│       └── PoliciesPage.tsx     # /app/policies - Policy cards with rules and agent assignments
+│       ├── AgentsPage.tsx       # /app/agents - Agent management
+│       ├── TransactionsPage.tsx # /app/transactions - Transaction history
+│       └── PoliciesPage.tsx     # /app/policies - Policy management
 ├── public/
 │   ├── moltfin-logo.png    # Lobster mascot logo
 │   ├── solana-logo.png     # Partner logo
@@ -47,12 +50,29 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 │   ├── mastercard-logo.png # Partner logo
 │   └── aws-logo.png        # Partner logo
 ├── server/
-│   ├── index.ts            # Express server: /api/health + static dist serve
+│   ├── index.ts            # Express server entry: initializes DB, mounts all API routes
+│   ├── db.ts               # PostgreSQL connection pool (pg)
+│   ├── schema.ts           # Database schema initialization (users, agents, transactions, policies)
+│   ├── auth.ts             # Auth routes (/api/auth/*) + JWT middleware
+│   ├── routes/
+│   │   ├── agents.ts       # CRUD /api/agents
+│   │   ├── transactions.ts # CRUD /api/transactions
+│   │   ├── policies.ts     # CRUD /api/policies
+│   │   └── overview.ts     # GET /api/overview (aggregated stats)
 │   └── tsconfig.json       # Server TS config
 ├── vite.config.ts          # Vite config with /api proxy to Express
 ├── tsconfig.json           # Frontend TS config
 └── package.json            # Dependencies and scripts
 ```
+
+## Database Schema
+
+- **users**: id (serial PK), email (unique), password_hash, name, created_at
+- **agents**: id (serial PK), user_id (FK), name, agent_id_slug (unique per user), status, purpose, currency, balance, created_at, updated_at
+- **transactions**: id (serial PK), user_id (FK), agent_id (FK nullable), tx_hash, recipient, amount, currency, status, latency_ms, created_at
+- **policies**: id (serial PK), user_id (FK), name, policy_id_slug (unique per user), status, max_per_tx, daily_limit, monthly_limit, multi_sig, multi_sig_threshold, allowed_merchants[], allowed_currencies[], assigned_agent_ids[], created_at, updated_at
+
+All tables enforce user_id isolation — users can only access their own data.
 
 ## Routes
 
@@ -66,6 +86,20 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 ## API Endpoints
 
 - `GET /api/health` Health check
+- `POST /api/auth/register` User registration (email, password, name)
+- `POST /api/auth/login` User login (returns JWT)
+- `GET /api/auth/me` Get current user (requires auth)
+- `GET /api/agents` List user's agents (requires auth)
+- `POST /api/agents` Create agent (requires auth)
+- `PATCH /api/agents/:id` Update agent (requires auth)
+- `DELETE /api/agents/:id` Delete agent (requires auth)
+- `GET /api/transactions` List transactions with search/filter/pagination (requires auth)
+- `POST /api/transactions` Create transaction (requires auth)
+- `GET /api/policies` List user's policies (requires auth)
+- `POST /api/policies` Create policy (requires auth)
+- `PATCH /api/policies/:id` Update policy (requires auth)
+- `DELETE /api/policies/:id` Delete policy (requires auth)
+- `GET /api/overview` Dashboard stats + recent activity (requires auth)
 
 ## Development
 
@@ -90,4 +124,6 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 
 ## Environment Variables
 
-No secrets required. The app is a static marketing site with mock dashboard data, no database or external API dependencies.
+- `DATABASE_URL` - PostgreSQL connection string (auto-set by Replit)
+- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - Individual DB connection params
+- `JWT_SECRET` - Secret key for JWT signing (defaults to a dev fallback if not set)

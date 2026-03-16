@@ -1,6 +1,12 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { initializeDatabase } from './schema.js';
+import { authRouter } from './auth.js';
+import { agentsRouter } from './routes/agents.js';
+import { transactionsRouter } from './routes/transactions.js';
+import { policiesRouter } from './routes/policies.js';
+import { overviewRouter } from './routes/overview.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
@@ -9,9 +15,17 @@ if (isProduction) {
   app.set('trust proxy', 1);
 }
 
+app.use(express.json({ limit: '1mb' }));
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+app.use('/api/auth', authRouter);
+app.use('/api/agents', agentsRouter);
+app.use('/api/transactions', transactionsRouter);
+app.use('/api/policies', policiesRouter);
+app.use('/api/overview', overviewRouter);
 
 const distPath = path.resolve(process.cwd(), 'dist');
 if (fs.existsSync(path.join(distPath, 'index.html'))) {
@@ -23,8 +37,18 @@ if (fs.existsSync(path.join(distPath, 'index.html'))) {
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`API server running on port ${PORT}`);
-});
+async function start() {
+  try {
+    await initializeDatabase();
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`API server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+start();
 
 export default app;
