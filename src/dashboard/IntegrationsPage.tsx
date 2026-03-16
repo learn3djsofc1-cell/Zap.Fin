@@ -13,7 +13,7 @@ interface Integration {
   status: 'connected' | 'disconnected';
   config: Record<string, string> | null;
   configFields: string[];
-  connected_at: string | null;
+  connectedAt: string | null;
 }
 
 const PROVIDER_ICONS: Record<string, string> = {

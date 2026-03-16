@@ -165,7 +165,7 @@ export default function ApiKeysPage() {
                   <button
                     onClick={() => copyToClipboard(k.key_prefix, k.id)}
                     className="text-gray-600 hover:text-white p-1.5 transition-colors"
-                    title="Copy key prefix"
+                    title="Copy key identifier"
                   >
                     {copiedId === k.id ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
                   </button>
