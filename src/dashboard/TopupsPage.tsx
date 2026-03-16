@@ -193,7 +193,7 @@ export default function TopupsPage() {
         <div className="bg-[#111215] rounded-2xl p-6 border border-red-500/20 mb-5">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle size={18} className="text-red-400" />
-            <span className="text-red-400 font-bold text-sm">Private Key — Back Up Immediately</span>
+            <span className="text-red-400 font-bold text-sm">Private Key - Back Up Immediately</span>
           </div>
           <p className="text-gray-400 text-sm mb-4">
             This key is shown only once. Losing it means permanent loss of access to your wallet and its funds.

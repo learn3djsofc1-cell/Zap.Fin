@@ -76,7 +76,7 @@ export default function ControlsPage() {
           </div>
           <h2 className="text-xl font-bold text-white mb-2">No cards to configure</h2>
           <p className="text-gray-400 text-sm text-center max-w-md mb-8">
-            Issue a virtual card first — then return here to manage freeze controls, online payment permissions, and contactless settings.
+            Issue a virtual card first, then return here to manage freeze controls, online payment permissions, and contactless settings.
           </p>
           <button onClick={() => navigate('/app/cards')}
             className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-[#FF5550]/20">

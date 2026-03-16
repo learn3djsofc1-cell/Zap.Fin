@@ -94,7 +94,7 @@ export default function OverviewPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard label="Portfolio" value={`$${Math.floor(usdBalance).toLocaleString()}`} sub={wallet?.confirmed ? `${solBalance.toFixed(4)} SOL` : 'No wallet'} icon={<BarChart3 size={16} />} accent />
-        <StatCard label="SOL Price" value={solPrice > 0 ? `$${solPrice.toFixed(2)}` : '—'} sub={solPrice > 0 ? 'Live' : 'Unavailable'} icon={<TrendingUp size={16} />} live={solPrice > 0} />
+        <StatCard label="SOL Price" value={solPrice > 0 ? `$${solPrice.toFixed(2)}` : '-'} sub={solPrice > 0 ? 'Live' : 'Unavailable'} icon={<TrendingUp size={16} />} live={solPrice > 0} />
         <StatCard label="Cards" value={`${cards.length}`} sub={`${cards.filter(c => !c.frozen).length} active`} icon={<CreditCard size={16} />} />
         <StatCard label="Security" value={cards.length > 0 ? 'Active' : 'Setup'} sub={cards.length > 0 ? `${cards.filter(c => c.frozen).length} frozen` : 'Issue a card'} icon={<Shield size={16} />} />
       </div>

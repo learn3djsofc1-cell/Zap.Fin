@@ -26,12 +26,12 @@ export default function LoginPage() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#FF5550]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FF5550]/3 rounded-full blur-3xl" />
         <div className="relative z-10 max-w-md">
-          <div className="flex items-center gap-2.5 mb-10">
+          <Link to="/" className="flex items-center gap-2.5 mb-10 hover:opacity-80 transition-opacity">
             <img src="/logo.png" alt="WispTap" className="w-10 h-10 rounded-lg" />
             <span className="text-white font-bold text-2xl tracking-tight">WispTap</span>
-          </div>
+          </Link>
           <h2 className="text-3xl font-extrabold text-white mb-4 leading-tight">Your crypto,<br />ready to spend.</h2>
-          <p className="text-gray-400 text-base leading-relaxed mb-10">Connect your Solana wallet, issue virtual Visa cards, and spend anywhere — all from one dashboard.</p>
+          <p className="text-gray-400 text-base leading-relaxed mb-10">Connect your Solana wallet, issue virtual Visa cards, and spend anywhere, all from one dashboard.</p>
           <div className="flex flex-col gap-4">
             {[
               { icon: <CreditCard size={18} />, text: 'Issue virtual Visa cards instantly' },

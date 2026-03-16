@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Copy, Check, Lock, Zap, Globe, Shield, CreditCard, Wallet, Menu, X, Send, BarChart3, Bell, TrendingUp, Sparkles, ArrowUpRight, Layers, Repeat } from 'lucide-react';
+import { ArrowRight, Check, Lock, Zap, Globe, Shield, CreditCard, Wallet, Menu, X, Send, BarChart3, Bell, TrendingUp, Sparkles, ArrowUpRight, Layers, Repeat } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -69,13 +69,6 @@ function Navbar() {
 }
 
 function HeroSection() {
-  const [caCopied, setCaCopied] = useState(false);
-  const CA = '9ABFVNCk4SDrM2GwjHDMMio7NvF2VcMBGHEUwTQgpump';
-  const copyCA = async () => {
-    try { await navigator.clipboard.writeText(CA); } catch { const ta = document.createElement('textarea'); ta.value = CA; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
-    setCaCopied(true); setTimeout(() => setCaCopied(false), 2000);
-  };
-
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#FFF5F5] via-white to-white z-0" />
@@ -91,7 +84,7 @@ function HeroSection() {
             Spend crypto like cash.<br className="hidden sm:block" /> <span className="text-[#FF5550]">Anywhere.</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }} className="text-base sm:text-lg md:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto mb-8">
-            WispTap turns your Solana wallet into a spending account. Issue virtual Visa cards, convert SOL to stablecoins, and pay at 80M+ merchants — all from one dashboard.
+            WispTap turns your Solana wallet into a spending account. Issue virtual Visa cards, convert SOL to stablecoins, and pay at merchants worldwide, all from one dashboard.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25 }} className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link to="/app" className="bg-[#FF5550] hover:bg-[#E84B47] text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#FF5550]/20">
@@ -100,13 +93,6 @@ function HeroSection() {
             <a href="#how-it-works" className="text-gray-600 hover:text-[#1A1A1A] font-semibold text-sm flex items-center gap-1.5 px-5 py-3.5 transition-colors">
               See how it works <ArrowRight size={15} />
             </a>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }} className="mt-5 flex justify-center">
-            <div className="bg-[#1A1A1A] rounded-xl px-4 py-2.5 inline-flex items-center gap-3">
-              <span className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">CA</span>
-              <code className="text-[#FF5550] text-[11px] sm:text-xs font-mono">{CA}</code>
-              <button onClick={copyCA} className="text-gray-500 hover:text-white transition-colors">{caCopied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}</button>
-            </div>
           </motion.div>
         </div>
 
@@ -180,7 +166,7 @@ function HeroSection() {
                       <div key={t.name}>
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded-full" style={{ background: t.color }} />
+                            <img src={t.name === 'SOL' ? '/sol-logo.png' : t.name === 'USDC' ? '/usdc-logo.png' : '/usdt-logo.png'} alt={t.name} className="w-3.5 h-3.5 rounded-full" />
                             <span className="text-white text-[10px] font-medium">{t.name}</span>
                           </div>
                           <span className="text-gray-400 text-[9px]">{t.usd}</span>
@@ -310,7 +296,7 @@ function FundingSection() {
               SOL in, dollars out
             </h2>
             <p className="text-base sm:text-lg text-gray-400 leading-relaxed max-w-lg mx-auto lg:mx-0 mb-7">
-              Convert SOL to USDC or USDT with live rates and near-zero fees. Your card balance updates instantly — no bridging, no delays.
+              Convert SOL to USDC or USDT with live rates and near-zero fees. Your card balance updates instantly. No bridging, no delays.
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
               {[{ src: '/sol-logo.png', name: 'SOL' }, { src: '/usdc-logo.png', name: 'USDC' }, { src: '/usdt-logo.png', name: 'USDT' }].map(t => (
@@ -333,13 +319,13 @@ function SecuritySection() {
         <RevealOnScroll className="text-center mb-14">
           <span className="text-[#FF5550] text-xs font-bold uppercase tracking-widest block mb-3">Security First</span>
           <h2 className="text-[32px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.08] tracking-tight text-[#1A1A1A] mb-4">Your money, your control</h2>
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">Granular controls for every card. Freeze, limit, and monitor — all in real time.</p>
+          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">Granular controls for every card. Freeze, limit, and monitor in real time.</p>
         </RevealOnScroll>
         <StaggerWrap className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" gap={0.08}>
           {[
             { icon: <Lock size={20} />, title: 'Instant Freeze', desc: 'Pause transactions on any card with a single tap.' },
             { icon: <Shield size={20} />, title: 'Spending Limits', desc: 'Set daily or monthly caps per card to stay on budget.' },
-            { icon: <Globe size={20} />, title: '200+ Countries', desc: 'Accepted at 80M+ merchants on standard Visa rails.' },
+            { icon: <Globe size={20} />, title: '200+ Countries', desc: 'Accepted at merchants worldwide on standard Visa rails.' },
             { icon: <Bell size={20} />, title: 'Live Alerts', desc: 'Real-time notifications for every transaction.' },
           ].map((item) => (
             <motion.div key={item.title} variants={fadeUp} className="bg-[#FAFAFA] rounded-2xl p-6 border border-gray-100 hover:border-[#FF5550]/20 transition-colors">
@@ -378,7 +364,7 @@ function PlatformSection() {
     {
       icon: <Layers size={24} />,
       title: 'Multi-Card Management',
-      desc: 'Run multiple virtual cards simultaneously — one for subscriptions, one for shopping, one for travel. Each with independent limits and controls.',
+      desc: 'Run multiple virtual cards simultaneously. One for subscriptions, one for shopping, one for travel. Each with independent limits and controls.',
       visual: (
         <div className="w-full max-w-[380px] relative">
           <div className="bg-gradient-to-br from-[#222] via-[#333] to-[#1a1a1a] rounded-xl p-4 border border-white/10 mb-[-30px] ml-4 relative z-10">
@@ -450,7 +436,7 @@ function PlatformSection() {
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#FF5550] text-xs font-bold uppercase tracking-widest block mb-3">Platform</span>
           <h2 className="text-[32px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">More than a card</h2>
-          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">A complete financial toolkit built on Solana — from portfolio tracking to on-chain receipts.</p>
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">A complete financial toolkit built on Solana, from portfolio tracking to on-chain receipts.</p>
         </RevealOnScroll>
 
         <div className="flex flex-col gap-8">
@@ -472,7 +458,7 @@ function PlatformSection() {
           <div className="bg-gradient-to-r from-[#FF5550]/10 to-transparent rounded-2xl p-6 sm:p-8 border border-[#FF5550]/10 flex flex-col sm:flex-row items-center justify-between gap-5">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-[#FF5550] rounded-xl flex items-center justify-center shrink-0"><Globe size={22} className="text-white" /></div>
-              <div><h3 className="text-white font-bold text-lg">Accepted in 200+ countries</h3><p className="text-gray-400 text-sm">Standard Visa rails. Works at 80M+ merchants worldwide.</p></div>
+              <div><h3 className="text-white font-bold text-lg">Accepted in 200+ countries</h3><p className="text-gray-400 text-sm">Standard Visa rails. Works at merchants worldwide.</p></div>
             </div>
             <Link to="/app" className="bg-[#FF5550] hover:bg-[#E84B47] text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shrink-0">Get Started</Link>
           </div>

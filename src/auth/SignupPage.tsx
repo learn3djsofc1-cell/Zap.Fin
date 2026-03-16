@@ -35,12 +35,12 @@ export default function SignupPage() {
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#FF5550]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#FF5550]/3 rounded-full blur-3xl" />
         <div className="relative z-10 max-w-md">
-          <div className="flex items-center gap-2.5 mb-10">
+          <Link to="/" className="flex items-center gap-2.5 mb-10 hover:opacity-80 transition-opacity">
             <img src="/logo.png" alt="WispTap" className="w-10 h-10 rounded-lg" />
             <span className="text-white font-bold text-2xl tracking-tight">WispTap</span>
-          </div>
+          </Link>
           <h2 className="text-3xl font-extrabold text-white mb-4 leading-tight">Start spending<br />crypto today.</h2>
-          <p className="text-gray-400 text-base leading-relaxed mb-10">Create your account in 30 seconds. No KYC, no waiting — just connect and go.</p>
+          <p className="text-gray-400 text-base leading-relaxed mb-10">Create your account in 30 seconds. No KYC, no waiting. Just connect and go.</p>
 
           <div className="bg-[#161719] rounded-2xl border border-white/5 p-5 mb-6">
             <span className="text-gray-500 text-[10px] font-bold uppercase tracking-wider block mb-4">What you get</span>
@@ -58,14 +58,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-5">
-            <div className="flex -space-x-2">
-              {['#FF5550', '#9945FF', '#2775CA', '#26A17B'].map((c, i) => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0D0E11] flex items-center justify-center text-white text-[9px] font-bold" style={{ background: c }}>{String.fromCharCode(65 + i)}</div>
-              ))}
-            </div>
-            <span className="text-gray-400 text-xs">Join 10,000+ users</span>
-          </div>
         </div>
       </div>
 

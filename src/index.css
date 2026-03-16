@@ -4,6 +4,11 @@
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
