@@ -38,6 +38,7 @@ export default function LoginPage() {
     setError('');
 
     if (!email.trim()) { setError('Email is required'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Please enter a valid email address'); return; }
     if (!password) { setError('Password is required'); return; }
 
     setLoading(true);
