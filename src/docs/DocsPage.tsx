@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, Wallet, Code2, Zap, Shield, Cpu, HelpCircle, BookOpen, Menu, X, Layers, Terminal } from 'lucide-react';
 
@@ -265,7 +265,7 @@ export default function DocsPage() {
   );
 }
 
-function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <section id={id} className="mb-16 scroll-mt-24">
       <h2 className="text-2xl font-bold text-white mb-6 pb-3 border-b border-white/5">{title}</h2>
@@ -274,19 +274,19 @@ function Section({ id, title, children }: { id: string; title: string; children:
   );
 }
 
-function H3({ children }: { children: React.ReactNode }) {
+function H3({ children }: { children: ReactNode }) {
   return <h3 className="text-lg font-bold text-white mt-8 mb-3">{children}</h3>;
 }
 
-function P({ children }: { children: React.ReactNode }) {
+function P({ children }: { children: ReactNode }) {
   return <p className="text-gray-400 text-sm leading-relaxed mb-4">{children}</p>;
 }
 
-function UL({ children }: { children: React.ReactNode }) {
+function UL({ children }: { children: ReactNode }) {
   return <ul className="list-disc list-outside ml-5 mb-4 flex flex-col gap-2">{children}</ul>;
 }
 
-function LI({ children }: { children: React.ReactNode }) {
+function LI({ children }: { children: ReactNode }) {
   return <li className="text-gray-400 text-sm leading-relaxed">{children}</li>;
 }
 
@@ -298,7 +298,7 @@ function CodeBlock({ code }: { code: string }) {
   );
 }
 
-function Callout({ type, title, children }: { type: 'warning' | 'info'; title: string; children: React.ReactNode }) {
+function Callout({ type, title, children }: { type: 'warning' | 'info'; title: string; children: ReactNode }) {
   const styles = type === 'warning'
     ? 'bg-amber-500/5 border-amber-500/20 text-amber-200'
     : 'bg-blue-500/5 border-blue-500/20 text-blue-200';

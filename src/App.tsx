@@ -17,7 +17,7 @@ function RevealOnScroll({ children, className, delay = 0, direction = 'up' }: { 
   );
 }
 
-function ScaleReveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+function ScaleReveal({ children, className, delay = 0, ...rest }: { children: ReactNode; className?: string; delay?: number; [key: string]: unknown }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
   return (
@@ -233,7 +233,7 @@ function ProtocolSection() {
                 { label: 'Instant settlement', detail: 'Sub-400ms transaction finality with cryptographic proof of settlement on Solana' },
                 { label: 'Natural language banking', detail: 'Native MCP integration enables agents to manage finances through conversational prompts' },
               ].map((item, i) => (
-                <ScaleReveal key={item.label} delay={i * 0.08}>
+                <ScaleReveal delay={i * 0.08} key={item.label}>
                   <div className="flex items-start gap-3 bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
                     <div className="w-6 h-6 rounded-full bg-[#FF6940]/10 flex items-center justify-center shrink-0 mt-0.5">
                       <Check size={12} className="text-[#FF6940]" />
