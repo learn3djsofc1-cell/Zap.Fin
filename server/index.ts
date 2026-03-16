@@ -9,8 +9,6 @@ if (isProduction) {
   app.set('trust proxy', 1);
 }
 
-app.use(express.json());
-
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
