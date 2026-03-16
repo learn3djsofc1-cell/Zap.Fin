@@ -3,15 +3,11 @@ import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import { pool, initDatabase } from './db.js';
 import authRoutes from './routes/auth.js';
 import cardRoutes from './routes/cards.js';
 import walletRoutes from './routes/wallet.js';
 import priceRoutes from './routes/prices.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();

@@ -7,7 +7,7 @@
     "dev": "tsx server/index.ts & vite",
     "dev:server": "tsx server/index.ts",
     "dev:client": "vite",
-    "build": "vite build && tsc --outDir dist-server --rootDir . --esModuleInterop --module nodenext --moduleResolution nodenext --target es2022 --skipLibCheck --resolveJsonModule server/index.ts",
+    "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs --external:bcrypt --external:pg-native --target=node20",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
@@ -29,6 +29,7 @@
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
+    "esbuild": "^0.27.4",
     "express": "^4.21.2",
     "express-session": "^1.19.0",
     "framer-motion": "^12.36.0",
