@@ -53,7 +53,6 @@ function Navbar() {
           ))}
         </div>
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/login" className="text-sm font-semibold text-gray-600 hover:text-[#1A1A1A] transition-colors px-4 py-2">Sign In</Link>
           <Link to="/app" className="bg-[#FF5550] hover:bg-[#E84B47] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF5550]/20">Launch App</Link>
         </div>
         <button className="md:hidden text-[#1A1A1A] p-1.5" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
@@ -90,9 +89,9 @@ function HeroSection() {
             <Link to="/app" className="bg-[#FF5550] hover:bg-[#E84B47] text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#FF5550]/20">
               <Send size={16} /> Get Started Free
             </Link>
-            <a href="#how-it-works" className="text-gray-600 hover:text-[#1A1A1A] font-semibold text-sm flex items-center gap-1.5 px-5 py-3.5 transition-colors">
-              See how it works <ArrowRight size={15} />
-            </a>
+            <Link to="/docs" className="text-gray-600 hover:text-[#1A1A1A] font-semibold text-sm flex items-center gap-1.5 px-5 py-3.5 transition-colors">
+              Documentation <ArrowRight size={15} />
+            </Link>
           </motion.div>
         </div>
 
@@ -480,7 +479,7 @@ function FooterSection() {
             <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto mb-8">Join thousands using WispTap to spend crypto seamlessly.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/signup" className="bg-[#FF5550] hover:bg-[#E84B47] text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF5550]/20"><Send size={16} /> Create Free Account</Link>
-              <Link to="/login" className="bg-white/5 hover:bg-white/10 text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border border-white/10">Sign In</Link>
+              <Link to="/docs" className="bg-white/5 hover:bg-white/10 text-white px-7 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border border-white/10">Documentation</Link>
             </div>
           </RevealOnScroll>
         </div>
@@ -500,6 +499,7 @@ function FooterSection() {
               <a href="#cards" className="text-gray-400 text-sm hover:text-white transition-colors">Cards</a>
               <a href="#funding" className="text-gray-400 text-sm hover:text-white transition-colors">Funding</a>
               <a href="#security" className="text-gray-400 text-sm hover:text-white transition-colors">Security</a>
+              <Link to="/docs" className="text-gray-400 text-sm hover:text-white transition-colors">Documentation</Link>
             </div>
           </div>
           <div>

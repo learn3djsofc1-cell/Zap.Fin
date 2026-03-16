@@ -11,6 +11,7 @@ import OverviewPage from './dashboard/OverviewPage.tsx';
 import CardsPage from './dashboard/CardsPage.tsx';
 import TopupsPage from './dashboard/TopupsPage.tsx';
 import ControlsPage from './dashboard/ControlsPage.tsx';
+import DocsPage from './docs/DocsPage.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/docs" element={<DocsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/app" element={

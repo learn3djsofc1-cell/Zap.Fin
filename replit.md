@@ -42,6 +42,8 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 │   │   ├── LoginPage.tsx    # /login — Email + password sign in
 │   │   ├── SignupPage.tsx   # /signup — Account creation with confirm password
 │   │   └── ProtectedRoute.tsx # Redirects to /login if not authenticated
+│   ├── docs/
+│       │   └── DocsPage.tsx       # /docs — Comprehensive platform documentation with sidebar TOC
 │   └── dashboard/
 │       ├── DashboardLayout.tsx  # Shared layout: sidebar (desktop), bottom nav (mobile)
 │       ├── OverviewPage.tsx     # /app — Balance, card preview, wallet address, activity
