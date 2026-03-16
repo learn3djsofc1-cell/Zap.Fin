@@ -5,13 +5,12 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-14px) rotate(0.3deg); }
-  66% { transform: translateY(-8px) rotate(-0.2deg); }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
 }
 
 .animate-float {
-  animation: float 7s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
 
 @keyframes slide-up {
@@ -25,18 +24,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 85, 80, 0.15); }
-  50% { box-shadow: 0 0 40px rgba(255, 85, 80, 0.3); }
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 85, 80, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(255, 85, 80, 0.25); }
 }
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
 }
 
 .animate-slide-up {
@@ -56,6 +50,24 @@
   animation: shimmer 3s linear infinite;
 }
 
-.animate-ticker {
-  animation: ticker 30s linear infinite;
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
 }

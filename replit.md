@@ -35,7 +35,7 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 ├── index.html              # HTML entry point with full SEO meta tags
 ├── src/
 │   ├── main.tsx            # React entry with BrowserRouter, AuthProvider, Routes
-│   ├── App.tsx             # Landing page (Hero, HowItWorks, CardsShowcase, Funding, Security, Capabilities, CTAFooter)
+│   ├── App.tsx             # Landing page (Hero with dashboard mockup, HowItWorks, CardsShowcase, Funding, Security, Platform panels, dark gradient footer)
 │   ├── index.css           # Global styles
 │   ├── auth/
 │   │   ├── AuthContext.tsx  # AuthProvider + useAuth hook (login/signup/logout/me)

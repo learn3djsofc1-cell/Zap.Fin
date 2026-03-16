@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Plus, Eye, EyeOff, Snowflake, Loader2, AlertCircle } from 'lucide-react';
+import { CreditCard, Plus, Eye, EyeOff, Snowflake, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
 
 interface Card {
   id: number;
@@ -21,6 +21,7 @@ export default function CardsPage() {
   const [revealedCards, setRevealedCards] = useState<Set<number>>(new Set());
   const [revealedCVVs, setRevealedCVVs] = useState<Set<number>>(new Set());
   const [cardError, setCardError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
   const MAX_CARDS = 2;
 
   const fetchCards = useCallback(async () => {
@@ -105,6 +106,13 @@ export default function CardsPage() {
     }
   };
 
+  const copyCardNumber = async (card: Card) => {
+    const num = card.card_number_formatted || card.card_number_masked;
+    try { await navigator.clipboard.writeText(num.replace(/\s/g, '')); } catch { /* fallback */ }
+    setCopiedId(card.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -116,15 +124,13 @@ export default function CardsPage() {
   if (cards.length === 0) {
     return (
       <div className="max-w-6xl mx-auto pb-20 md:pb-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Vault</h1>
-            <p className="text-gray-500 text-sm mt-1">Manage your virtual Visa cards</p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Card Vault</h1>
+          <p className="text-gray-500 text-sm mt-1">Manage your virtual Visa cards</p>
         </div>
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-20 h-20 rounded-2xl bg-[#111215] border border-white/5 flex items-center justify-center mb-6">
-            <CreditCard size={36} className="text-gray-600" />
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#FF5550]/20 to-[#FF5550]/5 flex items-center justify-center mb-6">
+            <CreditCard size={36} className="text-[#FF5550]" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Issue your first card</h2>
           <p className="text-gray-400 text-sm text-center max-w-md mb-8">
@@ -133,7 +139,7 @@ export default function CardsPage() {
           <button
             onClick={createCard}
             disabled={creating}
-            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20 disabled:opacity-50"
+            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-[#FF5550]/20 disabled:opacity-50"
           >
             {creating ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
             {creating ? 'Issuing...' : 'Issue Virtual Card'}
@@ -143,20 +149,25 @@ export default function CardsPage() {
     );
   }
 
+  const gradients = [
+    'linear-gradient(145deg, #FF5550 0%, #FF6B67 40%, #c43c38 100%)',
+    'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+  ];
+
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Vault</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Card Vault</h1>
           <span className="text-gray-500 text-xs mt-1 block">{cards.length} of {MAX_CARDS} cards issued</span>
         </div>
         {cards.length < MAX_CARDS && (
           <button
             onClick={createCard}
             disabled={creating}
-            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
+            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-2.5 px-5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {creating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
             {creating ? 'Issuing...' : 'Issue Card'}
           </button>
         )}
@@ -168,77 +179,73 @@ export default function CardsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {cards.map(card => (
-          <div key={card.id} className="flex flex-col gap-4">
-            <div className={`relative rounded-2xl p-6 overflow-hidden min-h-[210px] flex flex-col justify-between ${card.frozen ? 'opacity-60' : ''}`}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {cards.map((card, idx) => (
+          <div key={card.id} className="bg-[#111215] rounded-2xl border border-white/5 overflow-hidden">
+            <div className={`relative p-5 sm:p-6 min-h-[200px] flex flex-col justify-between ${card.frozen ? 'opacity-70 grayscale' : ''}`}
               style={{
-                background: card.frozen
-                  ? 'linear-gradient(135deg, #3a3a4a 0%, #2a2a3a 100%)'
-                  : 'linear-gradient(135deg, #FF5550 0%, #FF7A76 30%, #FF5550 60%, #D94440 100%)',
+                background: card.frozen ? 'linear-gradient(145deg, #2a2a3a 0%, #1a1a2a 100%)' : gradients[idx % gradients.length],
               }}
             >
+              <div className="absolute top-0 right-0 w-44 h-44 bg-white/5 rounded-full blur-3xl translate-x-14 -translate-y-14" />
+
               {card.frozen && (
-                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center gap-1.5">
-                  <Snowflake size={14} className="text-white" />
-                  <span className="text-white text-xs font-bold">FROZEN</span>
+                <div className="absolute top-4 right-4 bg-white/15 backdrop-blur-sm rounded-lg px-2.5 py-1 flex items-center gap-1.5 z-10">
+                  <Snowflake size={12} className="text-white" />
+                  <span className="text-white text-[10px] font-bold">FROZEN</span>
                 </div>
               )}
-              <div className="flex items-center justify-between">
-                <span className="text-white/90 text-sm font-medium">{card.name}</span>
-                <span className="text-white font-bold text-lg tracking-wider">VISA</span>
+
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-6 rounded bg-gradient-to-br from-[#e6d5a7] to-[#b89f65] border border-[#967d46]" />
+                  <span className="text-white/80 text-[10px] font-medium uppercase tracking-wider">{card.name}</span>
+                </div>
+                <span className="text-white font-bold text-base italic tracking-widest">VISA</span>
               </div>
 
-              <div className="mt-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-white text-lg sm:text-xl font-mono tracking-widest">
-                    {revealedCards.has(card.id)
-                      ? card.card_number_formatted
-                      : card.card_number_masked}
+              <div className="mt-auto relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-white text-base sm:text-lg font-mono tracking-[3px]">
+                    {revealedCards.has(card.id) ? card.card_number_formatted : card.card_number_masked}
                   </span>
-                  <button
-                    onClick={() => toggleReveal(card.id)}
-                    className="text-white/70 hover:text-white transition-colors"
-                    title={revealedCards.has(card.id) ? 'Hide card number' : 'Show card number'}
-                  >
-                    {revealedCards.has(card.id) ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+                  {revealedCards.has(card.id) && (
+                    <button onClick={() => copyCardNumber(card)} className="text-white/60 hover:text-white transition-colors">
+                      {copiedId === card.id ? <Check size={14} className="text-green-300" /> : <Copy size={14} />}
+                    </button>
+                  )}
                 </div>
-
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
                   <div>
-                    <span className="text-white/60 text-[10px] uppercase tracking-wider block">Expires</span>
+                    <span className="text-white/40 text-[9px] uppercase tracking-wider block">Exp</span>
                     <span className="text-white text-sm font-mono">{card.expiry}</span>
                   </div>
                   <div>
-                    <span className="text-white/60 text-[10px] uppercase tracking-wider block">CVV</span>
-                    <span className="text-white text-sm font-mono">
-                      {revealedCVVs.has(card.id) ? card.cvv : '***'}
-                    </span>
+                    <span className="text-white/40 text-[9px] uppercase tracking-wider block">CVV</span>
+                    <span className="text-white text-sm font-mono">{revealedCVVs.has(card.id) ? card.cvv : '•••'}</span>
                   </div>
-                  <div className="w-10 h-7 bg-white/20 rounded" />
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => toggleFreeze(card.id)}
-                className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 border ${
-                  card.frozen
-                    ? 'bg-[#FF5550]/10 border-[#FF5550]/30 text-[#FF5550] hover:bg-[#FF5550]/20'
-                    : 'bg-[#1A1B1F] border-white/5 text-white hover:bg-[#222326]'
-                }`}
-              >
-                <Snowflake size={16} />
-                {card.frozen ? 'Unfreeze Card' : 'Freeze Card'}
-              </button>
+            <div className="p-3 flex gap-2">
               <button
                 onClick={() => toggleReveal(card.id)}
-                className="flex-1 bg-[#1A1B1F] border border-white/5 text-white py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 hover:bg-[#222326]"
+                className="flex-1 bg-[#0A0B0E] hover:bg-[#161719] text-white py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-white/5"
               >
-                {revealedCards.has(card.id) ? <EyeOff size={16} /> : <Eye size={16} />}
-                {revealedCards.has(card.id) ? 'Hide Details' : 'Show Details'}
+                {revealedCards.has(card.id) ? <EyeOff size={14} /> : <Eye size={14} />}
+                {revealedCards.has(card.id) ? 'Hide' : 'Reveal'}
+              </button>
+              <button
+                onClick={() => toggleFreeze(card.id)}
+                className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border ${
+                  card.frozen
+                    ? 'bg-[#FF5550]/10 border-[#FF5550]/30 text-[#FF5550] hover:bg-[#FF5550]/20'
+                    : 'bg-[#0A0B0E] border-white/5 text-white hover:bg-[#161719]'
+                }`}
+              >
+                <Snowflake size={14} />
+                {card.frozen ? 'Unfreeze' : 'Freeze'}
               </button>
             </div>
           </div>
