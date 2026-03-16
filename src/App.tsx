@@ -3,6 +3,7 @@ import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Send, Code2, Cpu, Lock,
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './lib/AuthContext';
 
 function RevealOnScroll({ children, className, delay = 0, direction = 'up' }: { children: ReactNode; className?: string; delay?: number; direction?: 'up' | 'down' | 'left' | 'right' }) {
   const ref = useRef(null);
@@ -44,6 +45,8 @@ const cardReveal = {
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const appLink = user ? '/app' : '/login';
   const links = [
     { name: 'Features', href: '#features' },
     { name: 'Protocol', href: '#protocol' },
@@ -64,14 +67,14 @@ function Navbar() {
         </div>
         <div className="hidden md:flex items-center gap-3">
           <Link to="/docs" className="text-gray-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">Docs</Link>
-          <Link to="/login" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF6940]/20">Launch App</Link>
+          <Link to={appLink} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF6940]/20">{user ? 'Dashboard' : 'Launch App'}</Link>
         </div>
         <button className="md:hidden text-white p-1.5" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         {open && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 w-full bg-[#0D0E12] border-b border-white/5 shadow-2xl md:hidden flex flex-col px-5 py-4 gap-3 z-50">
             {links.map((l) => (<a key={l.name} href={l.href} className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>{l.name}</a>))}
             <Link to="/docs" className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>Docs</Link>
-            <Link to="/login" className="bg-[#FF6940] text-white px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>Launch App</Link>
+            <Link to={appLink} className="bg-[#FF6940] text-white px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>{user ? 'Dashboard' : 'Launch App'}</Link>
           </motion.div>
         )}
       </div>

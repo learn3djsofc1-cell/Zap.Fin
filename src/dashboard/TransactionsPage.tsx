@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { ArrowLeftRight, Search, Filter, Plus } from 'lucide-react';
+import { ArrowLeftRight, Search, Filter, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../lib/api';
 import { useToast } from '../lib/toast';
 import { TableRowSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+
+const PAGE_SIZE = 20;
 
 function timeAgo(date: string): string {
   const now = Date.now();
@@ -23,6 +25,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string>('all');
+  const [page, setPage] = useState(0);
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [agents, setAgents] = useState<any[]>([]);
@@ -34,19 +37,30 @@ export default function TransactionsPage() {
 
   const fetchTransactions = useCallback(() => {
     setLoading(true);
-    api.transactions.list({ search: search.trim() || undefined, status: filter, limit: 50 })
+    api.transactions.list({
+      search: search.trim() || undefined,
+      status: filter,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
+    })
       .then((data) => {
         setTransactions(data.transactions);
         setTotal(data.total);
       })
       .catch(() => toast('error', 'Failed to load transactions'))
       .finally(() => setLoading(false));
-  }, [search, filter]);
+  }, [search, filter, page]);
 
   useEffect(() => {
     const timer = setTimeout(fetchTransactions, search ? 300 : 0);
     return () => clearTimeout(timer);
   }, [fetchTransactions]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [search, filter]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const openCreate = () => {
     setFormAgentId(''); setFormRecipient(''); setFormAmount(''); setFormCurrency('USDC');
@@ -68,6 +82,7 @@ export default function TransactionsPage() {
       });
       toast('success', 'Transaction created');
       setShowCreate(false);
+      setPage(0);
       fetchTransactions();
     } catch (err: any) {
       toast('error', err.message || 'Failed to create transaction');
@@ -75,9 +90,6 @@ export default function TransactionsPage() {
       setSaving(false);
     }
   };
-
-  const settledCount = transactions.filter(t => t.status === 'settled').length;
-  const blockedCount = transactions.filter(t => t.status === 'blocked').length;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -182,6 +194,33 @@ export default function TransactionsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!loading && total > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.04]">
+            <span className="text-gray-500 text-xs">
+              Showing {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={14} /> Prev
+              </button>
+              <span className="text-gray-400 text-xs px-2">
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                Next <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
         )}
       </div>

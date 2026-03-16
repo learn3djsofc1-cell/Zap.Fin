@@ -1,20 +1,37 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { ApiError } from '../lib/api';
 
+interface LocationState {
+  from?: { pathname: string };
+}
+
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { user, loading: authLoading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || '/app';
+  const state = location.state as LocationState | null;
+  const from = state?.from?.pathname || '/app';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#08090C] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#FF6940] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/app" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
