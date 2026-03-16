@@ -533,6 +533,15 @@ function FooterSection() {
                 Twitter / X
               </a>
             </div>
+            <div className="mt-5">
+              <p className="text-gray-500 text-xs mb-2">Get product updates</p>
+              <form onSubmit={(e) => e.preventDefault()} className="flex gap-1.5">
+                <input type="email" placeholder="you@email.com" className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FF5550]/50 transition-colors" />
+                <button type="submit" className="bg-[#FF5550] hover:bg-[#E84B47] text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors shrink-0">
+                  <Send size={12} />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
 
