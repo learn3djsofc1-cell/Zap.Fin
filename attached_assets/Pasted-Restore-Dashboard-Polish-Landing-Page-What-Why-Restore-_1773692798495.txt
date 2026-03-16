@@ -1,0 +1,71 @@
+Restore Dashboard & Polish Landing Page
+What & Why
+Restore the previously deleted dashboard system and rebrand it for the Molt.Fin AI-agent banking infrastructure concept. The old dashboard was designed for a traditional crypto bank (cards, topups, controls). The new dashboard must reflect Molt.Fin's actual product: an infrastructure platform where developers manage AI agents, their accounts, spending policies, and settlement operations. Additionally, polish the landing page with several fixes and asset updates.
+
+Done looks like
+Dashboard is accessible at /app with sidebar navigation (desktop) and bottom nav (mobile)
+Dashboard pages reflect the Molt.Fin concept:
+Overview (/app): Agent stats (total agents, active transactions, volume, settlement speed), recent agent activity feed
+Agents (/app/agents): Create/manage AI agents, each with name, status, balance, currency, creation date
+Transactions (/app/transactions): Settlement/transaction history with status, amounts, latency, timestamps
+Policies (/app/policies): Create/manage spending policies (velocity limits, merchant whitelists, multi-sig thresholds)
+Dashboard uses the Molt.Fin lobster logo in the header/sidebar
+Landing page navbar links to dashboard via "Sign In" or "Launch App" button
+Hero section: "Powered by Solana" badge removed, CA/token address removed
+Partner logos section: Solana, USDC, Mastercard, AWS text replaced with actual logo images from attached files
+Footer: Only X/Twitter social link remaining, pointing to https://x.com/MoltFinApp
+Footer, favicon, and dashboard header use the Molt.Fin lobster logo
+All em dash characters removed from entire codebase (replaced with commas, periods, or rephrased)
+CTA section "Built for autonomous systems. Available today." is responsive on mobile (text wraps properly, not running together)
+Full mobile and desktop responsiveness verified across all pages
+index.html updated with domain https://moltfin.app for all SEO meta/OG/Twitter tags
+Production-grade output, no demo/placeholder quality
+Out of scope
+Backend API implementation (dashboard uses mock/static data, no real database)
+Authentication system (no login/signup flow, dashboard is directly accessible)
+Real-time data fetching from blockchain
+Tasks
+Copy brand assets to public directory - Copy Solana, USDC, Mastercard, AWS logos and the Molt.Fin lobster logo from attached_assets to public/ for web serving.
+
+Create dashboard layout - Build DashboardLayout component with sidebar navigation (desktop) and bottom navigation bar (mobile), using Molt.Fin lobster logo and #FF6940 accent, dark theme matching the landing page.
+
+Build Overview page - Create the dashboard home page showing agent statistics cards (total agents, active transactions, total volume, avg settlement speed) and a recent activity feed with mock data.
+
+Build Agents page - Create the agent management page with a list/grid of AI agents showing name, status, balance, currency. Include a "Create Agent" button and agent detail cards.
+
+Build Transactions page - Create the settlement/transaction history page with a table showing transaction ID, agent, recipient, amount, status, latency, and timestamp.
+
+Build Policies page - Create the spending policy management page with policy cards showing rule configurations (max per tx, daily limit, merchant whitelist, multi-sig settings).
+
+Update routing - Add dashboard routes to main.tsx with DashboardLayout wrapper and all four dashboard pages. Add "Launch App" link in landing page navbar.
+
+Update hero section - Remove "Powered by Solana" badge, remove CA/token address copy button, clean up hero layout.
+
+Replace partner text with logo images - Replace the Solana/USDC/Mastercard/AWS text labels in the hero trust bar with actual logo images, properly sized and styled for dark background.
+
+Update footer - Remove GitHub social link, keep only X/Twitter linking to https://x.com/MoltFinApp. Use Molt.Fin lobster logo image instead of icon component.
+
+Update favicon and logos - Replace favicon files with the Molt.Fin lobster logo. Update dashboard header and footer to use the lobster logo image.
+
+Remove all em dash characters - Find and replace every em dash in src/App.tsx and src/docs/DocsPage.tsx with appropriate punctuation.
+
+Fix CTA section mobile responsiveness - Ensure "Built for autonomous systems." and "Available today." break correctly on mobile with proper line spacing and wrapping.
+
+Mobile and desktop responsiveness audit - Test and fix all pages (landing, docs, all dashboard pages) for proper mobile/tablet/desktop rendering.
+
+Update index.html SEO - Change all canonical/OG/Twitter URLs from moltfin.xyz to https://moltfin.app domain.
+
+Relevant files
+src/App.tsx
+src/main.tsx
+src/index.css
+src/docs/DocsPage.tsx
+server/index.ts
+index.html
+vite.config.ts
+public/logo.png
+attached_assets/Frame_1171275132_1773691426846.png
+attached_assets/solana-sol-logo_(18)_1773691280053.png
+attached_assets/usd-coin-usdc-logo_(6)_1773691280053.png
+attached_assets/Mastercard_2019_logo_1773691274000.png
+attached_assets/Amazon_Web_Services-Logo.wine_1773691274000.png
