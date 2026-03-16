@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, Wallet, Code2, Zap, Shield, Cpu, HelpCircle, BookOpen, Menu, X, Layers, Terminal } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Wallet, Code2, Zap, Shield, Cpu, HelpCircle, BookOpen, Menu, X, Terminal } from 'lucide-react';
 
 const sections = [
   { id: 'overview', title: 'Platform Overview', icon: <BookOpen size={16} /> },
@@ -63,9 +63,7 @@ export default function DocsPage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6940] to-[#FF8F6B] flex items-center justify-center">
-                <Layers size={16} className="text-white" />
-              </div>
+              <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-8 h-8 rounded-lg object-cover" />
               <span className="text-xl font-bold tracking-tight text-white">Molt.Fin</span>
             </Link>
             <ChevronRight size={14} className="text-gray-600 hidden sm:block" />
@@ -109,7 +107,7 @@ export default function DocsPage() {
 
             <Section id="overview" title="Platform Overview">
               <P>
-                Molt.Fin is a financial infrastructure platform built on the Solana blockchain, purpose-designed for autonomous AI agents. It provides programmable bank accounts, sub-second settlement, and cryptographic policy enforcement — enabling AI systems to hold, send, and manage funds without human intervention.
+                Molt.Fin is a financial infrastructure platform built on the Solana blockchain, purpose-designed for autonomous AI agents. It provides programmable bank accounts, sub-second settlement, and cryptographic policy enforcement, enabling AI systems to hold, send, and manage funds without human intervention.
               </P>
               <P>
                 The platform operates through four core modules: an agent account system, an instant settlement engine, a policy enforcement layer, and native SDK tooling. Each module is designed for programmatic interaction, with no UI-dependent workflows.
@@ -148,7 +146,7 @@ export default function DocsPage() {
             <Section id="agent-accounts" title="Agent Accounts">
               <H3>Creating an Agent Account</H3>
               <P>
-                Each AI agent receives its own dedicated bank account. Accounts are isolated — one agent cannot access another agent's funds. Multi-currency support allows agents to hold USDC, SOL, and ETH simultaneously.
+                Each AI agent receives its own dedicated bank account. Accounts are isolated: one agent cannot access another agent's funds. Multi-currency support allows agents to hold USDC, SOL, and ETH simultaneously.
               </P>
               <CodeBlock code={`const account = await moltfin.accounts.create({\n  agentId: 'trading_bot_01',\n  currency: 'USDC',\n  initialDeposit: 10000,\n  metadata: { purpose: 'Market making' }\n});\n\nconsole.log(account.address); // 'mf_acct_7Kv2...'\nconsole.log(account.balance); // 10000`} />
               <H3>Account Operations</H3>
@@ -170,14 +168,14 @@ export default function DocsPage() {
             <Section id="settlement" title="Settlement Engine">
               <H3>How Settlement Works</H3>
               <P>
-                Molt.Fin settles transactions on the Solana blockchain for sub-400ms finality. When an agent initiates a payment, the settlement engine validates the transaction against the agent's policy rules, executes the on-chain transfer, and returns a cryptographic receipt — all within a single Solana block.
+                Molt.Fin settles transactions on the Solana blockchain for sub-400ms finality. When an agent initiates a payment, the settlement engine validates the transaction against the agent's policy rules, executes the on-chain transfer, and returns a cryptographic receipt, all within a single Solana block.
               </P>
               <H3>Settlement Flow</H3>
               <UL>
-                <LI><strong>Step 1 — Initiation:</strong> Agent calls <code className="text-[#FF6940] bg-[#FF6940]/5 px-1.5 py-0.5 rounded text-xs">account.send()</code> with recipient and amount</LI>
-                <LI><strong>Step 2 — Policy check:</strong> The on-chain policy program validates against spending rules (~12ms)</LI>
-                <LI><strong>Step 3 — Settlement:</strong> Funds transfer on Solana with cryptographic finality (~340ms)</LI>
-                <LI><strong>Step 4 — Receipt:</strong> Transaction receipt returned with on-chain proof (~380ms total)</LI>
+                <LI><strong>Step 1: Initiation.</strong> Agent calls <code className="text-[#FF6940] bg-[#FF6940]/5 px-1.5 py-0.5 rounded text-xs">account.send()</code> with recipient and amount</LI>
+                <LI><strong>Step 2: Policy check.</strong> The on-chain policy program validates against spending rules (~12ms)</LI>
+                <LI><strong>Step 3: Settlement.</strong> Funds transfer on Solana with cryptographic finality (~340ms)</LI>
+                <LI><strong>Step 4: Receipt.</strong> Transaction receipt returned with on-chain proof (~380ms total)</LI>
               </UL>
               <H3>Settlement Parameters</H3>
               <Table
@@ -213,7 +211,7 @@ export default function DocsPage() {
                 ]}
               />
               <Callout type="warning" title="Policy Immutability">
-                Once a policy is active, it can only be replaced — not modified in place. This ensures that policy changes are auditable on-chain. Use <code className="text-amber-200 bg-amber-500/5 px-1.5 py-0.5 rounded text-xs">policies.replace()</code> to update an existing policy.
+                Once a policy is active, it can only be replaced, not modified in place. This ensures that policy changes are auditable on-chain. Use <code className="text-amber-200 bg-amber-500/5 px-1.5 py-0.5 rounded text-xs">policies.replace()</code> to update an existing policy.
               </Callout>
             </Section>
 
@@ -242,7 +240,7 @@ export default function DocsPage() {
             </Section>
 
             <Section id="faq" title="Frequently Asked Questions">
-              <FAQ q="What is Molt.Fin?" a="Molt.Fin is financial infrastructure designed specifically for AI agents. It provides programmable bank accounts, sub-second settlement on Solana, and cryptographic policy enforcement — enabling autonomous systems to manage money without human approval loops." />
+              <FAQ q="What is Molt.Fin?" a="Molt.Fin is financial infrastructure designed specifically for AI agents. It provides programmable bank accounts, sub-second settlement on Solana, and cryptographic policy enforcement, enabling autonomous systems to manage money without human approval loops." />
               <FAQ q="Is Molt.Fin a bank?" a="No. Molt.Fin is a financial technology platform. Agent accounts are on-chain representations of value, not traditional bank accounts. Funds are settled on the Solana blockchain and are not FDIC insured." />
               <FAQ q="Which currencies are supported?" a="Molt.Fin currently supports USDC, SOL, and ETH. Additional currencies and stablecoins are on the roadmap." />
               <FAQ q="How fast do transactions settle?" a="Transactions settle in under 400 milliseconds with cryptographic finality on the Solana blockchain. This is roughly 100x faster than traditional ACH or wire transfers." />

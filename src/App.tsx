@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Send, Code2, Cpu, Lock, Layers, Terminal, Copy, Activity, Wallet, ChevronRight } from 'lucide-react';
+import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Send, Code2, Cpu, Lock, Layers, Terminal, Activity, Wallet, ChevronRight } from 'lucide-react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -54,9 +54,7 @@ function Navbar() {
     <nav className="sticky top-0 z-50 bg-[#08090C]/80 backdrop-blur-2xl border-b border-white/[0.04]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
         <a href="#" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6940] to-[#FF8F6B] flex items-center justify-center">
-            <Layers size={16} className="text-white" />
-          </div>
+          <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-8 h-8 rounded-lg object-cover" />
           <span className="text-xl font-bold tracking-tight text-white">Molt.Fin</span>
         </a>
         <div className="hidden md:flex items-center gap-7">
@@ -66,14 +64,14 @@ function Navbar() {
         </div>
         <div className="hidden md:flex items-center gap-3">
           <Link to="/docs" className="text-gray-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">Docs</Link>
-          <a href="#get-started" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF6940]/20">Get Started</a>
+          <Link to="/app" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#FF6940]/20">Launch App</Link>
         </div>
         <button className="md:hidden text-white p-1.5" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         {open && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 w-full bg-[#0D0E12] border-b border-white/5 shadow-2xl md:hidden flex flex-col px-5 py-4 gap-3 z-50">
             {links.map((l) => (<a key={l.name} href={l.href} className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>{l.name}</a>))}
             <Link to="/docs" className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>Docs</Link>
-            <a href="#get-started" className="bg-[#FF6940] text-white px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>Get Started</a>
+            <Link to="/app" className="bg-[#FF6940] text-white px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>Launch App</Link>
           </motion.div>
         )}
       </div>
@@ -82,18 +80,9 @@ function Navbar() {
 }
 
 function HeroSection() {
-  const [caCopied, setCaCopied] = useState(false);
-  const CA = '2vetyaB6FTKnWnRPwnq7iG8R3bgQW6TxAAik5nyXpump';
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
   const codeY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-
-  const handleCopyCA = () => {
-    navigator.clipboard.writeText(CA).then(() => {
-      setCaCopied(true);
-      setTimeout(() => setCaCopied(false), 2000);
-    });
-  };
 
   return (
     <section ref={containerRef} className="relative overflow-hidden bg-[#08090C]">
@@ -106,20 +95,6 @@ function HeroSection() {
       <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-16 pb-24 lg:pt-24 lg:pb-32 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
           <div className="flex-1 text-center lg:text-left max-w-2xl">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 bg-[#FF6940]/8 border border-[#FF6940]/15 text-[#FF6940] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full mb-5">
-              <Activity size={14} /> Powered by Solana
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }} className="mb-6">
-              <button onClick={handleCopyCA} className="group inline-flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-full px-4 py-2 transition-all cursor-pointer">
-                <span className="text-[11px] font-bold text-[#FF6940] uppercase tracking-wider">$MOLTFIN</span>
-                <span className="text-[10px] sm:text-xs font-mono text-gray-500 truncate max-w-[160px] sm:max-w-none">{CA}</span>
-                {caCopied ? (
-                  <Check size={13} className="text-green-400 shrink-0" />
-                ) : (
-                  <Copy size={13} className="text-gray-500 group-hover:text-[#FF6940] shrink-0 transition-colors" />
-                )}
-              </button>
-            </motion.div>
             <motion.h1 initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }} className="text-[34px] sm:text-[48px] md:text-[58px] lg:text-[66px] font-extrabold leading-[1.04] tracking-tight text-white mb-6">
               Financial rails for{' '}<br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-[#FF6940] to-[#FF8F6B] bg-clip-text text-transparent">autonomous agents</span>
@@ -158,7 +133,7 @@ function HeroSection() {
                 <div className="pl-8"><span className="text-gray-400">allowedMerchants</span><span className="text-gray-500">:</span> <span className="text-[#FF6940]">['*']</span></div>
                 <div className="pl-4"><span className="text-gray-300">{'}'}</span></div>
                 <div><span className="text-gray-300">{'}'}</span><span className="text-gray-500">);</span></div>
-                <div className="mt-3"><span className="text-gray-600">{'// Execute payment — settles <400ms'}</span></div>
+                <div className="mt-3"><span className="text-gray-600">{'// Execute payment - settles <400ms'}</span></div>
                 <div><span className="text-purple-400">const</span> <span className="text-blue-300">tx</span> <span className="text-gray-500">=</span> <span className="text-purple-400">await</span> <span className="text-blue-300">account</span><span className="text-gray-500">.</span><span className="text-green-300">send</span><span className="text-gray-500">(</span><span className="text-gray-300">{'{'}</span></div>
                 <div className="pl-4"><span className="text-gray-400">to</span><span className="text-gray-500">:</span> <span className="text-[#FF6940]">'merchant.moltfin'</span><span className="text-gray-600">,</span></div>
                 <div className="pl-4"><span className="text-gray-400">amount</span><span className="text-gray-500">:</span> <span className="text-green-300">249.99</span></div>
@@ -169,10 +144,11 @@ function HeroSection() {
           </motion.div>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }} className="mt-20 flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-          {['Solana', 'USDC', 'Mastercard', 'AWS'].map((name) => (
-            <span key={name} className="text-gray-600 text-sm font-semibold tracking-wide uppercase">{name}</span>
-          ))}
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }} className="mt-20 flex flex-wrap items-center justify-center gap-10 sm:gap-14">
+          <img src="/solana-logo.png" alt="Solana" className="h-7 sm:h-8 opacity-50 hover:opacity-80 transition-opacity object-contain" />
+          <img src="/usdc-logo-new.png" alt="USDC" className="h-7 sm:h-8 opacity-50 hover:opacity-80 transition-opacity object-contain" />
+          <img src="/mastercard-logo.png" alt="Mastercard" className="h-7 sm:h-8 opacity-50 hover:opacity-80 transition-opacity object-contain" />
+          <img src="/aws-logo.png" alt="AWS" className="h-7 sm:h-8 opacity-50 hover:opacity-80 transition-opacity object-contain" />
         </motion.div>
       </div>
     </section>
@@ -197,7 +173,7 @@ function FeaturesSection() {
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
             Built for machines that move money
           </h2>
-          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">Everything an autonomous agent needs to operate financially — from dedicated accounts to cryptographic policy enforcement.</p>
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">Everything an autonomous agent needs to operate financially, from dedicated accounts to cryptographic policy enforcement.</p>
         </RevealOnScroll>
 
         <StaggerWrap className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" gap={0.06}>
@@ -225,7 +201,7 @@ function ProtocolSection() {
               Financial autonomy,<br className="hidden sm:block" /> verifiable on-chain
             </h2>
             <p className="text-base sm:text-lg text-gray-400 leading-relaxed max-w-lg mx-auto lg:mx-0 mb-8">
-              Traditional banking was designed for humans — manual approvals, business-hour settlements, and phone-call disputes. Molt.Fin reimagines financial infrastructure for autonomous systems with dedicated accounts, instant finality, and programmable guardrails.
+              Traditional banking was designed for humans: manual approvals, business-hour settlements, and phone-call disputes. Molt.Fin reimagines financial infrastructure for autonomous systems with dedicated accounts, instant finality, and programmable guardrails.
             </p>
             <div className="flex flex-col gap-4 max-w-md mx-auto lg:mx-0">
               {[
@@ -387,15 +363,15 @@ function CTASection() {
             <div className="absolute inset-0 bg-gradient-to-br from-[#FF6940]/10 via-[#FF6940]/5 to-transparent" />
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#FF6940]/5 rounded-full blur-3xl" />
             <div className="relative border border-[#FF6940]/10 rounded-3xl p-10 sm:p-14 lg:p-20 text-center">
-              <h2 className="text-[28px] sm:text-[40px] md:text-[48px] font-extrabold text-white tracking-tight mb-4">
-                Built for autonomous systems.<br className="hidden sm:block" />
+              <h2 className="text-[28px] sm:text-[40px] md:text-[48px] font-extrabold text-white tracking-tight mb-4 leading-tight">
+                Built for autonomous systems.{' '}<br className="hidden sm:block" />
                 <span className="bg-gradient-to-r from-[#FF6940] to-[#FF8F6B] bg-clip-text text-transparent">Available today.</span>
               </h2>
               <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto mb-8 leading-relaxed">
                 Give your AI agents the ability to hold and manage money independently. Join the developers building agent-driven financial operations.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <a href="https://docs.moltfin.xyz" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF6940]/20">
+                <a href="https://docs.moltfin.app" className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#FF6940]/20">
                   <Send size={16} /> Get started
                 </a>
                 <Link to="/docs" className="bg-white/5 hover:bg-white/10 text-white px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border border-white/10">
@@ -417,9 +393,7 @@ function FooterSection() {
         <div className="py-12 grid grid-cols-2 sm:grid-cols-4 gap-8">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6940] to-[#FF8F6B] flex items-center justify-center">
-                <Layers size={13} className="text-white" />
-              </div>
+              <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-7 h-7 rounded-lg object-cover" />
               <span className="text-white font-bold text-base">Molt.Fin</span>
             </div>
             <p className="text-gray-500 text-xs leading-relaxed">Financial infrastructure for AI agents. Programmable accounts, instant settlement, cryptographic policies.</p>
@@ -446,11 +420,7 @@ function FooterSection() {
           <div>
             <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-3">Community</h4>
             <div className="flex flex-col gap-2">
-              <a href="https://github.com/moltfin" target="_blank" rel="noopener noreferrer" className="text-gray-400 text-sm hover:text-white transition-colors flex items-center gap-1.5">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                GitHub
-              </a>
-              <a href="https://x.com/MoltFin" target="_blank" rel="noopener noreferrer" className="text-gray-400 text-sm hover:text-white transition-colors flex items-center gap-1.5">
+              <a href="https://x.com/MoltFinApp" target="_blank" rel="noopener noreferrer" className="text-gray-400 text-sm hover:text-white transition-colors flex items-center gap-1.5">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 X / Twitter
               </a>

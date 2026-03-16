@@ -1,6 +1,6 @@
 # Molt.Fin
 
-AI-agent banking infrastructure platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page with documentation — no dashboard or authentication system.
+AI-agent banking infrastructure platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page, documentation, and a full dashboard for managing AI agents.
 
 ## Tech Stack
 
@@ -10,16 +10,18 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 - **Styling**: Tailwind CSS v4 (via @tailwindcss/vite)
 - **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations, parallax code mockup)
 - **Icons**: Lucide React
-- **Font**: Outfit (Google Fonts) — set as --font-sans in index.css
-- **Backend**: Express 4 with TypeScript (run via tsx) — health endpoint + static serve only
+- **Font**: Outfit (Google Fonts) set as --font-sans in index.css
+- **Backend**: Express 4 with TypeScript (run via tsx) for health endpoint + static serve only
 
 ## Brand
 
 - **Name**: Molt.Fin
+- **Domain**: https://moltfin.app
 - **Main Accent**: #FF6940
 - **Background**: #08090C (hero/features), #0D0E12 (cards/sections)
 - **Font**: Outfit (Google Fonts)
-- **Token**: $MOLTFIN (CA: 2vetyaB6FTKnWnRPwnq7iG8R3bgQW6TxAAik5nyXpump)
+- **Logo**: public/moltfin-logo.png (lobster mascot)
+- **Social**: X/Twitter at https://x.com/MoltFinApp
 
 ## Project Structure
 
@@ -27,14 +29,25 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 /
 ├── index.html              # HTML entry point with SEO meta, OG/Twitter cards, structured data
 ├── src/
-│   ├── main.tsx            # React entry with BrowserRouter, Routes (/ and /docs only)
-│   ├── App.tsx             # Landing page: Navbar, Hero (parallax code mockup + CA copy), Features (6 cards), Protocol (settlement flow), Developers (metrics + quickstart), Security (4 cards), CTA, Footer
-│   ├── index.css           # Global styles, animations (float, slide-up, fade-scale, pulse-glow, shimmer, gradient-shift), scrollbar
-│   └── docs/
-│       └── DocsPage.tsx    # /docs — Full platform documentation (overview, getting started, agent accounts, settlement, policies, SDK reference, FAQ)
+│   ├── main.tsx            # React entry with BrowserRouter, Routes (/, /docs, /app/*)
+│   ├── App.tsx             # Landing page: Navbar, Hero (parallax code mockup), Features (6 cards), Protocol (settlement flow), Developers (metrics + quickstart), Security (4 cards), CTA, Footer
+│   ├── index.css           # Global styles, animations, scrollbar
+│   ├── docs/
+│   │   └── DocsPage.tsx    # /docs - Full platform documentation
+│   └── dashboard/
+│       ├── DashboardLayout.tsx  # Sidebar + bottom nav layout with Outlet
+│       ├── OverviewPage.tsx     # /app - Agent stats + recent activity table
+│       ├── AgentsPage.tsx       # /app/agents - Agent cards with status, balance, tx count
+│       ├── TransactionsPage.tsx # /app/transactions - Searchable/filterable tx table
+│       └── PoliciesPage.tsx     # /app/policies - Policy cards with rules and agent assignments
+├── public/
+│   ├── moltfin-logo.png    # Lobster mascot logo
+│   ├── solana-logo.png     # Partner logo
+│   ├── usdc-logo-new.png   # Partner logo
+│   ├── mastercard-logo.png # Partner logo
+│   └── aws-logo.png        # Partner logo
 ├── server/
 │   ├── index.ts            # Express server: /api/health + static dist serve
-│   ├── db.ts               # Empty (no database needed)
 │   └── tsconfig.json       # Server TS config
 ├── vite.config.ts          # Vite config with /api proxy to Express
 ├── tsconfig.json           # Frontend TS config
@@ -43,18 +56,22 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 
 ## Routes
 
-- `/` — Landing page (marketing site)
-- `/docs` — Platform documentation
+- `/` Landing page (marketing site)
+- `/docs` Platform documentation
+- `/app` Dashboard overview
+- `/app/agents` Agent management
+- `/app/transactions` Transaction history
+- `/app/policies` Policy management
 
 ## API Endpoints
 
-- `GET /api/health` — Health check
+- `GET /api/health` Health check
 
 ## Development
 
-- **Dev server**: `npm run dev` → starts Express on port 3001 + Vite on port 5000
+- **Dev server**: `npm run dev` starts Express on port 3001 + Vite on port 5000
 - **Vite proxies** `/api/*` requests to Express backend
-- **Build**: `npm run build` → outputs to `dist/`
+- **Build**: `npm run build` outputs to `dist/`
 - **Lint**: `npm run lint`
 
 ## Deployment
@@ -73,4 +90,4 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 
 ## Environment Variables
 
-No secrets required. The app is a static marketing site with no database or external API dependencies.
+No secrets required. The app is a static marketing site with mock dashboard data, no database or external API dependencies.
