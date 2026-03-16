@@ -1,0 +1,79 @@
+MoltVault Logo
+Features
+Developers
+Status
+Github
+Sign in
+Sign up
+$MOLTVAULT live now! CA: 2vetyaB6FTKnWnRPwnq7iG8R3bgQW6TxAAik5nyXpump
+Banking infrastructure for
+OpenClaw AI agents
+Give OpenClaw the ability to send, spend, and save money autonomously. Programmable bank accounts with x402 settlement, cryptographic policies, and natural language operations.
+
+Get started
+View live demo
+MoltVault Dashboard
+Powered by cutting-edge infrastructure
+
+AWSSolanaMastercard
+The first neobank built for agents, not humans
+Traditional banking requires human approval workflows and slow settlement. MoltVault gives AI agents dedicated bank accounts with sub-second settlement via x402 and cryptographically-enforced spending policies.
+
+Agent bank accounts
+Give every OpenClaw agent its own bank account with programmable spending policies. Multi-currency support (USD, USDC, SOL, ETH). No human approval loops required.
+
+x402 protocol settlement
+Transactions settle in under 400ms with cryptographic finality via x402. 100x faster than traditional payment rails. Your agents move money as fast as they think.
+
+Policy-based authorization
+Define spending rules and enforce them cryptographically. Velocity limits, merchant whitelists, multi-sig thresholds. Policies validated on-chain—no centralized enforcement required.
+
+x402-POWERED SETTLEMENT
+Financial autonomy for AI agents
+Traditional banking wasn't built for autonomous systems. MoltVault is a neobank designed exclusively for AI agents—dedicated accounts, instant x402 settlement, and conversational operations via MCP. Give your OpenClaw agents the ability to hold and manage money independently.
+
+Dedicated agent accounts
+Every OpenClaw agent gets its own bank account with multi-currency support and programmable spending policies enforced cryptographically
+Instant x402 settlement
+Sub-400ms transaction finality via x402 protocol. 100x faster than traditional ACH with cryptographic proof of settlement
+Natural language banking
+Native MCP integration enables agents to check balances, send payments, and manage spending through conversational prompts
+View documentation
+// Create bank account for agent
+const account = await moltvault.accounts.create({
+agentId: 'openclaw_001',
+currency: 'USDC',
+initialDeposit: 10000
+});
+// Send payment via x402
+const payment = await moltvault.x402.send({
+from: account.id,
+to: 'merchant.x402',
+amount: 250
+});
+// Settled in <400ms
+Built for autonomous systems.
+Available today.
+Give your OpenClaw agents the ability to hold and manage money independently. Join the developers building agent-driven financial operations on x402.
+
+Get started
+Read documentation
+MoltVault
+MoltVault
+Financial infrastructure for AI agents. Enable OpenClaw agents to send, spend, and save money autonomously.
+
+Product
+Live Demo
+Sign up
+Monitor Status
+Resources
+Guides
+Platform Architecture
+Official SDKs
+Documentation
+Company
+GitHub
+X
+Contact
+© 2026 MoltVault. All rights reserved.
+
