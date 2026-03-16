@@ -41,11 +41,11 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity mb-6">
-            <img src="/logo.png" alt="Zap.Fin" className="w-10 h-10 rounded-lg" />
-            <span className="text-white font-bold text-2xl tracking-tight">Zap.Fin</span>
+            <img src="/logo.png" alt="WispTap" className="w-10 h-10 rounded-lg" />
+            <span className="text-white font-bold text-2xl tracking-tight">WispTap</span>
           </Link>
           <h1 className="text-2xl font-bold text-white mt-4">Create your account</h1>
-          <p className="text-gray-400 text-sm mt-2">Get started with Zap.Fin</p>
+          <p className="text-gray-400 text-sm mt-2">Get started with WispTap</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-[#111215] rounded-2xl p-6 sm:p-8 border border-white/5">
@@ -67,7 +67,7 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF6940]/50 focus:outline-none transition-colors placeholder-gray-600"
+                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF5550]/50 focus:outline-none transition-colors placeholder-gray-600"
                 placeholder="you@example.com"
               />
             </div>
@@ -83,7 +83,7 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="new-password"
-                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF6940]/50 focus:outline-none transition-colors placeholder-gray-600"
+                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF5550]/50 focus:outline-none transition-colors placeholder-gray-600"
                 placeholder="Min. 8 characters"
               />
             </div>
@@ -99,7 +99,7 @@ export default function SignupPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 autoComplete="new-password"
-                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF6940]/50 focus:outline-none transition-colors placeholder-gray-600"
+                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF5550]/50 focus:outline-none transition-colors placeholder-gray-600"
                 placeholder="Re-enter password"
               />
             </div>
@@ -107,7 +107,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#FF6940] hover:bg-[#E55E39] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm transition-colors mt-2"
+              className="w-full bg-[#FF5550] hover:bg-[#E84B47] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-sm transition-colors mt-2"
             >
               {submitting ? 'Creating account...' : 'Create Account'}
             </button>
@@ -115,7 +115,7 @@ export default function SignupPage() {
 
           <p className="text-center text-gray-400 text-sm mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#FF6940] hover:underline font-medium">
+            <Link to="/login" className="text-[#FF5550] hover:underline font-medium">
               Sign in
             </Link>
           </p>

@@ -108,7 +108,7 @@ export default function CardsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#FF6940]" size={32} />
+        <Loader2 className="animate-spin text-[#FF5550]" size={32} />
       </div>
     );
   }
@@ -130,7 +130,7 @@ export default function CardsPage() {
           <button
             onClick={createCard}
             disabled={creating}
-            className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-8 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-lg shadow-[#FF6940]/20 disabled:opacity-50"
+            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20 disabled:opacity-50"
           >
             {creating ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
             {creating ? 'Creating...' : 'Create Virtual Card'}
@@ -151,7 +151,7 @@ export default function CardsPage() {
           <button
             onClick={createCard}
             disabled={creating}
-            className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-6 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
           >
             {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
             {creating ? 'Creating...' : 'Add Card'}
@@ -172,7 +172,7 @@ export default function CardsPage() {
               style={{
                 background: card.frozen
                   ? 'linear-gradient(135deg, #3a3a4a 0%, #2a2a3a 100%)'
-                  : 'linear-gradient(135deg, #FF6940 0%, #FF8F6B 30%, #FF6940 60%, #E55527 100%)',
+                  : 'linear-gradient(135deg, #FF5550 0%, #FF7A76 30%, #FF5550 60%, #D94440 100%)',
               }}
             >
               {card.frozen && (
@@ -221,9 +221,9 @@ export default function CardsPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => toggleFreeze(card.id)}
-                className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 border ${
+                className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 border ${
                   card.frozen
-                    ? 'bg-[#FF6940]/10 border-[#FF6940]/30 text-[#FF6940] hover:bg-[#FF6940]/20'
+                    ? 'bg-[#FF5550]/10 border-[#FF5550]/30 text-[#FF5550] hover:bg-[#FF5550]/20'
                     : 'bg-[#1A1B1F] border-white/5 text-white hover:bg-[#222326]'
                 }`}
               >
@@ -232,7 +232,7 @@ export default function CardsPage() {
               </button>
               <button
                 onClick={() => toggleReveal(card.id)}
-                className="flex-1 bg-[#1A1B1F] border border-white/5 text-white py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 hover:bg-[#222326]"
+                className="flex-1 bg-[#1A1B1F] border border-white/5 text-white py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 hover:bg-[#222326]"
               >
                 {revealedCards.has(card.id) ? <EyeOff size={16} /> : <Eye size={16} />}
                 {revealedCards.has(card.id) ? 'Hide' : 'Reveal'}

@@ -65,7 +65,7 @@ export default function OverviewPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#FF6940]" size={32} />
+        <Loader2 className="animate-spin text-[#FF5550]" size={32} />
       </div>
     );
   }
@@ -101,7 +101,7 @@ export default function OverviewPage() {
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/app/topups')}
-              className="flex-1 sm:flex-none bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-6 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-none bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2"
             >
               <ArrowDownLeft size={16} />
               Top Up
@@ -111,12 +111,12 @@ export default function OverviewPage() {
 
         {firstCard ? (
           <div
-            className="rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[180px] cursor-pointer"
+            className="rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[180px] cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
             onClick={() => navigate('/app/cards')}
             style={{
               background: firstCard.frozen
                 ? 'linear-gradient(135deg, #3a3a4a 0%, #2a2a3a 100%)'
-                : 'linear-gradient(135deg, #FF6940 0%, #FF8F6B 30%, #FF6940 60%, #E55527 100%)',
+                : 'linear-gradient(135deg, #FF5550 0%, #FF7A76 30%, #FF5550 60%, #D94440 100%)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -143,7 +143,7 @@ export default function OverviewPage() {
             <p className="text-gray-400 text-sm text-center mb-4">No cards yet</p>
             <button
               onClick={() => navigate('/app/cards')}
-              className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-2.5 px-5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2"
+              className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-2.5 px-5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2"
             >
               <Plus size={16} />
               Create Visa Card
@@ -189,16 +189,16 @@ export default function OverviewPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => navigate('/app/topups')}
-                className="bg-[#1A1B1F] hover:bg-[#222326] p-4 rounded-xl flex flex-col items-center gap-2 transition-colors border border-white/5"
+                className="bg-[#1A1B1F] hover:bg-[#222326] p-4 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 border border-white/5"
               >
-                <ArrowDownLeft size={20} className="text-[#FF6940]" />
+                <ArrowDownLeft size={20} className="text-[#FF5550]" />
                 <span className="text-white text-xs font-medium">Top Up</span>
               </button>
               <button
                 onClick={() => navigate('/app/cards')}
-                className="bg-[#1A1B1F] hover:bg-[#222326] p-4 rounded-xl flex flex-col items-center gap-2 transition-colors border border-white/5"
+                className="bg-[#1A1B1F] hover:bg-[#222326] p-4 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 border border-white/5"
               >
-                <CreditCard size={20} className="text-[#FF6940]" />
+                <CreditCard size={20} className="text-[#FF5550]" />
                 <span className="text-white text-xs font-medium">Cards</span>
               </button>
             </div>
@@ -214,12 +214,12 @@ export default function OverviewPage() {
                     <span className="text-gray-400 text-xs">${usdBalance.toFixed(2)}</span>
                   )}
                 </div>
-                <code className="text-[#FF6940] text-xs break-all font-mono bg-[#0A0B0E] rounded-lg p-3">
+                <code className="text-[#FF5550] text-xs break-all font-mono bg-[#0A0B0E] rounded-lg p-3">
                   {wallet.address}
                 </code>
                 <button
                   onClick={() => navigate('/app/topups')}
-                  className="text-[#FF6940] text-xs font-bold mt-1 hover:underline"
+                  className="text-[#FF5550] text-xs font-bold mt-1 hover:underline"
                 >
                   Go to Top-ups
                 </button>
@@ -230,7 +230,7 @@ export default function OverviewPage() {
                 <p className="text-gray-500 text-sm">No wallet created</p>
                 <button
                   onClick={() => navigate('/app/topups')}
-                  className="text-[#FF6940] text-xs font-bold mt-2 hover:underline"
+                  className="text-[#FF5550] text-xs font-bold mt-2 hover:underline"
                 >
                   Create Solana Wallet
                 </button>

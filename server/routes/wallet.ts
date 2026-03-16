@@ -5,7 +5,7 @@ import bs58 from 'bs58';
 import crypto from 'crypto';
 
 const isProduction = process.env.NODE_ENV === 'production';
-const ENCRYPTION_KEY = process.env.WALLET_ENCRYPTION_KEY || process.env.SESSION_SECRET || (isProduction ? '' : 'zap-fin-dev-wallet-key-32chars!!');
+const ENCRYPTION_KEY = process.env.WALLET_ENCRYPTION_KEY || process.env.SESSION_SECRET || (isProduction ? '' : 'wisptap-dev-wallet-key-32chars!');
 
 if (isProduction && !ENCRYPTION_KEY) {
   console.error('FATAL: WALLET_ENCRYPTION_KEY or SESSION_SECRET must be set in production');

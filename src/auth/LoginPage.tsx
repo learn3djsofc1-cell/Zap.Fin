@@ -29,8 +29,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity mb-6">
-            <img src="/logo.png" alt="Zap.Fin" className="w-10 h-10 rounded-lg" />
-            <span className="text-white font-bold text-2xl tracking-tight">Zap.Fin</span>
+            <img src="/logo.png" alt="WispTap" className="w-10 h-10 rounded-lg" />
+            <span className="text-white font-bold text-2xl tracking-tight">WispTap</span>
           </Link>
           <h1 className="text-2xl font-bold text-white mt-4">Welcome back</h1>
           <p className="text-gray-400 text-sm mt-2">Sign in to your account</p>
@@ -55,7 +55,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF6940]/50 focus:outline-none transition-colors placeholder-gray-600"
+                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF5550]/50 focus:outline-none transition-colors placeholder-gray-600"
                 placeholder="you@example.com"
               />
             </div>
@@ -71,7 +71,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF6940]/50 focus:outline-none transition-colors placeholder-gray-600"
+                className="w-full bg-[#0A0B0E] text-white px-4 py-3 rounded-xl border border-white/5 focus:border-[#FF5550]/50 focus:outline-none transition-colors placeholder-gray-600"
                 placeholder="••••••••"
               />
             </div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#FF6940] hover:bg-[#E55E39] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm transition-colors mt-2"
+              className="w-full bg-[#FF5550] hover:bg-[#E84B47] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-sm transition-colors mt-2"
             >
               {submitting ? 'Signing in...' : 'Sign In'}
             </button>
@@ -87,7 +87,7 @@ export default function LoginPage() {
 
           <p className="text-center text-gray-400 text-sm mt-6">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-[#FF6940] hover:underline font-medium">
+            <Link to="/signup" className="text-[#FF5550] hover:underline font-medium">
               Sign up
             </Link>
           </p>

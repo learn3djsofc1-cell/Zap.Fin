@@ -35,7 +35,7 @@ app.use(session({
     tableName: 'session',
     createTableIfMissing: true,
   }),
-  secret: sessionSecret || 'zap-fin-dev-session-secret',
+  secret: sessionSecret || 'wisptap-dev-session-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {

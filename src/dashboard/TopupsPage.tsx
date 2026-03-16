@@ -166,7 +166,7 @@ export default function TopupsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#FF6940]" size={32} />
+        <Loader2 className="animate-spin text-[#FF5550]" size={32} />
       </div>
     );
   }
@@ -178,11 +178,11 @@ export default function TopupsPage() {
 
         <div className="bg-[#111215] rounded-2xl p-6 border border-white/5 mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Wallet size={20} className="text-[#FF6940]" />
+            <Wallet size={20} className="text-[#FF5550]" />
             <span className="text-white font-bold">Wallet Address</span>
           </div>
           <div className="bg-[#0A0B0E] rounded-xl p-4 flex items-center justify-between gap-3">
-            <code className="text-[#FF6940] text-sm break-all flex-1 font-mono">{walletAddress}</code>
+            <code className="text-[#FF5550] text-sm break-all flex-1 font-mono">{walletAddress}</code>
             <button
               onClick={() => copyToClipboard(walletAddress, 'address')}
               className="text-gray-400 hover:text-white transition-colors shrink-0"
@@ -214,7 +214,7 @@ export default function TopupsPage() {
               type="checkbox"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF6940] focus:ring-[#FF6940] focus:ring-offset-0 accent-[#FF6940]"
+              className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF5550] focus:ring-[#FF5550] focus:ring-offset-0 accent-[#FF5550]"
             />
             <span className="text-white text-sm font-medium">
               I have securely saved my private key and understand it will not be shown again
@@ -224,7 +224,7 @@ export default function TopupsPage() {
         <button
           onClick={confirmWallet}
           disabled={!confirmed || confirming}
-          className="w-full bg-[#FF6940] hover:bg-[#E55E39] text-black py-3.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF6940]/20"
+          className="w-full bg-[#FF5550] hover:bg-[#E84B47] text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF5550]/20"
         >
           {confirming ? <Loader2 size={18} className="animate-spin" /> : null}
           {confirming ? 'Confirming...' : 'Continue to Top-ups'}
@@ -250,7 +250,7 @@ export default function TopupsPage() {
           <button
             onClick={createWallet}
             disabled={creating}
-            className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-8 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-lg shadow-[#FF6940]/20 disabled:opacity-50"
+            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20 disabled:opacity-50"
           >
             {creating ? <Loader2 size={18} className="animate-spin" /> : <Wallet size={18} />}
             {creating ? 'Creating...' : 'Create Solana Wallet'}
@@ -266,11 +266,11 @@ export default function TopupsPage() {
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8">Confirm Your Wallet</h1>
         <div className="bg-[#111215] rounded-2xl p-6 border border-white/5 mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Wallet size={20} className="text-[#FF6940]" />
+            <Wallet size={20} className="text-[#FF5550]" />
             <span className="text-white font-bold">Wallet Address</span>
           </div>
           <div className="bg-[#0A0B0E] rounded-xl p-4">
-            <code className="text-[#FF6940] text-sm break-all font-mono">{wallet.address}</code>
+            <code className="text-[#FF5550] text-sm break-all font-mono">{wallet.address}</code>
           </div>
         </div>
         <div className="bg-[#111215] rounded-2xl p-6 border border-yellow-500/20 mb-6">
@@ -286,7 +286,7 @@ export default function TopupsPage() {
               type="checkbox"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF6940] focus:ring-[#FF6940] focus:ring-offset-0 accent-[#FF6940]"
+              className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF5550] focus:ring-[#FF5550] focus:ring-offset-0 accent-[#FF5550]"
             />
             <span className="text-white text-sm font-medium">
               I have securely saved my private key
@@ -296,7 +296,7 @@ export default function TopupsPage() {
         <button
           onClick={confirmWallet}
           disabled={!confirmed || confirming}
-          className="w-full bg-[#FF6940] hover:bg-[#E55E39] text-black py-3.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF6940]/20"
+          className="w-full bg-[#FF5550] hover:bg-[#E84B47] text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF5550]/20"
         >
           {confirming ? <Loader2 size={18} className="animate-spin" /> : null}
           {confirming ? 'Confirming...' : 'Confirm & Continue'}
@@ -324,7 +324,7 @@ export default function TopupsPage() {
           <div className="bg-[#111215] rounded-2xl p-6 border border-white/5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Wallet size={20} className="text-[#FF6940]" />
+                <Wallet size={20} className="text-[#FF5550]" />
                 <span className="text-white font-bold">Wallet Balance</span>
               </div>
               {prices?.stale && (
@@ -345,7 +345,7 @@ export default function TopupsPage() {
             )}
 
             <div className="bg-[#0A0B0E] rounded-xl p-3 mt-4 flex items-center justify-between gap-3">
-              <code className="text-[#FF6940] text-xs break-all flex-1 font-mono">{wallet.address}</code>
+              <code className="text-[#FF5550] text-xs break-all flex-1 font-mono">{wallet.address}</code>
               <button
                 onClick={() => copyToClipboard(wallet.address, 'address')}
                 className="text-gray-400 hover:text-white transition-colors shrink-0"
@@ -357,7 +357,7 @@ export default function TopupsPage() {
               href={`https://solscan.io/account/${wallet.address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#FF6940] text-xs font-medium hover:underline flex items-center gap-1 mt-2"
+              className="text-[#FF5550] text-xs font-medium hover:underline flex items-center gap-1 mt-2"
             >
               View on Solscan <ExternalLink size={12} />
             </a>
@@ -400,7 +400,7 @@ export default function TopupsPage() {
                 ))}
                 <button
                   onClick={() => setPercentage(100)}
-                  className="bg-[#FF6940]/10 hover:bg-[#FF6940]/20 border border-[#FF6940]/20 text-[#FF6940] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors"
+                  className="bg-[#FF5550]/10 hover:bg-[#FF5550]/20 border border-[#FF5550]/20 text-[#FF5550] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors"
                 >
                   MAX
                 </button>
@@ -409,7 +409,7 @@ export default function TopupsPage() {
 
             <div className="flex justify-center -my-1 relative z-10">
               <div className="w-10 h-10 rounded-full bg-[#1A1B1F] border-4 border-[#111215] flex items-center justify-center">
-                <ArrowDown size={16} className="text-[#FF6940]" />
+                <ArrowDown size={16} className="text-[#FF5550]" />
               </div>
             </div>
 
@@ -426,7 +426,7 @@ export default function TopupsPage() {
                     onClick={() => setTargetCurrency('usdc')}
                     className={`px-3 py-2 text-sm font-bold transition-colors flex items-center gap-1.5 ${
                       targetCurrency === 'usdc'
-                        ? 'bg-[#FF6940] text-black'
+                        ? 'bg-[#FF5550] text-white'
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
@@ -437,7 +437,7 @@ export default function TopupsPage() {
                     onClick={() => setTargetCurrency('usdt')}
                     className={`px-3 py-2 text-sm font-bold transition-colors flex items-center gap-1.5 ${
                       targetCurrency === 'usdt'
-                        ? 'bg-[#FF6940] text-black'
+                        ? 'bg-[#FF5550] text-white'
                         : 'text-gray-400 hover:text-white'
                     }`}
                   >
@@ -460,7 +460,7 @@ export default function TopupsPage() {
             <button
               onClick={() => setShowConfirmModal(true)}
               disabled={solValue <= 0 || solValue > solBalance || !prices}
-              className="w-full mt-5 bg-[#FF6940] hover:bg-[#E55E39] text-black py-3.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF6940]/20"
+              className="w-full mt-5 bg-[#FF5550] hover:bg-[#E84B47] text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF5550]/20"
             >
               {solValue > solBalance ? 'Insufficient Balance' : 'Convert'}
             </button>
@@ -528,7 +528,7 @@ export default function TopupsPage() {
             </div>
             <button
               onClick={() => setShowConfirmModal(false)}
-              className="w-full bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 rounded-xl font-bold text-sm transition-colors"
+              className="w-full bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 rounded-xl font-bold text-sm transition-all duration-200"
             >
               Got it
             </button>

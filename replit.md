@@ -1,4 +1,4 @@
-# Zap.Fin
+# WispTap
 
 A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. Features a marketing landing page, authentication, and a full dashboard application for managing crypto cards, wallets, and top-ups.
 
@@ -11,11 +11,22 @@ A crypto finance web dApp built with React, Vite, TypeScript, and Tailwind CSS. 
 - **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations)
 - **3D**: React Three Fiber + Three.js
 - **Icons**: Lucide React
+- **Font**: Outfit (Google Fonts) — set as --font-sans in index.css
 - **Backend**: Express 4 with TypeScript (run via tsx)
 - **Database**: PostgreSQL (Replit built-in)
 - **Auth**: express-session + connect-pg-simple (session-based), bcrypt for password hashing
 - **Solana**: @solana/web3.js for wallet keypair generation
 - **AI**: @google/genai (Gemini API key via GEMINI_API_KEY env var)
+
+## Brand
+
+- **Name**: WispTap
+- **Main Accent**: #FF5550
+- **Background**: #FFFFFF (landing), #0A0B0E/#111215 (dashboard dark theme)
+- **Font**: Outfit (Google Fonts)
+- **Logo**: public/logo.png
+- **Domain**: wisptap.xyz
+- **Twitter/X**: https://x.com/WispTapX
 
 ## Project Structure
 
@@ -114,13 +125,13 @@ Configured as a **static** site deployment:
 
 ## Brand Assets (public/)
 
-- `logo.png` — Zap.Fin logo (favicon + navbar + inline)
+- `logo.png` — WispTap logo (favicon + navbar + inline)
 - `netflix.png`, `usdc.png`, `usdt.png` — Brand logos used in dashboard mockups
 - `spotify.png`, `airbnb.png`, `apple.png`, `telegram.jpg` — Brand logos used in Rewards & Referrals card
 
 ## Social Links
 
-- Twitter/X: https://x.com/ZapFinBank
+- Twitter/X: https://x.com/WispTapX
 
 ## Environment Variables
 

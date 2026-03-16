@@ -58,7 +58,7 @@ export default function ControlsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#FF6940]" size={32} />
+        <Loader2 className="animate-spin text-[#FF5550]" size={32} />
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default function ControlsPage() {
           </p>
           <button
             onClick={() => navigate('/app/cards')}
-            className="bg-[#FF6940] hover:bg-[#E55E39] text-black py-3 px-8 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-lg shadow-[#FF6940]/20"
+            className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20"
           >
             <Plus size={18} />
             Create a Card
@@ -99,8 +99,8 @@ export default function ControlsPage() {
         {cards.map(card => (
           <div key={card.id} className="bg-[#111215] rounded-2xl border border-white/5 overflow-hidden">
             <div className="p-5 sm:p-6 border-b border-white/5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#FF6940]/10 flex items-center justify-center">
-                <CreditCard size={20} className="text-[#FF6940]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FF5550]/10 flex items-center justify-center">
+                <CreditCard size={20} className="text-[#FF5550]" />
               </div>
               <div>
                 <span className="text-white font-bold block">{card.name}</span>
@@ -162,10 +162,10 @@ function ToggleRow({
   return (
     <div className="flex items-center justify-between p-5 sm:p-6">
       <div className="flex items-center gap-4">
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors duration-200 ${
           destructive
             ? (enabled ? 'bg-red-500/10 text-red-400' : 'bg-[#1A1B1F] text-gray-400')
-            : (enabled ? 'bg-[#FF6940]/10 text-[#FF6940]' : 'bg-[#1A1B1F] text-gray-400')
+            : (enabled ? 'bg-[#FF5550]/10 text-[#FF5550]' : 'bg-[#1A1B1F] text-gray-400')
         }`}>
           {icon}
         </div>
@@ -179,7 +179,7 @@ function ToggleRow({
         disabled={loading}
         className={`relative w-12 h-7 rounded-full transition-colors duration-200 ${
           enabled
-            ? (destructive ? 'bg-red-500' : 'bg-[#FF6940]')
+            ? (destructive ? 'bg-red-500' : 'bg-[#FF5550]')
             : 'bg-[#2A2B2F]'
         } ${loading ? 'opacity-50' : ''}`}
       >
