@@ -272,7 +272,7 @@ export default function PoliciesPage() {
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
-              placeholder="e.g. Standard Trading Policy"
+              placeholder="e.g. Default Spending Policy"
               className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
             />
           </div>
