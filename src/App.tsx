@@ -356,70 +356,117 @@ function SecuritySection() {
 
 function PlatformSection() {
   const features = [
-    { icon: <BarChart3 size={24} />, title: 'Portfolio Dashboard', desc: 'Real-time portfolio tracking with SOL, USDC, and USDT breakdowns. See your net worth at a glance with interactive charts and detailed analytics.', visual: (
-      <div className="flex items-end gap-1 h-20 px-2">
-        {[30, 45, 35, 55, 50, 70, 60, 80, 75, 90, 85, 95].map((h, i) => (
-          <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: `rgba(255,85,80,${0.2 + (i / 12) * 0.8})` }} />
-        ))}
-      </div>
-    )},
-    { icon: <Layers size={24} />, title: 'Multi-Card Management', desc: 'Run multiple virtual cards simultaneously — one for subscriptions, one for shopping, one for travel. Each with independent limits and controls.', visual: (
-      <div className="flex flex-col gap-2 px-2">
-        {['Subscriptions', 'Shopping', 'Travel'].map((n, i) => (
-          <div key={n} className="flex items-center justify-between bg-[#0D0E11] rounded-lg px-3 py-2 border border-white/5">
-            <div className="flex items-center gap-2"><div className="w-5 h-3 rounded" style={{ background: i === 0 ? '#FF5550' : i === 1 ? '#9945FF' : '#26A17B' }} /><span className="text-white text-[10px] font-medium">{n}</span></div>
-            <span className="text-gray-400 text-[9px]">•••• {4821 + i * 1111}</span>
+    {
+      icon: <BarChart3 size={24} />,
+      title: 'Portfolio Dashboard',
+      desc: 'Real-time portfolio tracking with SOL, USDC, and USDT breakdowns. See your net worth at a glance with interactive charts and detailed analytics.',
+      visual: (
+        <div className="bg-[#161719] rounded-2xl p-5 border border-white/5 w-full max-w-[380px]">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-white text-xs font-bold">Portfolio</span>
+            <div className="flex gap-1">{['1D', '1W', '1M'].map(p => (<span key={p} className={`text-[8px] font-bold px-2 py-0.5 rounded ${p === '1M' ? 'bg-[#FF5550] text-white' : 'text-gray-500 bg-[#0D0E11]'}`}>{p}</span>))}</div>
           </div>
-        ))}
-      </div>
-    )},
-    { icon: <ArrowUpRight size={24} />, title: 'On-Chain Receipts', desc: 'Every transaction linked to verifiable on-chain evidence. Export proof bundles for tax compliance or personal record-keeping.', visual: (
-      <div className="flex flex-col gap-1.5 px-2">
-        {['tx:8Kv2...mFx3', 'tx:3Jp4...nRw1', 'tx:9Bq7...kLm2'].map(tx => (
-          <div key={tx} className="flex items-center justify-between bg-[#0D0E11] rounded-lg px-3 py-1.5 border border-white/5">
-            <code className="text-[#FF5550] text-[9px] font-mono">{tx}</code>
-            <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center"><Check size={8} className="text-green-400" /></div>
+          <div className="flex items-end gap-[3px] h-24 mb-3">
+            {[30, 45, 35, 55, 50, 70, 60, 80, 75, 90, 85, 95, 88, 92, 86].map((h, i) => (
+              <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: `rgba(255,85,80,${0.15 + (i / 15) * 0.85})` }} />
+            ))}
           </div>
-        ))}
-      </div>
-    )},
-    { icon: <Sparkles size={24} />, title: 'Cashback Rewards', desc: 'Earn tokenized cashback on every purchase. Refer friends to unlock bonus rewards credited directly to your WispTap balance.', visual: (
-      <div className="px-2">
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-2xl font-bold text-[#FF5550]">24.8</span>
-          <img src="/logo.png" alt="" className="w-5 h-5 rounded" />
-          <span className="text-gray-400 text-[10px]">earned</span>
+          <div className="flex justify-between text-[10px]"><span className="text-gray-500">30 days ago</span><span className="text-[#FF5550] font-bold">+12.4%</span></div>
         </div>
-        <div className="flex gap-1.5">
-          {['/spotify.png', '/netflix.png', '/apple.png'].map(src => (
-            <div key={src} className="w-7 h-7 rounded-lg overflow-hidden border border-white/10"><img src={src} alt="" className="w-full h-full object-cover" /></div>
-          ))}
-          <div className="w-7 h-7 rounded-lg bg-[#0D0E11] border border-white/5 flex items-center justify-center text-gray-500 text-[9px] font-bold">+5</div>
+      ),
+    },
+    {
+      icon: <Layers size={24} />,
+      title: 'Multi-Card Management',
+      desc: 'Run multiple virtual cards simultaneously — one for subscriptions, one for shopping, one for travel. Each with independent limits and controls.',
+      visual: (
+        <div className="w-full max-w-[380px] relative">
+          <div className="bg-gradient-to-br from-[#222] via-[#333] to-[#1a1a1a] rounded-xl p-4 border border-white/10 mb-[-30px] ml-4 relative z-10">
+            <div className="flex justify-between mb-3"><span className="text-white/60 text-[9px] font-bold uppercase">Subscriptions</span><span className="text-white/40 text-[8px] italic font-bold">VISA</span></div>
+            <span className="text-white/40 text-[9px] font-mono tracking-[2px]">•••• •••• •••• 4821</span>
+          </div>
+          <div className="bg-gradient-to-br from-[#FF5550] to-[#c43c38] rounded-xl p-4 border border-white/10 relative z-20 ml-0">
+            <div className="flex justify-between mb-3"><span className="text-white/80 text-[9px] font-bold uppercase">Shopping</span><span className="text-white/60 text-[8px] italic font-bold">VISA</span></div>
+            <span className="text-white/50 text-[9px] font-mono tracking-[2px]">•••• •••• •••• 7291</span>
+          </div>
         </div>
-      </div>
-    )},
+      ),
+    },
+    {
+      icon: <ArrowUpRight size={24} />,
+      title: 'On-Chain Receipts',
+      desc: 'Every transaction linked to verifiable on-chain evidence. Export proof bundles for tax compliance or personal record-keeping.',
+      visual: (
+        <div className="bg-[#161719] rounded-2xl p-5 border border-white/5 w-full max-w-[380px]">
+          <span className="text-white text-xs font-bold block mb-3">Recent Proofs</span>
+          <div className="flex flex-col gap-2">
+            {[
+              { tx: 'tx:8Kv2...mFx3', time: '2m ago', amt: '$42.50' },
+              { tx: 'tx:3Jp4...nRw1', time: '1h ago', amt: '$127.00' },
+              { tx: 'tx:9Bq7...kLm2', time: '3h ago', amt: '$15.99' },
+            ].map(item => (
+              <div key={item.tx} className="flex items-center justify-between bg-[#0D0E11] rounded-lg px-3 py-2 border border-white/5">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-green-500/15 flex items-center justify-center"><Check size={10} className="text-green-400" /></div>
+                  <code className="text-[#FF5550] text-[9px] font-mono">{item.tx}</code>
+                </div>
+                <div className="text-right">
+                  <span className="text-white text-[9px] font-bold block">{item.amt}</span>
+                  <span className="text-gray-600 text-[8px]">{item.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      icon: <Sparkles size={24} />,
+      title: 'Cashback Rewards',
+      desc: 'Earn tokenized cashback on every purchase. Refer friends to unlock bonus rewards credited directly to your WispTap balance.',
+      visual: (
+        <div className="bg-[#161719] rounded-2xl p-5 border border-white/5 w-full max-w-[380px]">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-white text-xs font-bold">Rewards Earned</span>
+            <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">+3.2 this week</span>
+          </div>
+          <div className="flex items-baseline gap-2 mb-4">
+            <span className="text-3xl font-extrabold text-[#FF5550]">24.8</span>
+            <img src="/logo.png" alt="" className="w-4 h-4 rounded" />
+            <span className="text-gray-500 text-xs">tokens earned</span>
+          </div>
+          <div className="w-full h-1.5 bg-[#0D0E11] rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-[#FF5550] to-[#FF7A76]" style={{ width: '62%' }} />
+          </div>
+          <div className="flex justify-between mt-1.5 text-[9px]"><span className="text-gray-500">24.8 / 40 to next tier</span><span className="text-[#FF5550] font-bold">62%</span></div>
+        </div>
+      ),
+    },
   ];
 
   return (
     <section className="py-20 lg:py-28 bg-[#0D0E11]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6">
-        <RevealOnScroll className="text-center mb-14">
+        <RevealOnScroll className="text-center mb-16">
           <span className="text-[#FF5550] text-xs font-bold uppercase tracking-widest block mb-3">Platform</span>
-          <h2 className="text-[32px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.08] tracking-tight text-white">More than a card</h2>
+          <h2 className="text-[32px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">More than a card</h2>
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">A complete financial toolkit built on Solana — from portfolio tracking to on-chain receipts.</p>
         </RevealOnScroll>
 
-        <StaggerWrap className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5" gap={0.1}>
-          {features.map((f) => (
-            <motion.div key={f.title} variants={fadeUp} className="bg-[#161719] rounded-2xl border border-white/5 overflow-hidden hover:border-[#FF5550]/15 transition-colors group">
-              <div className="p-6 sm:p-7">
-                <div className="w-11 h-11 bg-[#FF5550]/10 rounded-xl flex items-center justify-center text-[#FF5550] mb-4 group-hover:bg-[#FF5550] group-hover:text-white transition-all">{f.icon}</div>
-                <h3 className="text-lg font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+        <div className="flex flex-col gap-8">
+          {features.map((f, idx) => (
+            <RevealOnScroll key={f.title} delay={idx * 0.08} direction={idx % 2 === 0 ? 'left' : 'right'}>
+              <div className={`flex flex-col ${idx % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-14 bg-[#161719] rounded-2xl p-6 sm:p-8 lg:p-10 border border-white/5 hover:border-[#FF5550]/10 transition-colors`}>
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="w-12 h-12 bg-[#FF5550]/10 rounded-xl flex items-center justify-center text-[#FF5550] mb-5 mx-auto lg:mx-0">{f.icon}</div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">{f.title}</h3>
+                  <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0">{f.desc}</p>
+                </div>
+                <div className="flex-1 flex justify-center lg:justify-end w-full">{f.visual}</div>
               </div>
-              <div className="bg-[#111214] border-t border-white/5 p-4">{f.visual}</div>
-            </motion.div>
+            </RevealOnScroll>
           ))}
-        </StaggerWrap>
+        </div>
 
         <RevealOnScroll delay={0.15} className="mt-10">
           <div className="bg-gradient-to-r from-[#FF5550]/10 to-transparent rounded-2xl p-6 sm:p-8 border border-[#FF5550]/10 flex flex-col sm:flex-row items-center justify-between gap-5">
