@@ -67,22 +67,25 @@ export default function ControlsPage() {
     return (
       <div className="max-w-6xl mx-auto pb-20 md:pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Controls</h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Security</h1>
+            <p className="text-gray-500 text-sm mt-1">Manage card permissions and spending controls</p>
+          </div>
         </div>
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-20 h-20 rounded-2xl bg-[#111215] border border-white/5 flex items-center justify-center mb-6">
             <Shield size={36} className="text-gray-600" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">No cards to manage</h2>
+          <h2 className="text-xl font-bold text-white mb-2">No cards to configure</h2>
           <p className="text-gray-400 text-sm text-center max-w-md mb-8">
-            Create a virtual card first to access security controls, spending limits, and card settings.
+            Issue a virtual card first — then return here to manage freeze controls, online payment permissions, and contactless settings.
           </p>
           <button
             onClick={() => navigate('/app/cards')}
             className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20"
           >
             <Plus size={18} />
-            Create a Card
+            Issue a Card
           </button>
         </div>
       </div>
@@ -92,7 +95,10 @@ export default function ControlsPage() {
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Controls</h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Security</h1>
+          <p className="text-gray-500 text-sm mt-1">Toggle permissions for each of your issued cards</p>
+        </div>
       </div>
 
       <div className="flex flex-col gap-6">
@@ -104,7 +110,7 @@ export default function ControlsPage() {
               </div>
               <div>
                 <span className="text-white font-bold block">{card.name}</span>
-                <span className="text-gray-400 text-sm">{card.card_number_masked} &middot; {card.expiry}</span>
+                <span className="text-gray-400 text-sm">{card.card_number_masked} &middot; Exp {card.expiry}</span>
               </div>
             </div>
 
@@ -112,7 +118,7 @@ export default function ControlsPage() {
               <ToggleRow
                 icon={<Snowflake size={18} />}
                 label="Freeze Card"
-                description="Temporarily disable all transactions"
+                description="Block all transactions immediately"
                 enabled={card.frozen}
                 loading={toggling === `${card.id}-frozen`}
                 onToggle={() => toggleField(card.id, 'frozen')}
@@ -121,7 +127,7 @@ export default function ControlsPage() {
               <ToggleRow
                 icon={<Wifi size={18} />}
                 label="Online Payments"
-                description="Allow payments on websites and apps"
+                description="Allow purchases on websites and apps"
                 enabled={card.online_payments}
                 loading={toggling === `${card.id}-online_payments`}
                 onToggle={() => toggleField(card.id, 'online_payments')}
@@ -129,7 +135,7 @@ export default function ControlsPage() {
               <ToggleRow
                 icon={<Radio size={18} />}
                 label="Contactless"
-                description="Allow tap-to-pay at terminals"
+                description="Enable tap-to-pay at physical terminals"
                 enabled={card.contactless}
                 loading={toggling === `${card.id}-contactless`}
                 onToggle={() => toggleField(card.id, 'contactless')}

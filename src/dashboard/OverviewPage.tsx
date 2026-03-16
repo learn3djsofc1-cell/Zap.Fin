@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDownLeft, CreditCard, Wallet, Plus, Loader2 } from 'lucide-react';
+import { ArrowDownLeft, CreditCard, Wallet, Plus, Loader2, TrendingUp, Shield, ArrowRight } from 'lucide-react';
 
 interface Card {
   id: number;
@@ -78,13 +78,24 @@ export default function OverviewPage() {
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Overview</h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Welcome back</h1>
+          <p className="text-gray-500 text-sm mt-1">Here's your portfolio at a glance.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
         <div className="lg:col-span-2 bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
-          <span className="text-gray-400 text-sm font-medium">Total Balance</span>
-          <div className="mt-3 mb-1">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-gray-400 text-sm font-medium">Portfolio Value</span>
+            {solPrice > 0 && (
+              <div className="flex items-center gap-1.5 bg-green-500/10 text-green-400 text-xs font-bold px-2.5 py-1 rounded-full">
+                <TrendingUp size={12} />
+                Live
+              </div>
+            )}
+          </div>
+          <div className="mb-1">
             <span className="text-4xl sm:text-5xl font-bold text-white">
               ${Math.floor(usdBalance).toLocaleString()}
             </span>
@@ -93,18 +104,25 @@ export default function OverviewPage() {
             </span>
           </div>
           {wallet?.confirmed && (
-            <span className="text-gray-500 text-sm block mb-4">
+            <span className="text-gray-500 text-sm block mb-5">
               {solBalance.toFixed(4)} SOL {solPrice > 0 && `@ $${solPrice.toFixed(2)}`}
             </span>
           )}
-          {!wallet?.confirmed && <div className="mb-4" />}
+          {!wallet?.confirmed && <div className="mb-5" />}
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/app/topups')}
               className="flex-1 sm:flex-none bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2"
             >
               <ArrowDownLeft size={16} />
-              Top Up
+              Fund Wallet
+            </button>
+            <button
+              onClick={() => navigate('/app/cards')}
+              className="flex-1 sm:flex-none bg-[#1A1B1F] hover:bg-[#222326] text-white py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 border border-white/5"
+            >
+              <CreditCard size={16} />
+              Manage Cards
             </button>
           </div>
         </div>
@@ -140,13 +158,13 @@ export default function OverviewPage() {
         ) : (
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5 flex flex-col items-center justify-center min-h-[180px]">
             <CreditCard size={32} className="text-gray-600 mb-3" />
-            <p className="text-gray-400 text-sm text-center mb-4">No cards yet</p>
+            <p className="text-gray-400 text-sm text-center mb-4">No cards issued yet</p>
             <button
               onClick={() => navigate('/app/cards')}
               className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-2.5 px-5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2"
             >
               <Plus size={16} />
-              Create Visa Card
+              Issue First Card
             </button>
           </div>
         )}
@@ -155,17 +173,17 @@ export default function OverviewPage() {
       {cards.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
           <div className="bg-[#111215] rounded-2xl p-5 border border-white/5">
-            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">Cards</span>
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">Active Cards</span>
             <span className="text-2xl font-bold text-white">{cards.length}</span>
-            <span className="text-gray-500 text-xs ml-1">active</span>
+            <span className="text-gray-500 text-xs ml-1">issued</span>
           </div>
           <div className="bg-[#111215] rounded-2xl p-5 border border-white/5">
-            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">SOL Balance</span>
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">SOL Holdings</span>
             <span className="text-2xl font-bold text-white">{solBalance.toFixed(2)}</span>
             <span className="text-gray-500 text-xs ml-1">SOL</span>
           </div>
           <div className="bg-[#111215] rounded-2xl p-5 border border-white/5 col-span-2 sm:col-span-1">
-            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">USD Value</span>
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-2">USD Equivalent</span>
             <span className="text-2xl font-bold text-white">${usdBalance.toFixed(2)}</span>
           </div>
         </div>
@@ -173,39 +191,55 @@ export default function OverviewPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
-          <span className="text-white text-lg font-bold mb-5 block">Recent Activity</span>
+          <span className="text-white text-lg font-bold mb-5 block">Transaction History</span>
           <div className="flex flex-col items-center justify-center py-12">
             <div className="w-12 h-12 rounded-full bg-[#1A1B1F] flex items-center justify-center mb-3">
               <Wallet size={24} className="text-gray-600" />
             </div>
-            <p className="text-gray-500 text-sm">No activity yet</p>
-            <p className="text-gray-600 text-xs mt-1">Your transactions will appear here</p>
+            <p className="text-gray-500 text-sm">No transactions yet</p>
+            <p className="text-gray-600 text-xs mt-1">Transactions will appear here as you use your cards</p>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:gap-6">
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
             <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Quick Actions</span>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={() => navigate('/app/topups')}
-                className="bg-[#1A1B1F] hover:bg-[#222326] p-4 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 border border-white/5"
+                className="bg-[#1A1B1F] hover:bg-[#222326] p-3.5 rounded-xl flex items-center justify-between transition-all duration-200 border border-white/5 group"
               >
-                <ArrowDownLeft size={20} className="text-[#FF5550]" />
-                <span className="text-white text-xs font-medium">Top Up</span>
+                <div className="flex items-center gap-3">
+                  <ArrowDownLeft size={18} className="text-[#FF5550]" />
+                  <span className="text-white text-sm font-medium">Fund Wallet</span>
+                </div>
+                <ArrowRight size={14} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
               </button>
               <button
                 onClick={() => navigate('/app/cards')}
-                className="bg-[#1A1B1F] hover:bg-[#222326] p-4 rounded-xl flex flex-col items-center gap-2 transition-all duration-200 border border-white/5"
+                className="bg-[#1A1B1F] hover:bg-[#222326] p-3.5 rounded-xl flex items-center justify-between transition-all duration-200 border border-white/5 group"
               >
-                <CreditCard size={20} className="text-[#FF5550]" />
-                <span className="text-white text-xs font-medium">Cards</span>
+                <div className="flex items-center gap-3">
+                  <CreditCard size={18} className="text-[#FF5550]" />
+                  <span className="text-white text-sm font-medium">Issue Card</span>
+                </div>
+                <ArrowRight size={14} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
+              </button>
+              <button
+                onClick={() => navigate('/app/controls')}
+                className="bg-[#1A1B1F] hover:bg-[#222326] p-3.5 rounded-xl flex items-center justify-between transition-all duration-200 border border-white/5 group"
+              >
+                <div className="flex items-center gap-3">
+                  <Shield size={18} className="text-[#FF5550]" />
+                  <span className="text-white text-sm font-medium">Card Security</span>
+                </div>
+                <ArrowRight size={14} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
               </button>
             </div>
           </div>
 
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
-            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Wallet</span>
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Solana Wallet</span>
             {wallet?.confirmed ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between mb-1">
@@ -221,18 +255,18 @@ export default function OverviewPage() {
                   onClick={() => navigate('/app/topups')}
                   className="text-[#FF5550] text-xs font-bold mt-1 hover:underline"
                 >
-                  Go to Top-ups
+                  Fund this wallet →
                 </button>
               </div>
             ) : (
               <div className="flex flex-col items-center py-4">
                 <Wallet size={24} className="text-gray-600 mb-2" />
-                <p className="text-gray-500 text-sm">No wallet created</p>
+                <p className="text-gray-500 text-sm">No wallet connected</p>
                 <button
                   onClick={() => navigate('/app/topups')}
                   className="text-[#FF5550] text-xs font-bold mt-2 hover:underline"
                 >
-                  Create Solana Wallet
+                  Set up Solana wallet →
                 </button>
               </div>
             )}

@@ -44,7 +44,7 @@ export default function CardsPage() {
   const createCard = async () => {
     setCardError(null);
     if (cards.length >= MAX_CARDS) {
-      setCardError(`Maximum of ${MAX_CARDS} cards allowed. Remove an existing card to create a new one.`);
+      setCardError(`You've reached the limit of ${MAX_CARDS} cards. Remove an existing card before issuing a new one.`);
       return;
     }
     setCreating(true);
@@ -58,11 +58,11 @@ export default function CardsPage() {
         await fetchCards();
       } else {
         const data = await res.json();
-        setCardError(data.error || 'Failed to create card');
+        setCardError(data.error || 'Failed to issue card');
       }
     } catch (err) {
       console.error('Failed to create card:', err);
-      setCardError('Failed to create card');
+      setCardError('Something went wrong. Please try again.');
     } finally {
       setCreating(false);
     }
@@ -117,15 +117,18 @@ export default function CardsPage() {
     return (
       <div className="max-w-6xl mx-auto pb-20 md:pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">My Cards</h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Vault</h1>
+            <p className="text-gray-500 text-sm mt-1">Manage your virtual Visa cards</p>
+          </div>
         </div>
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-20 h-20 rounded-2xl bg-[#111215] border border-white/5 flex items-center justify-center mb-6">
             <CreditCard size={36} className="text-gray-600" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">No cards yet</h2>
+          <h2 className="text-xl font-bold text-white mb-2">Issue your first card</h2>
           <p className="text-gray-400 text-sm text-center max-w-md mb-8">
-            Create your first virtual Visa card to start making payments and managing your spending.
+            Create a virtual Visa card to start spending crypto at millions of merchants worldwide. Each card comes with its own security controls.
           </p>
           <button
             onClick={createCard}
@@ -133,7 +136,7 @@ export default function CardsPage() {
             className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20 disabled:opacity-50"
           >
             {creating ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-            {creating ? 'Creating...' : 'Create Virtual Card'}
+            {creating ? 'Issuing...' : 'Issue Virtual Card'}
           </button>
         </div>
       </div>
@@ -144,8 +147,8 @@ export default function CardsPage() {
     <div className="max-w-6xl mx-auto pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">My Cards</h1>
-          <span className="text-gray-500 text-xs mt-1 block">{cards.length}/{MAX_CARDS} cards</span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Card Vault</h1>
+          <span className="text-gray-500 text-xs mt-1 block">{cards.length} of {MAX_CARDS} cards issued</span>
         </div>
         {cards.length < MAX_CARDS && (
           <button
@@ -154,7 +157,7 @@ export default function CardsPage() {
             className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
           >
             {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-            {creating ? 'Creating...' : 'Add Card'}
+            {creating ? 'Issuing...' : 'Issue Card'}
           </button>
         )}
       </div>
@@ -196,7 +199,7 @@ export default function CardsPage() {
                   <button
                     onClick={() => toggleReveal(card.id)}
                     className="text-white/70 hover:text-white transition-colors"
-                    title={revealedCards.has(card.id) ? 'Hide details' : 'Show details'}
+                    title={revealedCards.has(card.id) ? 'Hide card number' : 'Show card number'}
                   >
                     {revealedCards.has(card.id) ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -228,14 +231,14 @@ export default function CardsPage() {
                 }`}
               >
                 <Snowflake size={16} />
-                {card.frozen ? 'Unfreeze' : 'Freeze'}
+                {card.frozen ? 'Unfreeze Card' : 'Freeze Card'}
               </button>
               <button
                 onClick={() => toggleReveal(card.id)}
                 className="flex-1 bg-[#1A1B1F] border border-white/5 text-white py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 hover:bg-[#222326]"
               >
                 {revealedCards.has(card.id) ? <EyeOff size={16} /> : <Eye size={16} />}
-                {revealedCards.has(card.id) ? 'Hide' : 'Reveal'}
+                {revealedCards.has(card.id) ? 'Hide Details' : 'Show Details'}
               </button>
             </div>
           </div>

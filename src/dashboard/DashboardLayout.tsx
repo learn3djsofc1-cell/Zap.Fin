@@ -7,10 +7,10 @@ const WispTapLogo = ({ className }: { className?: string }) => (
 );
 
 const navItems = [
-  { label: 'Dashboard', path: '/app', icon: LayoutDashboard, end: true },
+  { label: 'Overview', path: '/app', icon: LayoutDashboard, end: true },
   { label: 'Cards', path: '/app/cards', icon: CreditCard, end: false },
-  { label: 'Top-ups', path: '/app/topups', icon: ArrowUpCircle, end: false },
-  { label: 'Controls', path: '/app/controls', icon: Shield, end: false },
+  { label: 'Fund', path: '/app/topups', icon: ArrowUpCircle, end: false },
+  { label: 'Security', path: '/app/controls', icon: Shield, end: false },
 ];
 
 export default function DashboardLayout() {
@@ -28,15 +28,15 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-[#0A0B0E] flex flex-col md:flex-row">
-      <aside className="hidden md:flex sticky top-0 left-0 z-50 h-screen w-64 bg-[#111215] border-r border-white/5 flex-col shrink-0">
-        <div className="p-5 flex items-center justify-between">
+      <aside className="hidden md:flex sticky top-0 left-0 z-50 h-screen w-60 bg-[#111215] border-r border-white/5 flex-col shrink-0">
+        <div className="px-5 py-6 flex items-center">
           <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <WispTapLogo className="w-8 h-8" />
             <span className="text-white font-bold text-lg tracking-tight">WispTap</span>
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+        <nav className="flex-1 px-3 py-2 flex flex-col gap-0.5">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -52,9 +52,7 @@ export default function DashboardLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-200 ${isActive ? 'bg-[#FF5550]' : 'bg-gray-600'}`}>
-                    <div className="w-2 h-2 bg-white rounded-sm" />
-                  </div>
+                  <item.icon size={18} className={isActive ? 'text-[#FF5550]' : 'text-gray-500'} />
                   {item.label}
                 </>
               )}
@@ -68,7 +66,7 @@ export default function DashboardLayout() {
             className="flex items-center gap-2 text-gray-500 hover:text-red-400 text-xs font-medium transition-colors w-full px-3 py-2"
           >
             <LogOut size={14} />
-            Logout
+            Sign Out
           </button>
         </div>
       </aside>
@@ -94,7 +92,7 @@ export default function DashboardLayout() {
             <button
               onClick={handleLogout}
               className="md:hidden text-gray-400 hover:text-red-400 p-1.5 transition-colors"
-              aria-label="Logout"
+              aria-label="Sign out"
             >
               <LogOut size={18} />
             </button>

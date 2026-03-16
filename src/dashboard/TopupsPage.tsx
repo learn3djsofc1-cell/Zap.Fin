@@ -174,12 +174,13 @@ export default function TopupsPage() {
   if (showKeyFlow) {
     return (
       <div className="max-w-2xl mx-auto pb-20 md:pb-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8">Wallet Created</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Wallet Generated</h1>
+        <p className="text-gray-500 text-sm mb-8">Your new Solana wallet is ready. Save your credentials below.</p>
 
         <div className="bg-[#111215] rounded-2xl p-6 border border-white/5 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Wallet size={20} className="text-[#FF5550]" />
-            <span className="text-white font-bold">Wallet Address</span>
+            <span className="text-white font-bold">Public Address</span>
           </div>
           <div className="bg-[#0A0B0E] rounded-xl p-4 flex items-center justify-between gap-3">
             <code className="text-[#FF5550] text-sm break-all flex-1 font-mono">{walletAddress}</code>
@@ -195,10 +196,10 @@ export default function TopupsPage() {
         <div className="bg-[#111215] rounded-2xl p-6 border border-red-500/20 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle size={20} className="text-red-400" />
-            <span className="text-red-400 font-bold">Private Key — Save This Now</span>
+            <span className="text-red-400 font-bold">Private Key — Back Up Immediately</span>
           </div>
           <p className="text-gray-400 text-sm mb-4">
-            This key will only be shown once. If you lose it, you will lose access to your wallet and any funds in it. Copy and store it securely.
+            This key is shown only once. Losing it means permanent loss of access to your wallet and its funds. Copy it now and store it in a secure location.
           </p>
           <div className="bg-[#0A0B0E] rounded-xl p-4 flex items-center justify-between gap-3 mb-4">
             <code className="text-red-300 text-xs break-all flex-1 font-mono">{privateKey}</code>
@@ -217,7 +218,7 @@ export default function TopupsPage() {
               className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF5550] focus:ring-[#FF5550] focus:ring-offset-0 accent-[#FF5550]"
             />
             <span className="text-white text-sm font-medium">
-              I have securely saved my private key and understand it will not be shown again
+              I confirm I have backed up my private key securely
             </span>
           </label>
         </div>
@@ -227,7 +228,7 @@ export default function TopupsPage() {
           className="w-full bg-[#FF5550] hover:bg-[#E84B47] text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF5550]/20"
         >
           {confirming ? <Loader2 size={18} className="animate-spin" /> : null}
-          {confirming ? 'Confirming...' : 'Continue to Top-ups'}
+          {confirming ? 'Confirming...' : 'Continue to Funding'}
         </button>
       </div>
     );
@@ -237,7 +238,10 @@ export default function TopupsPage() {
     return (
       <div className="max-w-5xl mx-auto pb-20 md:pb-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Top-up Balance</h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Fund Your Account</h1>
+            <p className="text-gray-500 text-sm mt-1">Set up a wallet to start funding your cards</p>
+          </div>
         </div>
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-20 h-20 rounded-2xl bg-[#111215] border border-white/5 flex items-center justify-center mb-6">
@@ -245,7 +249,7 @@ export default function TopupsPage() {
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Create a Solana Wallet</h2>
           <p className="text-gray-400 text-sm text-center max-w-md mb-8">
-            You need a Solana wallet to top up your balance. Create one to get started with deposits and conversions.
+            A Solana wallet is required to deposit funds and convert crypto into spendable card balance. Generation takes a few seconds.
           </p>
           <button
             onClick={createWallet}
@@ -253,7 +257,7 @@ export default function TopupsPage() {
             className="bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 px-8 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg shadow-[#FF5550]/20 disabled:opacity-50"
           >
             {creating ? <Loader2 size={18} className="animate-spin" /> : <Wallet size={18} />}
-            {creating ? 'Creating...' : 'Create Solana Wallet'}
+            {creating ? 'Generating...' : 'Generate Wallet'}
           </button>
         </div>
       </div>
@@ -263,7 +267,8 @@ export default function TopupsPage() {
   if (!wallet.confirmed) {
     return (
       <div className="max-w-2xl mx-auto pb-20 md:pb-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8">Confirm Your Wallet</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Confirm Your Wallet</h1>
+        <p className="text-gray-500 text-sm mb-8">Verify that you've saved your private key before proceeding.</p>
         <div className="bg-[#111215] rounded-2xl p-6 border border-white/5 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Wallet size={20} className="text-[#FF5550]" />
@@ -276,10 +281,10 @@ export default function TopupsPage() {
         <div className="bg-[#111215] rounded-2xl p-6 border border-yellow-500/20 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle size={20} className="text-yellow-400" />
-            <span className="text-yellow-400 font-bold">Confirmation Required</span>
+            <span className="text-yellow-400 font-bold">Pending Confirmation</span>
           </div>
           <p className="text-gray-400 text-sm mb-4">
-            Your wallet was created but you haven't confirmed that you saved the private key. The private key cannot be shown again. If you have it saved, confirm below to continue.
+            Your wallet was created but key backup wasn't confirmed. The private key cannot be displayed again. If you have it stored, confirm below to proceed.
           </p>
           <label className="flex items-start gap-3 cursor-pointer select-none">
             <input
@@ -289,7 +294,7 @@ export default function TopupsPage() {
               className="mt-0.5 w-5 h-5 rounded border-white/20 bg-[#1A1B1F] text-[#FF5550] focus:ring-[#FF5550] focus:ring-offset-0 accent-[#FF5550]"
             />
             <span className="text-white text-sm font-medium">
-              I have securely saved my private key
+              I have my private key backed up securely
             </span>
           </label>
         </div>
@@ -299,7 +304,7 @@ export default function TopupsPage() {
           className="w-full bg-[#FF5550] hover:bg-[#E84B47] text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF5550]/20"
         >
           {confirming ? <Loader2 size={18} className="animate-spin" /> : null}
-          {confirming ? 'Confirming...' : 'Confirm & Continue'}
+          {confirming ? 'Confirming...' : 'Verify & Continue'}
         </button>
       </div>
     );
@@ -308,7 +313,10 @@ export default function TopupsPage() {
   return (
     <div className="max-w-5xl mx-auto pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Top-up Balance</h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Fund Your Account</h1>
+          <p className="text-gray-500 text-sm mt-1">Convert SOL into stablecoin card balance</p>
+        </div>
         <button
           onClick={() => { fetchBalance(); fetchPrices(); }}
           disabled={loadingBalance || loadingPrices}
@@ -328,7 +336,7 @@ export default function TopupsPage() {
                 <span className="text-white font-bold">Wallet Balance</span>
               </div>
               {prices?.stale && (
-                <span className="text-yellow-400 text-xs">Prices may be outdated</span>
+                <span className="text-yellow-400 text-xs">Prices may be delayed</span>
               )}
             </div>
 
@@ -364,13 +372,14 @@ export default function TopupsPage() {
           </div>
 
           <div className="bg-[#111215] rounded-2xl p-6 border border-white/5">
-            <span className="text-white font-bold block mb-5">Convert SOL</span>
+            <span className="text-white font-bold block mb-1">Convert SOL</span>
+            <span className="text-gray-500 text-xs block mb-5">Swap SOL for USDC or USDT to fund your card balance</span>
 
             <div className="bg-[#0A0B0E] rounded-xl p-4 mb-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-xs uppercase tracking-wider font-bold">You Send</span>
                 <span className="text-gray-500 text-xs">
-                  Balance: {solBalance.toFixed(4)} SOL
+                  Available: {solBalance.toFixed(4)} SOL
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -452,7 +461,7 @@ export default function TopupsPage() {
               <div className="mt-4 text-center">
                 <span className="text-gray-500 text-xs">
                   1 SOL ≈ {rate.toFixed(2)} {targetCurrency.toUpperCase()}
-                  {loadingPrices && ' (updating...)'}
+                  {loadingPrices && ' (refreshing...)'}
                 </span>
               </div>
             )}
@@ -462,14 +471,14 @@ export default function TopupsPage() {
               disabled={solValue <= 0 || solValue > solBalance || !prices}
               className="w-full mt-5 bg-[#FF5550] hover:bg-[#E84B47] text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#FF5550]/20"
             >
-              {solValue > solBalance ? 'Insufficient Balance' : 'Convert'}
+              {solValue > solBalance ? 'Insufficient SOL Balance' : 'Preview Conversion'}
             </button>
           </div>
         </div>
 
         <div className="flex flex-col gap-6">
           <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
-            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Live Prices</span>
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Market Prices</span>
             {prices ? (
               <div className="flex flex-col gap-3">
                 <PriceRow label="SOL / USD" value={`$${solPrice.toFixed(2)}`} icon="/sol-logo.png" />
@@ -485,7 +494,7 @@ export default function TopupsPage() {
 
           {solValue > 0 && prices && (
             <div className="bg-[#111215] rounded-2xl p-5 sm:p-6 border border-white/5">
-              <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Conversion Summary</span>
+              <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 block">Conversion Preview</span>
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between">
                   <span className="text-gray-400 text-sm">Send</span>
@@ -512,13 +521,13 @@ export default function TopupsPage() {
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#111215] rounded-2xl p-6 border border-white/10 max-w-md w-full">
-            <h3 className="text-white text-lg font-bold mb-2">Swap Coming Soon</h3>
+            <h3 className="text-white text-lg font-bold mb-2">Conversion Preview</h3>
             <p className="text-gray-400 text-sm mb-6">
-              On-chain SOL to {targetCurrency.toUpperCase()} swaps are not yet available. This feature is under development. Your wallet balance remains unchanged.
+              On-chain SOL → {targetCurrency.toUpperCase()} swaps are coming soon. This feature is under active development. Your wallet balance will remain unchanged.
             </p>
             <div className="bg-[#0A0B0E] rounded-xl p-4 mb-6">
               <div className="flex justify-between mb-2">
-                <span className="text-gray-400 text-sm">Would send</span>
+                <span className="text-gray-400 text-sm">Would convert</span>
                 <span className="text-white text-sm font-bold">{solValue.toFixed(6)} SOL</span>
               </div>
               <div className="flex justify-between">
@@ -530,7 +539,7 @@ export default function TopupsPage() {
               onClick={() => setShowConfirmModal(false)}
               className="w-full bg-[#FF5550] hover:bg-[#E84B47] text-white py-3 rounded-xl font-bold text-sm transition-all duration-200"
             >
-              Got it
+              Understood
             </button>
           </div>
         </div>
