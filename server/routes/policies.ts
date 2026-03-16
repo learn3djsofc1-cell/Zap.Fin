@@ -70,14 +70,25 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       ? allowedMerchants.filter((m: string) => typeof m === 'string' && m.trim().length > 0).map((m: string) => m.trim())
       : [];
 
-    if (assignedAgentIds && Array.isArray(assignedAgentIds) && assignedAgentIds.length > 0) {
-      const agentCheck = await pool.query(
-        'SELECT id FROM agents WHERE id = ANY($1) AND user_id = $2',
-        [assignedAgentIds, req.userId]
-      );
-      if (agentCheck.rows.length !== assignedAgentIds.length) {
-        res.status(400).json({ error: 'One or more assigned agents not found' });
+    if (assignedAgentIds !== undefined && !Array.isArray(assignedAgentIds)) {
+      res.status(400).json({ error: 'Assigned agent IDs must be an array' });
+      return;
+    }
+
+    if (Array.isArray(assignedAgentIds)) {
+      if (!assignedAgentIds.every((id: any) => typeof id === 'number' && Number.isInteger(id) && id > 0)) {
+        res.status(400).json({ error: 'Assigned agent IDs must be positive integers' });
         return;
+      }
+      if (assignedAgentIds.length > 0) {
+        const agentCheck = await pool.query(
+          'SELECT id FROM agents WHERE id = ANY($1) AND user_id = $2',
+          [assignedAgentIds, req.userId]
+        );
+        if (agentCheck.rows.length !== assignedAgentIds.length) {
+          res.status(400).json({ error: 'One or more assigned agents not found' });
+          return;
+        }
       }
     }
 
@@ -209,6 +220,10 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     if (assignedAgentIds !== undefined) {
       if (!Array.isArray(assignedAgentIds)) {
         res.status(400).json({ error: 'Assigned agent IDs must be an array' });
+        return;
+      }
+      if (!assignedAgentIds.every((id: any) => typeof id === 'number' && Number.isInteger(id) && id > 0)) {
+        res.status(400).json({ error: 'Assigned agent IDs must be positive integers' });
         return;
       }
       if (assignedAgentIds.length > 0) {

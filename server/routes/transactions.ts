@@ -72,6 +72,11 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
+    if (recipient.trim().length > 255) {
+      res.status(400).json({ error: 'Recipient must be 255 characters or less' });
+      return;
+    }
+
     if (amount === undefined || amount === null || isNaN(Number(amount)) || Number(amount) <= 0) {
       res.status(400).json({ error: 'Amount must be a positive number' });
       return;
@@ -82,7 +87,11 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    if (agentId) {
+    if (agentId !== undefined && agentId !== null) {
+      if (typeof agentId !== 'number' || !Number.isInteger(agentId) || agentId <= 0) {
+        res.status(400).json({ error: 'Agent ID must be a positive integer' });
+        return;
+      }
       const agentCheck = await pool.query(
         'SELECT id FROM agents WHERE id = $1 AND user_id = $2',
         [agentId, req.userId]
@@ -94,10 +103,10 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
     }
 
     const validCurrencies = ['USDC', 'SOL', 'ETH'];
-    const txCurrency = currency && validCurrencies.includes(currency) ? currency : 'USDC';
+    const txCurrency = typeof currency === 'string' && validCurrencies.includes(currency) ? currency : 'USDC';
 
     const validStatuses = ['settled', 'pending', 'blocked', 'failed'];
-    const txStatus = status && validStatuses.includes(status) ? status : 'settled';
+    const txStatus = typeof status === 'string' && validStatuses.includes(status) ? status : 'settled';
 
     const txHash = `tx_${crypto.randomBytes(8).toString('hex')}`;
     const txLatency = latencyMs !== undefined ? Math.max(0, Math.min(parseInt(latencyMs, 10) || 0, 99999)) : Math.floor(Math.random() * 300) + 100;

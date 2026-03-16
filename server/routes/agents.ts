@@ -35,8 +35,18 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
+    if (purpose !== undefined && typeof purpose !== 'string') {
+      res.status(400).json({ error: 'Purpose must be a string' });
+      return;
+    }
+
+    if (currency !== undefined && typeof currency !== 'string') {
+      res.status(400).json({ error: 'Currency must be a string' });
+      return;
+    }
+
     const validCurrencies = ['USDC', 'SOL', 'ETH'];
-    const agentCurrency = currency && validCurrencies.includes(currency) ? currency : 'USDC';
+    const agentCurrency = typeof currency === 'string' && validCurrencies.includes(currency) ? currency : 'USDC';
 
     const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
     const agentIdSlug = `${slug}_${Date.now().toString(36)}`;
@@ -45,7 +55,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       `INSERT INTO agents (user_id, name, agent_id_slug, purpose, currency)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [req.userId, name.trim(), agentIdSlug, (purpose || '').trim(), agentCurrency]
+      [req.userId, name.trim(), agentIdSlug, typeof purpose === 'string' ? purpose.trim() : '', agentCurrency]
     );
 
     res.status(201).json({ agent: result.rows[0] });
@@ -87,7 +97,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 
     if (status !== undefined) {
       const validStatuses = ['active', 'paused'];
-      if (!validStatuses.includes(status)) {
+      if (typeof status !== 'string' || !validStatuses.includes(status)) {
         res.status(400).json({ error: 'Status must be "active" or "paused"' });
         return;
       }
@@ -96,8 +106,12 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     }
 
     if (purpose !== undefined) {
+      if (typeof purpose !== 'string') {
+        res.status(400).json({ error: 'Purpose must be a string' });
+        return;
+      }
       updates.push(`purpose = $${paramIndex++}`);
-      values.push((purpose || '').trim());
+      values.push(purpose.trim());
     }
 
     if (updates.length === 0) {

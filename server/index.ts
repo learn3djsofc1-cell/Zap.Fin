@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { initializeDatabase } from './schema.js';
@@ -26,6 +26,11 @@ app.use('/api/agents', agentsRouter);
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/policies', policiesRouter);
 app.use('/api/overview', overviewRouter);
+
+app.use('/api', (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Unhandled API error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 const distPath = path.resolve(process.cwd(), 'dist');
 if (fs.existsSync(path.join(distPath, 'index.html'))) {
