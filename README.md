@@ -1,6 +1,6 @@
-# Molt.Fin
+# GhostLane
 
-Financial infrastructure for AI agents. Programmable bank accounts with sub-second settlement on Solana.
+Privacy-focused cryptocurrency ecosystem. Advanced mixing, encrypted messaging, privacy bridge, and VPN — powered by zero-knowledge technology.
 
 ## Development
 

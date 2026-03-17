@@ -57,7 +57,7 @@ function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-2xl border-b border-white/[0.04]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2.5">
+        <a href="/" className="flex items-center gap-2.5">
           <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
           <span className="text-xl font-bold tracking-tight text-white">GhostLane</span>
         </a>
@@ -327,9 +327,9 @@ function Ux402Section() {
             <Link to="/docs" className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-6 py-3 rounded-xl font-bold text-sm transition-all">
               View Full Documentation
             </Link>
-            <a href="#" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-1.5 px-5 py-3 transition-colors border border-white/[0.06] rounded-xl hover:border-white/10">
+            <Link to="/docs" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-1.5 px-5 py-3 transition-colors border border-white/[0.06] rounded-xl hover:border-white/10">
               API Reference <ArrowRight size={14} />
-            </a>
+            </Link>
           </div>
         </RevealOnScroll>
       </div>
@@ -660,21 +660,17 @@ function FooterSection() {
     { label: 'How It Works', href: '#how-it-works' },
     { label: 'Supported Assets', href: '#assets' },
     { label: 'Security', href: '#security' },
-    { label: 'Privacy Policy', href: '#' },
+    { label: 'FAQ', href: '#faq' },
   ];
 
   const supportLinks = [
-    { label: 'Help Center', href: '#' },
-    { label: 'Contact Us', href: '#' },
-    { label: 'Status', href: '#' },
-    { label: 'Bug Reports', href: '#' },
+    { label: 'Documentation', href: '/docs' },
+    { label: 'Ux402 Protocol', href: '#ux402' },
   ];
 
   const resourceLinks = [
-    { label: 'Documentation', href: '/docs' },
-    { label: 'API Reference', href: '#' },
-    { label: 'Terms of Service', href: '#' },
-    { label: 'Legal', href: '#' },
+    { label: 'API Reference', href: '/docs' },
+    { label: 'Features', href: '#features' },
   ];
 
   return (
