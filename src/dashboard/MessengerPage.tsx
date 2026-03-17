@@ -76,8 +76,9 @@ export default function MessengerPage() {
       });
       setMessages((prev) => [...prev, data.message]);
       setMessageText('');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to send message');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send message';
+      toast('error', message);
     } finally {
       setSending(false);
     }
@@ -99,8 +100,9 @@ export default function MessengerPage() {
       setShowNewChat(false);
       setNewContactName('');
       setNewContactAddress('');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to create conversation');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create conversation';
+      toast('error', message);
     }
   }
 

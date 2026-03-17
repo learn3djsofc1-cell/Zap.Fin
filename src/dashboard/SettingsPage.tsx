@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Settings, User, Lock, Shield, Bell, Smartphone, Key, LogOut } from 'lucide-react';
-import { api } from '../lib/api';
+import { User, Lock, Bell, Smartphone } from 'lucide-react';
+import { api, type UserSession, type NotificationPreference } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../lib/toast';
 import { motion } from 'framer-motion';
 
-function NotificationToggle({ label, desc, defaultOn }: { label: string; desc: string; defaultOn: boolean; [key: string]: any }) {
-  const [on, setOn] = useState(defaultOn);
+function NotificationToggle({ label, desc, enabled, onToggle }: { label: string; desc: string; enabled: boolean; onToggle: () => void }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0">
       <div>
@@ -14,36 +13,71 @@ function NotificationToggle({ label, desc, defaultOn }: { label: string; desc: s
         <span className="text-gray-500 text-xs">{desc}</span>
       </div>
       <button
-        onClick={() => setOn(!on)}
+        onClick={onToggle}
         className={`relative w-10 h-5 rounded-full transition-all shrink-0 ml-4 ${
-          on ? 'bg-[#0AF5D6]' : 'bg-white/[0.08]'
+          enabled ? 'bg-[#0AF5D6]' : 'bg-white/[0.08]'
         }`}
       >
         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all shadow ${
-          on ? 'left-[22px]' : 'left-0.5'
+          enabled ? 'left-[22px]' : 'left-0.5'
         }`} />
       </button>
     </div>
   );
 }
 
-const NOTIFICATION_PREFS = [
-  { label: 'Mix Operations', desc: 'Get notified when mix operations complete', defaultOn: true },
-  { label: 'Bridge Transfers', desc: 'Alerts for cross-chain transfer status changes', defaultOn: true },
-  { label: 'Security Alerts', desc: 'Notifications for login attempts and security events', defaultOn: true },
-  { label: 'VPN Connection', desc: 'Alerts when VPN connection drops or changes', defaultOn: false },
-  { label: 'New Messages', desc: 'Notifications for new encrypted messages', defaultOn: true },
-];
-
 function NotificationPreferences() {
+  const { toast } = useToast();
+  const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.settings.notifications()
+      .then((data) => setPreferences(data.preferences))
+      .catch(() => toast('error', 'Failed to load notification preferences'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleToggle(key: string, currentEnabled: boolean) {
+    try {
+      const data = await api.settings.updateNotification(key, !currentEnabled);
+      setPreferences((prev) => prev.map((p) => p.key === key ? data.preference : p));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update preference';
+      toast('error', message);
+    }
+  }
+
   return (
     <div className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] p-6">
       <h2 className="text-white font-bold text-base mb-6">Notification Preferences</h2>
-      <div className="space-y-0 max-w-md">
-        {NOTIFICATION_PREFS.map((pref) => (
-          <NotificationToggle key={pref.label} {...pref} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="space-y-4 max-w-md">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between py-3">
+              <div>
+                <div className="w-32 h-3.5 bg-white/[0.04] rounded animate-pulse mb-1.5" />
+                <div className="w-48 h-3 bg-white/[0.04] rounded animate-pulse" />
+              </div>
+              <div className="w-10 h-5 bg-white/[0.04] rounded-full animate-pulse" />
+            </div>
+          ))}
+        </div>
+      ) : preferences.length === 0 ? (
+        <p className="text-gray-500 text-xs">No notification preferences available</p>
+      ) : (
+        <div className="space-y-0 max-w-md">
+          {preferences.map((pref) => (
+            <NotificationToggle
+              key={pref.key}
+              label={pref.label}
+              desc={pref.description}
+              enabled={pref.enabled}
+              onToggle={() => handleToggle(pref.key, pref.enabled)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -63,7 +97,7 @@ export default function SettingsPage() {
   const [changingPassword, setChangingPassword] = useState(false);
   const [twoFaEnabled, setTwoFaEnabled] = useState(false);
   const [togglingTwoFa, setTogglingTwoFa] = useState(false);
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<UserSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
 
   useEffect(() => {
@@ -76,7 +110,7 @@ export default function SettingsPage() {
     setSessionsLoading(true);
     api.settings.sessions()
       .then((data) => setSessions(data.sessions))
-      .catch(() => {})
+      .catch(() => toast('error', 'Failed to load sessions'))
       .finally(() => setSessionsLoading(false));
   }
 
@@ -89,8 +123,9 @@ export default function SettingsPage() {
     try {
       await api.settings.updateProfile({ name: name.trim(), email: email.trim() });
       toast('success', 'Profile updated');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to update profile');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update profile';
+      toast('error', message);
     } finally {
       setSaving(false);
     }
@@ -109,8 +144,9 @@ export default function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       toast('success', 'Password changed');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to change password');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to change password';
+      toast('error', message);
     } finally {
       setChangingPassword(false);
     }
@@ -119,11 +155,12 @@ export default function SettingsPage() {
   async function handleToggle2FA() {
     setTogglingTwoFa(true);
     try {
-      const data = await api.settings.toggle2FA(!twoFaEnabled);
+      await api.settings.toggle2FA(!twoFaEnabled);
       setTwoFaEnabled(!twoFaEnabled);
       toast('success', `Two-factor authentication ${!twoFaEnabled ? 'enabled' : 'disabled'}`);
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to toggle 2FA');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to toggle 2FA';
+      toast('error', message);
     } finally {
       setTogglingTwoFa(false);
     }
@@ -134,8 +171,9 @@ export default function SettingsPage() {
       await api.settings.revokeSession(id);
       setSessions((prev) => prev.filter((s) => s.id !== id));
       toast('success', 'Session revoked');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to revoke session');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to revoke session';
+      toast('error', message);
     }
   }
 

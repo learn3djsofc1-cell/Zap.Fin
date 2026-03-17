@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Shuffle, Clock, Shield, Zap, ChevronDown, Plus, Lock } from 'lucide-react';
-import { api, type MixOperation } from '../lib/api';
+import { Shuffle, Clock, Shield, Zap, Plus, Lock, Users, Database } from 'lucide-react';
+import { api, type MixOperation, type MixPool } from '../lib/api';
 import { useToast } from '../lib/toast';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import CurrencyBadge from '../components/CurrencyBadge';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const SUPPORTED_COINS = ['BTC', 'ETH', 'XMR', 'LTC', 'DASH', 'ZEC', 'BCH', 'DOGE'];
+import { motion } from 'framer-motion';
 
 const PRIVACY_LEVELS = [
   { value: 'standard', label: 'Standard', desc: 'Basic mixing with moderate anonymity set', icon: Shield, time: '~15 min' },
@@ -39,10 +37,18 @@ const statusDots: Record<string, string> = {
   failed: 'bg-red-400',
 };
 
+function formatPoolSize(size: number): string {
+  if (size >= 1000000) return `${(size / 1000000).toFixed(1)}M`;
+  if (size >= 1000) return `${(size / 1000).toFixed(1)}K`;
+  return String(size);
+}
+
 export default function MixerPage() {
   const { toast } = useToast();
   const [mixes, setMixes] = useState<MixOperation[]>([]);
+  const [pools, setPools] = useState<MixPool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [poolsLoading, setPoolsLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState('all');
   const [creating, setCreating] = useState(false);
@@ -56,6 +62,17 @@ export default function MixerPage() {
   useEffect(() => {
     loadMixes();
   }, [filter]);
+
+  useEffect(() => {
+    api.mixer.pools()
+      .then((data) => setPools(data.pools))
+      .catch(() => toast('error', 'Failed to load pool data'))
+      .finally(() => setPoolsLoading(false));
+  }, []);
+
+  const supportedCoins = pools.length > 0
+    ? pools.map((p) => p.coin)
+    : ['BTC', 'ETH', 'XMR', 'LTC', 'DASH', 'ZEC', 'BCH', 'DOGE'];
 
   function loadMixes() {
     setLoading(true);
@@ -84,11 +101,16 @@ export default function MixerPage() {
       setAmount('');
       setRecipient('');
       toast('success', 'Mix operation initiated');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to create mix');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create mix';
+      toast('error', message);
     } finally {
       setCreating(false);
     }
+  }
+
+  function getPoolForCoin(coinName: string): MixPool | undefined {
+    return pools.find((p) => p.coin === coinName);
   }
 
   return (
@@ -122,6 +144,46 @@ export default function MixerPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.05 }}
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"
+      >
+        {poolsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-[#0A0A0A] rounded-xl border border-white/[0.04] p-4">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.04] animate-pulse mb-3" />
+              <div className="w-16 h-4 bg-white/[0.04] rounded animate-pulse mb-1" />
+              <div className="w-12 h-3 bg-white/[0.04] rounded animate-pulse" />
+            </div>
+          ))
+        ) : pools.length === 0 ? (
+          <div className="col-span-full bg-[#0A0A0A] rounded-xl border border-white/[0.04] p-4 text-center">
+            <Database size={16} className="text-gray-600 mx-auto mb-1" />
+            <p className="text-gray-500 text-xs">No pool data available</p>
+          </div>
+        ) : (
+          pools.slice(0, 8).map((pool) => (
+            <div key={pool.coin} className="bg-[#0A0A0A] rounded-xl border border-white/[0.04] p-4 hover:border-purple-500/20 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <CurrencyBadge currency={pool.coin} size="sm" showLabel={false} />
+                <span className="text-white text-sm font-bold">{pool.coin}</span>
+              </div>
+              <div className="flex items-center gap-1 mb-1">
+                <Database size={10} className="text-purple-400" />
+                <span className="text-white text-sm font-semibold">{formatPoolSize(pool.size)}</span>
+                <span className="text-gray-500 text-[10px]">pool size</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Users size={10} className="text-gray-500" />
+                <span className="text-gray-400 text-xs">{pool.participants} participants</span>
+              </div>
+            </div>
+          ))
+        )}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.08 }}
         className="flex gap-2 mb-6 overflow-x-auto pb-1"
       >
         {['all', 'pending', 'mixing', 'complete', 'failed'].map((f) => (
@@ -212,21 +274,31 @@ export default function MixerPage() {
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Select Asset</label>
             <div className="grid grid-cols-4 gap-2">
-              {SUPPORTED_COINS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCoin(c)}
-                  className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    coin === c
-                      ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
-                      : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
-                  }`}
-                >
-                  <CurrencyBadge currency={c} size="sm" showLabel={false} />
-                  {c}
-                </button>
-              ))}
+              {supportedCoins.map((c) => {
+                const pool = getPoolForCoin(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCoin(c)}
+                    className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      coin === c
+                        ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
+                        : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <CurrencyBadge currency={c} size="sm" showLabel={false} />
+                      {c}
+                    </div>
+                    {pool && (
+                      <span className="text-[9px] text-gray-600 font-normal">
+                        {formatPoolSize(pool.size)} pool
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

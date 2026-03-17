@@ -27,7 +27,7 @@ router.patch('/profile', async (req: AuthRequest, res: Response): Promise<void> 
   try {
     const { name, email } = req.body;
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number)[] = [];
     let idx = 1;
 
     if (name !== undefined) {
@@ -110,6 +110,39 @@ router.delete('/sessions/:id', async (req: AuthRequest, res: Response): Promise<
     res.json({ success: true });
   } catch (err) {
     console.error('Settings revoke session error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+const DEFAULT_NOTIFICATION_PREFS = [
+  { key: 'mix_operations', label: 'Mix Operations', description: 'Get notified when mix operations complete', enabled: true },
+  { key: 'bridge_transfers', label: 'Bridge Transfers', description: 'Alerts for cross-chain transfer status changes', enabled: true },
+  { key: 'security_alerts', label: 'Security Alerts', description: 'Notifications for login attempts and security events', enabled: true },
+  { key: 'vpn_connection', label: 'VPN Connection', description: 'Alerts when VPN connection drops or changes', enabled: false },
+  { key: 'new_messages', label: 'New Messages', description: 'Notifications for new encrypted messages', enabled: true },
+];
+
+router.get('/notifications', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    res.json({ preferences: DEFAULT_NOTIFICATION_PREFS });
+  } catch (err) {
+    console.error('Settings notifications error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.patch('/notifications/:key', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { key } = req.params;
+    const { enabled } = req.body;
+    const pref = DEFAULT_NOTIFICATION_PREFS.find((p) => p.key === key);
+    if (!pref) {
+      res.status(404).json({ error: 'Notification preference not found' });
+      return;
+    }
+    res.json({ preference: { ...pref, enabled: !!enabled } });
+  } catch (err) {
+    console.error('Settings update notification error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -142,13 +142,59 @@ export interface ActivityItem {
   status: string;
 }
 
+export interface AuthUser {
+  id: number;
+  email: string;
+  name: string;
+  created_at: string;
+}
+
+export interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+}
+
+export interface TwoFactorResponse {
+  enabled: boolean;
+}
+
+export interface UserSession {
+  id: string;
+  device: string;
+  ip: string;
+  lastActive: string;
+  current: boolean;
+}
+
+export interface MixPool {
+  coin: string;
+  size: number;
+  participants: number;
+}
+
+export interface Chain {
+  id: string;
+  name: string;
+  icon: string;
+  tokens: string[];
+}
+
+export interface NotificationPreference {
+  key: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+}
+
 export const api = {
   auth: {
     register: (body: { email: string; password: string; name: string }) =>
-      request<{ user: any; token: string }>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
+      request<{ user: AuthUser; token: string }>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
     login: (body: { email: string; password: string }) =>
-      request<{ user: any; token: string }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
-    me: () => request<{ user: any }>('/auth/me'),
+      request<{ user: AuthUser; token: string }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+    me: () => request<{ user: AuthUser }>('/auth/me'),
   },
   overview: {
     stats: () => request<{ stats: OverviewStats }>('/overview/stats'),
@@ -166,7 +212,7 @@ export const api = {
       return request<{ mixes: MixOperation[]; total: number }>(`/mixer${qs ? `?${qs}` : ''}`);
     },
     get: (id: string) => request<{ mix: MixOperation }>(`/mixer/${id}`),
-    pools: () => request<{ pools: { coin: string; size: number; participants: number }[] }>('/mixer/pools'),
+    pools: () => request<{ pools: MixPool[] }>('/mixer/pools'),
   },
   messenger: {
     conversations: () => request<{ conversations: Conversation[] }>('/messenger/conversations'),
@@ -188,7 +234,7 @@ export const api = {
       const qs = query.toString();
       return request<{ transfers: BridgeTransfer[]; total: number }>(`/bridge${qs ? `?${qs}` : ''}`);
     },
-    chains: () => request<{ chains: { id: string; name: string; icon: string; tokens: string[] }[] }>('/bridge/chains'),
+    chains: () => request<{ chains: Chain[] }>('/bridge/chains'),
   },
   vpn: {
     servers: () => request<{ servers: VpnServer[] }>('/vpn/servers'),
@@ -201,15 +247,18 @@ export const api = {
       request<{ session: VpnSession }>('/vpn/kill-switch', { method: 'POST', body: JSON.stringify({ enabled }) }),
   },
   settings: {
-    profile: () => request<{ profile: any }>('/settings/profile'),
+    profile: () => request<{ profile: UserProfile }>('/settings/profile'),
     updateProfile: (body: { name?: string; email?: string }) =>
-      request<{ profile: any }>('/settings/profile', { method: 'PATCH', body: JSON.stringify(body) }),
+      request<{ profile: UserProfile }>('/settings/profile', { method: 'PATCH', body: JSON.stringify(body) }),
     changePassword: (body: { currentPassword: string; newPassword: string }) =>
       request<{ success: boolean }>('/settings/password', { method: 'POST', body: JSON.stringify(body) }),
     toggle2FA: (enabled: boolean) =>
-      request<{ twoFactor: any }>('/settings/2fa', { method: 'POST', body: JSON.stringify({ enabled }) }),
-    sessions: () => request<{ sessions: any[] }>('/settings/sessions'),
+      request<{ twoFactor: TwoFactorResponse }>('/settings/2fa', { method: 'POST', body: JSON.stringify({ enabled }) }),
+    sessions: () => request<{ sessions: UserSession[] }>('/settings/sessions'),
     revokeSession: (id: string) =>
       request<{ success: boolean }>(`/settings/sessions/${id}`, { method: 'DELETE' }),
+    notifications: () => request<{ preferences: NotificationPreference[] }>('/settings/notifications'),
+    updateNotification: (key: string, enabled: boolean) =>
+      request<{ preference: NotificationPreference }>(`/settings/notifications/${key}`, { method: 'PATCH', body: JSON.stringify({ enabled }) }),
   },
 };

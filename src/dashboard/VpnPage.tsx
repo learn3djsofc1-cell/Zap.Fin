@@ -78,8 +78,9 @@ export default function VpnPage() {
         setSession(data.session);
         toast('success', 'VPN connected');
       }
-    } catch (err: any) {
-      toast('error', err.message || 'Connection failed');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Connection failed';
+      toast('error', message);
     } finally {
       setConnecting(false);
     }
@@ -90,8 +91,9 @@ export default function VpnPage() {
       const data = await api.vpn.toggleKillSwitch(!session?.killSwitch);
       setSession(data.session);
       toast('success', `Kill switch ${data.session.killSwitch ? 'enabled' : 'disabled'}`);
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to toggle kill switch');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to toggle kill switch';
+      toast('error', message);
     }
   }
 

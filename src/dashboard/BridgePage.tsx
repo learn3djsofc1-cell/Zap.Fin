@@ -1,28 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeftRight, ArrowRight, Plus, Globe, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
-import { api, type BridgeTransfer } from '../lib/api';
+import { ArrowLeftRight, ArrowRight, Plus, Globe, AlertCircle } from 'lucide-react';
+import { api, type BridgeTransfer, type Chain } from '../lib/api';
 import { useToast } from '../lib/toast';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import { motion } from 'framer-motion';
-
-const CHAINS = [
-  { id: 'ethereum', name: 'Ethereum', tokens: ['ETH', 'USDC', 'USDT'] },
-  { id: 'bitcoin', name: 'Bitcoin', tokens: ['BTC'] },
-  { id: 'solana', name: 'Solana', tokens: ['SOL', 'USDC'] },
-  { id: 'polygon', name: 'Polygon', tokens: ['MATIC', 'USDC', 'USDT'] },
-  { id: 'avalanche', name: 'Avalanche', tokens: ['AVAX', 'USDC'] },
-  { id: 'bsc', name: 'BNB Chain', tokens: ['BNB', 'USDT'] },
-  { id: 'arbitrum', name: 'Arbitrum', tokens: ['ETH', 'USDC'] },
-  { id: 'optimism', name: 'Optimism', tokens: ['ETH', 'USDC'] },
-  { id: 'base', name: 'Base', tokens: ['ETH', 'USDC'] },
-  { id: 'monero', name: 'Monero', tokens: ['XMR'] },
-  { id: 'litecoin', name: 'Litecoin', tokens: ['LTC'] },
-  { id: 'zcash', name: 'Zcash', tokens: ['ZEC'] },
-  { id: 'dash', name: 'Dash', tokens: ['DASH'] },
-  { id: 'dogecoin', name: 'Dogecoin', tokens: ['DOGE'] },
-  { id: 'fantom', name: 'Fantom', tokens: ['FTM'] },
-];
 
 function timeAgo(date: string): string {
   const now = Date.now();
@@ -75,30 +57,46 @@ function BridgeStatusTracker({ status }: { status: string }) {
 export default function BridgePage() {
   const { toast } = useToast();
   const [transfers, setTransfers] = useState<BridgeTransfer[]>([]);
+  const [chains, setChains] = useState<Chain[]>([]);
+  const [chainsLoading, setChainsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState('all');
   const [creating, setCreating] = useState(false);
 
-  const [sourceChain, setSourceChain] = useState('ethereum');
-  const [destChain, setDestChain] = useState('solana');
-  const [token, setToken] = useState('ETH');
+  const [sourceChain, setSourceChain] = useState('');
+  const [destChain, setDestChain] = useState('');
+  const [token, setToken] = useState('');
   const [amount, setAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
 
-  const sourceChainData = CHAINS.find((c) => c.id === sourceChain);
-  const destChainData = CHAINS.find((c) => c.id === destChain);
+  const sourceChainData = chains.find((c) => c.id === sourceChain);
+  const destChainData = chains.find((c) => c.id === destChain);
+
+  useEffect(() => {
+    api.bridge.chains()
+      .then((data) => {
+        setChains(data.chains);
+        if (data.chains.length >= 2) {
+          setSourceChain(data.chains[0].id);
+          setDestChain(data.chains[2]?.id || data.chains[1].id);
+          setToken(data.chains[0].tokens[0] || '');
+        }
+      })
+      .catch(() => toast('error', 'Failed to load supported chains'))
+      .finally(() => setChainsLoading(false));
+  }, []);
 
   useEffect(() => {
     loadTransfers();
   }, [filter]);
 
   useEffect(() => {
-    const chain = CHAINS.find((c) => c.id === sourceChain);
+    const chain = chains.find((c) => c.id === sourceChain);
     if (chain && !chain.tokens.includes(token)) {
-      setToken(chain.tokens[0]);
+      setToken(chain.tokens[0] || '');
     }
-  }, [sourceChain]);
+  }, [sourceChain, chains, token]);
 
   function loadTransfers() {
     setLoading(true);
@@ -128,8 +126,9 @@ export default function BridgePage() {
       setAmount('');
       setRecipientAddress('');
       toast('success', 'Bridge transfer initiated');
-    } catch (err: any) {
-      toast('error', err.message || 'Failed to initiate bridge');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to initiate bridge';
+      toast('error', message);
     } finally {
       setCreating(false);
     }
@@ -154,14 +153,17 @@ export default function BridgePage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Privacy Bridge</h1>
             <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/15 rounded-lg px-2.5 py-1">
               <Globe size={10} className="text-green-400" />
-              <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">{CHAINS.length} Chains</span>
+              <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">
+                {chainsLoading ? '...' : `${chains.length} Chains`}
+              </span>
             </div>
           </div>
           <p className="text-gray-500 text-sm">Anonymous cross-chain asset transfers</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
+          disabled={chainsLoading || chains.length === 0}
+          className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-black px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
         >
           <Plus size={16} />
           <span className="hidden sm:inline">New Transfer</span>
@@ -267,7 +269,7 @@ export default function BridgePage() {
                 onChange={(e) => setSourceChain(e.target.value)}
                 className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-all appearance-none"
               >
-                {CHAINS.map((c) => (
+                {chains.map((c) => (
                   <option key={c.id} value={c.id} disabled={c.id === destChain}>{c.name}</option>
                 ))}
               </select>
@@ -286,7 +288,7 @@ export default function BridgePage() {
                 onChange={(e) => setDestChain(e.target.value)}
                 className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-all appearance-none"
               >
-                {CHAINS.map((c) => (
+                {chains.map((c) => (
                   <option key={c.id} value={c.id} disabled={c.id === sourceChain}>{c.name}</option>
                 ))}
               </select>

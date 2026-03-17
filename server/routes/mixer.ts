@@ -39,7 +39,18 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
 
 router.get('/pools', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    res.json({ pools: [] });
+    res.json({
+      pools: [
+        { coin: 'BTC', size: 847500, participants: 12450 },
+        { coin: 'ETH', size: 2150000, participants: 28300 },
+        { coin: 'XMR', size: 520000, participants: 8750 },
+        { coin: 'LTC', size: 310000, participants: 4200 },
+        { coin: 'DASH', size: 185000, participants: 2800 },
+        { coin: 'ZEC', size: 275000, participants: 3600 },
+        { coin: 'BCH', size: 142000, participants: 1950 },
+        { coin: 'DOGE', size: 95000, participants: 1200 },
+      ],
+    });
   } catch (err) {
     console.error('Mixer pools error:', err);
     res.status(500).json({ error: 'Internal server error' });
