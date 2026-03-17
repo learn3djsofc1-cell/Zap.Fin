@@ -86,6 +86,15 @@ router.post('/password', async (req: AuthRequest, res: Response): Promise<void> 
   }
 });
 
+router.get('/2fa', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    res.json({ enabled: false });
+  } catch (err) {
+    console.error('Settings 2FA status error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.post('/2fa', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { enabled } = req.body;

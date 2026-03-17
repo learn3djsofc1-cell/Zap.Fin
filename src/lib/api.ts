@@ -252,6 +252,7 @@ export const api = {
       request<{ profile: UserProfile }>('/settings/profile', { method: 'PATCH', body: JSON.stringify(body) }),
     changePassword: (body: { currentPassword: string; newPassword: string }) =>
       request<{ success: boolean }>('/settings/password', { method: 'POST', body: JSON.stringify(body) }),
+    get2FAStatus: () => request<{ enabled: boolean }>('/settings/2fa'),
     toggle2FA: (enabled: boolean) =>
       request<{ twoFactor: TwoFactorResponse }>('/settings/2fa', { method: 'POST', body: JSON.stringify({ enabled }) }),
     sessions: () => request<{ sessions: UserSession[] }>('/settings/sessions'),

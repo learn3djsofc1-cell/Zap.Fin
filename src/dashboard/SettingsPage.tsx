@@ -103,6 +103,9 @@ export default function SettingsPage() {
   useEffect(() => {
     if (activeTab === 'security') {
       loadSessions();
+      api.settings.get2FAStatus()
+        .then((data) => setTwoFaEnabled(data.enabled))
+        .catch(() => {});
     }
   }, [activeTab]);
 
