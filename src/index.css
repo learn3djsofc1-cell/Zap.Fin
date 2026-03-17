@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
 }
 
 html, body {
@@ -29,8 +29,8 @@ html, body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 105, 64, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(255, 105, 64, 0.25); }
+  0%, 100% { box-shadow: 0 0 20px rgba(10, 245, 214, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(10, 245, 214, 0.25); }
 }
 
 @keyframes shimmer {

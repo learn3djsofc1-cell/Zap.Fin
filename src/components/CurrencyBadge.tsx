@@ -22,7 +22,7 @@ export default function CurrencyBadge({ currency, size = 'sm', showLabel = true,
         <img src={logo} alt={currency} className={`${iconSize} object-contain`} />
       ) : null}
       {showLabel && (
-        <span className={`${textSize} font-bold text-[#FF6940]`}>{currency}</span>
+        <span className={`${textSize} font-bold text-[#0AF5D6]`}>{currency}</span>
       )}
     </span>
   );
@@ -47,7 +47,7 @@ export function CurrencySelect({ value, onChange, currencies = ['USDC', 'SOL', '
             onClick={() => onChange(c)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
               value === c
-                ? 'bg-[#FF6940]/15 text-[#FF6940] border border-[#FF6940]/30'
+                ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                 : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
             }`}
           >
@@ -86,7 +86,7 @@ export function CurrencyToggle({ selected, onChange, currencies = ['USDC', 'SOL'
             onClick={() => toggle(c)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
               selected.includes(c)
-                ? 'bg-[#FF6940]/15 text-[#FF6940] border border-[#FF6940]/30'
+                ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                 : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
             }`}
           >

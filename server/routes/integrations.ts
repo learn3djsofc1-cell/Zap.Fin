@@ -9,7 +9,7 @@ const AVAILABLE_PROVIDERS = [
   {
     id: 'openclaw',
     name: 'OpenClaw',
-    description: 'MCP-based agent framework connector. Enable your AI agents to interact with Molt.Fin through the Model Context Protocol.',
+    description: 'MCP-based agent framework connector. Enable your AI agents to interact with GhostLane through the Model Context Protocol.',
     category: 'agent-framework',
     configFields: ['mcp_endpoint', 'agent_id'],
   },

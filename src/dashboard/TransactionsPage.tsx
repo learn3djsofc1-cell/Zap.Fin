@@ -101,7 +101,7 @@ export default function TransactionsPage() {
             {loading ? 'Loading...' : `${total} total`}
           </p>
         </div>
-        <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
+        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
           <Plus size={16} /> New Transaction
         </button>
       </div>
@@ -114,7 +114,7 @@ export default function TransactionsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by agent, recipient, or hash..."
-            className="w-full bg-[#0D0E12] border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/30 transition-colors"
+            className="w-full bg-[#0A0A0A] border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/30 transition-colors"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function TransactionsPage() {
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-colors ${
-                filter === f ? 'bg-[#FF6940]/10 text-[#FF6940]' : 'text-gray-500 hover:text-gray-300 bg-white/[0.02]'
+                filter === f ? 'bg-[#0AF5D6]/10 text-[#0AF5D6]' : 'text-gray-500 hover:text-gray-300 bg-white/[0.02]'
               }`}
             >
               {f}
@@ -133,7 +133,7 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      <div className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] overflow-hidden">
+      <div className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] overflow-hidden">
         {loading ? (
           <table className="w-full text-sm">
             <tbody>
@@ -150,7 +150,7 @@ export default function TransactionsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#111318]">
+                <tr className="bg-[#111111]">
                   <th className="text-left text-gray-500 font-medium px-6 py-3 text-xs uppercase tracking-wider">TX Hash</th>
                   <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Agent</th>
                   <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden sm:table-cell">Recipient</th>
@@ -164,7 +164,7 @@ export default function TransactionsPage() {
                 {transactions.map((tx) => (
                   <tr key={tx.id} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-3.5">
-                      <span className="text-[#FF6940] text-xs font-mono">{tx.tx_hash?.slice(0, 12) || '-'}</span>
+                      <span className="text-[#0AF5D6] text-xs font-mono">{tx.tx_hash?.slice(0, 12) || '-'}</span>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="text-white text-xs font-medium">{tx.agent_name || '-'}</span>
@@ -236,7 +236,7 @@ export default function TransactionsPage() {
             <select
               value={formAgentId}
               onChange={(e) => setFormAgentId(e.target.value)}
-              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
             >
               <option value="">No agent</option>
               {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -249,7 +249,7 @@ export default function TransactionsPage() {
               value={formRecipient}
               onChange={(e) => setFormRecipient(e.target.value)}
               placeholder="e.g. vendor_alpha"
-              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -262,7 +262,7 @@ export default function TransactionsPage() {
                 value={formAmount}
                 onChange={(e) => setFormAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
               />
             </div>
             <div>
@@ -280,7 +280,7 @@ export default function TransactionsPage() {
             <button
               onClick={handleCreate}
               disabled={saving}
-              className="bg-[#FF6940] hover:bg-[#E85C38] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+              className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
             >
               {saving ? 'Creating...' : 'Create Transaction'}
             </button>

@@ -1,13 +1,13 @@
 const API_BASE = '/api';
 
-let authToken: string | null = localStorage.getItem('moltfin_token');
+let authToken: string | null = localStorage.getItem('ghostlane_token');
 
 export function setToken(token: string | null) {
   authToken = token;
   if (token) {
-    localStorage.setItem('moltfin_token', token);
+    localStorage.setItem('ghostlane_token', token);
   } else {
-    localStorage.removeItem('moltfin_token');
+    localStorage.removeItem('ghostlane_token');
   }
 }
 

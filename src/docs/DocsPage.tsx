@@ -1,13 +1,13 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, Wallet, Code2, Zap, Shield, Cpu, HelpCircle, BookOpen, Menu, X, Terminal } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Shield, Code2, Zap, Lock, HelpCircle, BookOpen, Menu, X, Terminal } from 'lucide-react';
 
 const sections = [
   { id: 'overview', title: 'Platform Overview', icon: <BookOpen size={16} /> },
   { id: 'getting-started', title: 'Getting Started', icon: <Terminal size={16} /> },
-  { id: 'agent-accounts', title: 'Agent Accounts', icon: <Wallet size={16} /> },
-  { id: 'settlement', title: 'Settlement Engine', icon: <Zap size={16} /> },
-  { id: 'policies', title: 'Policy Framework', icon: <Shield size={16} /> },
+  { id: 'mixer', title: 'Privacy Mixer', icon: <Lock size={16} /> },
+  { id: 'ux402', title: 'Ux402 Protocol', icon: <Zap size={16} /> },
+  { id: 'security', title: 'Security Framework', icon: <Shield size={16} /> },
   { id: 'sdk', title: 'SDK Reference', icon: <Code2 size={16} /> },
   { id: 'faq', title: 'FAQ', icon: <HelpCircle size={16} /> },
 ];
@@ -22,7 +22,7 @@ function SidebarNav({ activeSection, onSelect }: { activeSection: string; onSele
           onClick={onSelect}
           className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
             activeSection === s.id
-              ? 'bg-[#FF6940]/10 text-[#FF6940]'
+              ? 'bg-[#0AF5D6]/10 text-[#0AF5D6]'
               : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -58,13 +58,13 @@ export default function DocsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#08090C] font-sans">
-      <header className="sticky top-0 z-50 bg-[#08090C]/90 backdrop-blur-xl border-b border-white/[0.04]">
+    <div className="min-h-screen bg-[#000000] font-sans">
+      <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-white/[0.04]">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-              <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-8 h-8 rounded-lg object-cover" />
-              <span className="text-xl font-bold tracking-tight text-white">Molt.Fin</span>
+              <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
+              <span className="text-xl font-bold tracking-tight text-white">GhostLane</span>
             </Link>
             <ChevronRight size={14} className="text-gray-600 hidden sm:block" />
             <span className="text-gray-400 text-sm font-medium hidden sm:block">Documentation</span>
@@ -82,7 +82,7 @@ export default function DocsPage() {
 
       {mobileNav && (
         <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setMobileNav(false)}>
-          <div className="absolute top-[65px] left-0 w-72 h-[calc(100vh-65px)] bg-[#0D0E12] border-r border-white/[0.04] p-5 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute top-[65px] left-0 w-72 h-[calc(100vh-65px)] bg-[#0A0A0A] border-r border-white/[0.04] p-5 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <SidebarNav activeSection={activeSection} onSelect={() => setMobileNav(false)} />
           </div>
         </div>
@@ -99,155 +99,132 @@ export default function DocsPage() {
         <main className="flex-1 min-w-0 py-8 pb-24">
           <div className="max-w-3xl">
             <div className="mb-12">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">Molt.Fin Documentation</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">GhostLane Documentation</h1>
               <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
-                Complete reference for the Molt.Fin platform. Learn how to create agent accounts, configure spending policies, integrate the SDK, and manage settlement operations.
+                Complete reference for the GhostLane privacy platform. Learn how to use the mixer, integrate the Ux402 protocol, configure security policies, and access the SDK.
               </p>
             </div>
 
             <Section id="overview" title="Platform Overview">
               <P>
-                Molt.Fin is a financial infrastructure platform built on the Solana blockchain, purpose-designed for autonomous AI agents. It provides programmable bank accounts, sub-second settlement, and cryptographic policy enforcement, enabling AI systems to hold, send, and manage funds without human intervention.
+                GhostLane is a complete privacy ecosystem built for cryptocurrency users who value financial confidentiality. It combines advanced mixing technology, encrypted messaging, cross-chain privacy bridges, and VPN services into a unified platform powered by zero-knowledge cryptography.
               </P>
               <P>
-                The platform operates through four core modules: an agent account system, an instant settlement engine, a policy enforcement layer, and native SDK tooling. Each module is designed for programmatic interaction, with no UI-dependent workflows.
+                The platform operates through four core products: a privacy mixer with zero-knowledge proofs, an encrypted messenger with disappearing messages, a cross-chain privacy bridge, and a military-grade VPN with Tor integration.
               </P>
               <H3>Architecture</H3>
               <P>
-                Molt.Fin follows a decentralized settlement model. Agent accounts are represented as on-chain programs on Solana, ensuring transparency and auditability. Policy rules are encoded as smart contract constraints, meaning spending limits and merchant whitelists are enforced cryptographically rather than through centralized middleware.
+                GhostLane uses a decentralized architecture with distributed nodes across the globe. Zero-knowledge proofs (zk-SNARKs) ensure transaction privacy while maintaining verifiability. No logs are stored, and the infrastructure has no single point of failure.
               </P>
               <H3>Key Capabilities</H3>
               <UL>
-                <LI>Programmable agent bank accounts with multi-currency support (USDC, SOL, ETH)</LI>
-                <LI>Sub-400ms transaction settlement with on-chain finality</LI>
-                <LI>Cryptographic spending policies: velocity limits, merchant whitelists, multi-sig thresholds</LI>
-                <LI>Native MCP integration for conversational financial operations</LI>
-                <LI>TypeScript and Python SDKs with type-safe API surfaces</LI>
-                <LI>Verifiable on-chain audit trail for every transaction</LI>
+                <LI>Advanced cryptocurrency mixing with zero-knowledge proofs across 15+ chains</LI>
+                <LI>End-to-end encrypted messaging with self-destructing messages</LI>
+                <LI>Cross-chain asset transfers with complete anonymity</LI>
+                <LI>Military-grade VPN with Tor integration and kill switch</LI>
+                <LI>Ux402 Protocol for untraceable cross-chain transactions on Solana</LI>
+                <LI>TypeScript, Python, and Rust SDKs for developer integration</LI>
               </UL>
             </Section>
 
             <Section id="getting-started" title="Getting Started">
               <H3>Installation</H3>
               <P>
-                Install the Molt.Fin SDK using your preferred package manager. The SDK supports Node.js 18+ and Python 3.10+.
+                Install the GhostLane SDK using your preferred package manager. The SDK supports Node.js 18+ and Python 3.10+.
               </P>
-              <CodeBlock code={`# Node.js / TypeScript\nnpm install @moltfin/sdk\n\n# Python\npip install moltfin`} />
+              <CodeBlock code={`# Node.js / TypeScript\nnpm install @ghostlane/sdk\n\n# Python\npip install ghostlane`} />
               <H3>Initialization</H3>
               <P>
-                Create a Molt.Fin client instance with your API key. API keys are generated from the Molt.Fin developer dashboard and scoped to specific environments (sandbox or production).
+                Create a GhostLane client instance with your API key. API keys are generated from the GhostLane dashboard and scoped to specific environments (sandbox or production).
               </P>
-              <CodeBlock code={`import { MoltFin } from '@moltfin/sdk';\n\nconst moltfin = new MoltFin('mf_live_your_api_key');\n\n// Verify connection\nconst status = await moltfin.health();\nconsole.log(status); // { ok: true, latency: '12ms' }`} />
+              <CodeBlock code={`import { GhostLane } from '@ghostlane/sdk';\n\nconst client = new GhostLane('gl_live_your_api_key');\n\n// Verify connection\nconst status = await client.health();\nconsole.log(status); // { ok: true, latency: '12ms' }`} />
               <Callout type="info" title="Sandbox Environment">
-                Use the sandbox API key prefix <code className="text-[#FF6940] bg-[#FF6940]/5 px-1.5 py-0.5 rounded text-xs">mf_test_</code> for development. Sandbox transactions settle immediately but do not move real funds.
+                Use the sandbox API key prefix <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">gl_test_</code> for development. Sandbox transactions execute immediately but do not use real funds.
               </Callout>
             </Section>
 
-            <Section id="agent-accounts" title="Agent Accounts">
-              <H3>Creating an Agent Account</H3>
+            <Section id="mixer" title="Privacy Mixer">
+              <H3>How Mixing Works</H3>
               <P>
-                Each AI agent receives its own dedicated bank account. Accounts are isolated: one agent cannot access another agent's funds. Multi-currency support allows agents to hold USDC, SOL, and ETH simultaneously.
+                The GhostLane mixer uses advanced zero-knowledge proofs to break the link between deposit and withdrawal addresses. Assets enter a mixing pool where they are combined with other users' funds, making it impossible to trace the origin of any withdrawal.
               </P>
-              <CodeBlock code={`const account = await moltfin.accounts.create({\n  agentId: 'trading_bot_01',\n  currency: 'USDC',\n  initialDeposit: 10000,\n  metadata: { purpose: 'Market making' }\n});\n\nconsole.log(account.address); // 'mf_acct_7Kv2...'\nconsole.log(account.balance); // 10000`} />
-              <H3>Account Operations</H3>
-              <P>
-                Agent accounts support standard financial operations: deposits, withdrawals, transfers between agents, and payments to external merchants. All operations are atomic and produce verifiable on-chain receipts.
-              </P>
+              <CodeBlock code={`const mix = await client.mixer.create({\n  asset: 'ETH',\n  amount: '1.5',\n  delay: 'random',\n  privacyLevel: 'maximum',\n});\n\nconsole.log(mix.status); // 'mixing'\nconsole.log(mix.estimatedCompletion); // '~2 minutes'`} />
+              <H3>Privacy Levels</H3>
               <Table
-                headers={['Operation', 'Method', 'Latency']}
+                headers={['Level', 'Anonymity Set', 'Typical Delay']}
                 rows={[
-                  ['Deposit', 'account.deposit(amount)', '<100ms'],
-                  ['Withdraw', 'account.withdraw(amount, to)', '<400ms'],
-                  ['Transfer', 'account.transfer(toAgent, amount)', '<400ms'],
-                  ['Payment', 'account.send({ to, amount })', '<400ms'],
-                  ['Balance', 'account.balance()', '<50ms'],
+                  ['Standard', '100+ participants', '< 1 minute'],
+                  ['Enhanced', '500+ participants', '1-5 minutes'],
+                  ['Maximum', '1000+ participants', '5-30 minutes'],
                 ]}
               />
             </Section>
 
-            <Section id="settlement" title="Settlement Engine">
-              <H3>How Settlement Works</H3>
+            <Section id="ux402" title="Ux402 Protocol">
+              <H3>Shielded Cross-Chain Facilitator</H3>
               <P>
-                Molt.Fin settles transactions on the Solana blockchain for sub-400ms finality. When an agent initiates a payment, the settlement engine validates the transaction against the agent's policy rules, executes the on-chain transfer, and returns a cryptographic receipt, all within a single Solana block.
+                The Ux402 Protocol is the world's first untraceable x402 implementation, enabling complete transaction privacy across blockchains. Built on Solana for speed and low cost, it uses multi-hop routing through privacy pools.
               </P>
-              <H3>Settlement Flow</H3>
-              <UL>
-                <LI><strong>Step 1: Initiation.</strong> Agent calls <code className="text-[#FF6940] bg-[#FF6940]/5 px-1.5 py-0.5 rounded text-xs">account.send()</code> with recipient and amount</LI>
-                <LI><strong>Step 2: Policy check.</strong> The on-chain policy program validates against spending rules (~12ms)</LI>
-                <LI><strong>Step 3: Settlement.</strong> Funds transfer on Solana with cryptographic finality (~340ms)</LI>
-                <LI><strong>Step 4: Receipt.</strong> Transaction receipt returned with on-chain proof (~380ms total)</LI>
-              </UL>
-              <H3>Settlement Parameters</H3>
-              <Table
-                headers={['Parameter', 'Value']}
-                rows={[
-                  ['Average latency', '<400ms'],
-                  ['Finality', 'Cryptographic (Solana consensus)'],
-                  ['Settlement currency', 'USDC, SOL, ETH'],
-                  ['Network fees', '~0.0001 SOL per transaction'],
-                  ['Throughput', '~65,000 TPS (Solana limit)'],
-                ]}
-              />
+              <CodeBlock code={`import { Ux402Client } from '@ghostlane/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.ghostlane.io/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'solana',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n});`} />
+              <H3>Supported Chains</H3>
+              <P>
+                Ux402 currently supports cross-chain transfers between 15+ blockchains including Ethereum, Solana, Bitcoin, Polygon, Avalanche, Arbitrum, and more.
+              </P>
             </Section>
 
-            <Section id="policies" title="Policy Framework">
-              <H3>Defining Spending Rules</H3>
+            <Section id="security" title="Security Framework">
+              <H3>Zero-Knowledge Architecture</H3>
               <P>
-                Policies are cryptographic rules attached to agent accounts. They are validated on-chain before every transaction, meaning policy enforcement cannot be bypassed by application-level bugs or compromised middleware.
+                GhostLane's security is built on zero-knowledge proofs that ensure no party — including GhostLane itself — can link deposits to withdrawals. All cryptographic operations are verified on-chain.
               </P>
-              <CodeBlock code={`const policy = await moltfin.policies.create({\n  agentId: 'trading_bot_01',\n  rules: {\n    maxPerTransaction: 500,\n    dailyLimit: 5000,\n    allowedMerchants: ['vendor_a', 'vendor_b'],\n    requireMultiSig: false,\n    allowedCurrencies: ['USDC']\n  }\n});\n\n// Policies are enforced on-chain\n// Attempting to exceed limits returns PolicyViolation error`} />
-              <H3>Available Policy Rules</H3>
+              <H3>Security Measures</H3>
               <Table
-                headers={['Rule', 'Type', 'Description']}
+                headers={['Measure', 'Implementation']}
                 rows={[
-                  ['maxPerTransaction', 'number', 'Maximum amount per single transaction'],
-                  ['dailyLimit', 'number', 'Maximum total spend within 24-hour window'],
-                  ['monthlyLimit', 'number', 'Maximum total spend within 30-day window'],
-                  ['allowedMerchants', 'string[]', 'Whitelist of permitted payment recipients'],
-                  ['blockedMerchants', 'string[]', 'Blacklist of blocked payment recipients'],
-                  ['requireMultiSig', 'boolean', 'Require multi-signature approval for transactions'],
-                  ['multiSigThreshold', 'number', 'Number of signatures required (if multi-sig enabled)'],
-                  ['allowedCurrencies', 'string[]', 'Restrict transactions to specific currencies'],
+                  ['Encryption', 'AES-256-GCM for all data at rest and in transit'],
+                  ['Key Management', 'Multi-signature cold storage for treasury funds'],
+                  ['Infrastructure', 'Distributed nodes across 50+ countries'],
+                  ['Logging', 'Zero-log policy — no transaction data stored'],
+                  ['Network', 'Full Tor network compatibility'],
+                  ['Insurance', 'Insurance fund for asset protection'],
                 ]}
               />
-              <Callout type="warning" title="Policy Immutability">
-                Once a policy is active, it can only be replaced, not modified in place. This ensures that policy changes are auditable on-chain. Use <code className="text-amber-200 bg-amber-500/5 px-1.5 py-0.5 rounded text-xs">policies.replace()</code> to update an existing policy.
+              <Callout type="warning" title="Security Notice">
+                Never share your API keys or wallet private keys. GhostLane will never ask for your private keys. All mixing operations are non-custodial — you maintain full control of your assets.
               </Callout>
             </Section>
 
             <Section id="sdk" title="SDK Reference">
               <H3>TypeScript SDK</H3>
               <P>
-                The TypeScript SDK provides a fully typed interface to all Molt.Fin operations. It supports both ESM and CJS module systems and requires Node.js 18+.
+                The TypeScript SDK provides a fully typed interface to all GhostLane operations. It supports both ESM and CJS module systems and requires Node.js 18+.
               </P>
-              <CodeBlock code={`import { MoltFin } from '@moltfin/sdk';\n\nconst mf = new MoltFin('mf_live_...');\n\n// Accounts\nconst account = await mf.accounts.create({ agentId, currency });\nconst balance = await account.balance();\nconst tx = await account.send({ to, amount });\n\n// Policies\nconst policy = await mf.policies.create({ agentId, rules });\nconst updated = await mf.policies.replace({ agentId, rules });\n\n// Transactions\nconst history = await mf.transactions.list({ agentId, limit: 50 });\nconst receipt = await mf.transactions.get(txId);`} />
+              <CodeBlock code={`import { GhostLane } from '@ghostlane/sdk';\n\nconst gl = new GhostLane('gl_live_...');\n\n// Mixer\nconst mix = await gl.mixer.create({ asset, amount, privacyLevel });\nconst status = await gl.mixer.status(mix.id);\n\n// Bridge\nconst bridge = await gl.bridge.transfer({ from, to, amount, chain });\n\n// Messenger\nconst msg = await gl.messenger.send({ to, content, selfDestruct: '24h' });`} />
               <H3>Python SDK</H3>
               <P>
                 The Python SDK mirrors the TypeScript API surface with Pythonic naming conventions. It uses async/await for all I/O operations and supports Python 3.10+.
               </P>
-              <CodeBlock code={`from moltfin import MoltFin\n\nmf = MoltFin("mf_live_...")\n\n# Create agent account\naccount = await mf.accounts.create(\n    agent_id="trading_bot_01",\n    currency="USDC"\n)\n\n# Send payment\ntx = await account.send(to="vendor.moltfin", amount=249.99)\nprint(f"Settled in {tx.latency}ms")`} />
+              <CodeBlock code={`from ghostlane import GhostLane\n\ngl = GhostLane("gl_live_...")\n\n# Create mixing operation\nmix = await gl.mixer.create(\n    asset="ETH",\n    amount="1.5",\n    privacy_level="maximum"\n)\n\nstatus = await gl.mixer.status(mix.id)\nprint(f"Status: {status.state}")`} />
               <H3>Error Handling</H3>
               <Table
                 headers={['Error Code', 'Description', 'Resolution']}
                 rows={[
-                  ['PolicyViolation', 'Transaction violates spending policy', 'Check policy rules and transaction parameters'],
-                  ['InsufficientBalance', 'Account lacks funds for transaction', 'Deposit additional funds before retrying'],
-                  ['InvalidRecipient', 'Recipient address not found', 'Verify the merchant or agent address'],
+                  ['InsufficientFunds', 'Not enough balance for operation', 'Deposit additional funds before retrying'],
+                  ['InvalidAsset', 'Asset not supported for mixing', 'Check supported assets list'],
+                  ['PoolUnavailable', 'Mixing pool temporarily at capacity', 'Retry after a short delay'],
                   ['RateLimited', 'Too many requests in time window', 'Implement exponential backoff'],
-                  ['SettlementTimeout', 'On-chain settlement did not finalize', 'Retry with idempotency key'],
+                  ['ChainUnavailable', 'Target blockchain temporarily unavailable', 'Check network status and retry'],
                 ]}
               />
             </Section>
 
             <Section id="faq" title="Frequently Asked Questions">
-              <FAQ q="What is Molt.Fin?" a="Molt.Fin is financial infrastructure designed specifically for AI agents. It provides programmable bank accounts, sub-second settlement on Solana, and cryptographic policy enforcement, enabling autonomous systems to manage money without human approval loops." />
-              <FAQ q="Is Molt.Fin a bank?" a="No. Molt.Fin is a financial technology platform. Agent accounts are on-chain representations of value, not traditional bank accounts. Funds are settled on the Solana blockchain and are not FDIC insured." />
-              <FAQ q="Which currencies are supported?" a="Molt.Fin currently supports USDC, SOL, and ETH. Additional currencies and stablecoins are on the roadmap." />
-              <FAQ q="How fast do transactions settle?" a="Transactions settle in under 400 milliseconds with cryptographic finality on the Solana blockchain. This is roughly 100x faster than traditional ACH or wire transfers." />
-              <FAQ q="Can I set spending limits on agents?" a="Yes. The policy framework allows you to define per-transaction limits, daily/monthly caps, merchant whitelists, and multi-signature requirements. Policies are enforced on-chain and cannot be bypassed." />
-              <FAQ q="Is there a sandbox for testing?" a="Yes. Use API keys with the mf_test_ prefix to access the sandbox environment. Sandbox transactions settle instantly but do not move real funds." />
-              <FAQ q="What agent frameworks are supported?" a="Molt.Fin is framework-agnostic. The SDK works with any TypeScript or Python application, including popular agent frameworks like LangChain, AutoGPT, and CrewAI. Native MCP integration is also available." />
-              <FAQ q="How are policies enforced?" a="Policies are compiled to Solana smart contract constraints. Before every transaction, the on-chain program validates the request against active policy rules. If any rule is violated, the transaction is rejected before funds move." />
+              <FAQ q="What is GhostLane?" a="GhostLane is a complete privacy ecosystem for cryptocurrency users. It provides advanced mixing, encrypted messaging, cross-chain privacy bridges, and VPN services — all powered by zero-knowledge cryptography." />
+              <FAQ q="Is using GhostLane legal?" a="GhostLane is a privacy tool, similar to encrypted messaging apps or VPNs. The legality of privacy tools varies by jurisdiction. We encourage users to comply with their local laws." />
+              <FAQ q="Which assets are supported?" a="GhostLane supports mixing for BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE, and more. The Ux402 protocol supports cross-chain transfers across 15+ blockchains." />
+              <FAQ q="How does the mixer ensure privacy?" a="The mixer uses zero-knowledge proofs (zk-SNARKs), ring signatures, and large anonymity sets to break the link between deposit and withdrawal addresses. No logs are stored." />
+              <FAQ q="Is there a sandbox for testing?" a="Yes. Use API keys with the gl_test_ prefix to access the sandbox environment. Sandbox operations execute instantly but do not use real funds." />
+              <FAQ q="What is the Ux402 Protocol?" a="Ux402 is our shielded cross-chain facilitator built on Solana. It enables untraceable asset transfers between blockchains using multi-hop routing through privacy pools." />
             </Section>
           </div>
         </main>
@@ -255,7 +232,7 @@ export default function DocsPage() {
 
       <footer className="border-t border-white/[0.04] py-6">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-[11px] text-gray-600">
-          <span>&copy; 2026 Molt.Fin. All rights reserved.</span>
+          <span>&copy; 2024 GhostLane. All rights reserved.</span>
           <Link to="/" className="text-gray-500 hover:text-white transition-colors text-xs">Back to Home</Link>
         </div>
       </footer>
@@ -290,7 +267,7 @@ function LI({ children }: { children: ReactNode }) {
 
 function CodeBlock({ code }: { code: string }) {
   return (
-    <div className="bg-[#0D0E12] rounded-xl border border-white/[0.04] p-5 mb-6 overflow-x-auto">
+    <div className="bg-[#0A0A0A] rounded-xl border border-white/[0.04] p-5 mb-6 overflow-x-auto">
       <pre className="text-[12px] sm:text-[13px] font-mono leading-relaxed text-gray-300 whitespace-pre">{code}</pre>
     </div>
   );
@@ -299,8 +276,8 @@ function CodeBlock({ code }: { code: string }) {
 function Callout({ type, title, children }: { type: 'warning' | 'info'; title: string; children: ReactNode }) {
   const styles = type === 'warning'
     ? 'bg-amber-500/5 border-amber-500/20 text-amber-200'
-    : 'bg-blue-500/5 border-blue-500/20 text-blue-200';
-  const labelColor = type === 'warning' ? 'text-amber-400' : 'text-blue-400';
+    : 'bg-[#0AF5D6]/5 border-[#0AF5D6]/20 text-[#0AF5D6]/80';
+  const labelColor = type === 'warning' ? 'text-amber-400' : 'text-[#0AF5D6]';
 
   return (
     <div className={`rounded-xl border p-5 mb-6 ${styles}`}>
@@ -315,7 +292,7 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
     <div className="overflow-x-auto mb-6 rounded-xl border border-white/[0.04]">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-[#111318]">
+          <tr className="bg-[#0A0A0A]">
             {headers.map((h, i) => (
               <th key={i} className="text-left text-gray-300 font-semibold px-4 py-3 text-xs uppercase tracking-wider">{h}</th>
             ))}

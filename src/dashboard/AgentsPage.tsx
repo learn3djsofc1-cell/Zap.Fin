@@ -114,7 +114,7 @@ export default function AgentsPage() {
             {loading ? 'Loading...' : `${activeCount} active, ${pausedCount} paused`}
           </p>
         </div>
-        <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
+        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
           <Plus size={16} /> Create Agent Account
         </button>
       </div>
@@ -129,7 +129,7 @@ export default function AgentsPage() {
           title="No agent accounts yet"
           description="Create your first AI agent account — a programmable bank account for autonomous financial operations."
           action={
-            <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
+            <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
               <Plus size={16} /> Create Agent Account
             </button>
           }
@@ -137,12 +137,12 @@ export default function AgentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {agents.map((agent) => (
-            <div key={agent.id} className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] hover:border-[#FF6940]/10 transition-colors overflow-hidden">
+            <div key={agent.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/10 transition-colors overflow-hidden">
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#FF6940]/8 flex items-center justify-center">
-                      <Bot size={18} className="text-[#FF6940]" />
+                    <div className="w-10 h-10 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center">
+                      <Bot size={18} className="text-[#0AF5D6]" />
                     </div>
                     <div>
                       <span className="text-white font-bold text-sm block">{agent.name}</span>
@@ -161,7 +161,7 @@ export default function AgentsPage() {
                         <MoreVertical size={14} />
                       </button>
                       {menuOpen === agent.id && (
-                        <div className="absolute right-0 top-8 bg-[#111318] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20 min-w-[140px]">
+                        <div className="absolute right-0 top-8 bg-[#111111] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20 min-w-[140px]">
                           <button
                             onClick={() => openEdit(agent)}
                             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/[0.04] transition-colors"
@@ -230,7 +230,7 @@ export default function AgentsPage() {
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               placeholder="e.g. payment_processor_01"
-              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
             />
           </div>
           <div>
@@ -240,7 +240,7 @@ export default function AgentsPage() {
               onChange={(e) => setFormPurpose(e.target.value)}
               placeholder="Describe what this agent account is used for"
               rows={3}
-              className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors resize-none"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors resize-none"
             />
           </div>
           {!editAgent && (
@@ -259,7 +259,7 @@ export default function AgentsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-[#FF6940] hover:bg-[#E85C38] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+              className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
             >
               {saving ? 'Saving...' : editAgent ? 'Update' : 'Create'}
             </button>

@@ -38,7 +38,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
     const validEnvs = ['live', 'test'];
     const env = typeof environment === 'string' && validEnvs.includes(environment) ? environment : 'live';
 
-    const prefix = env === 'test' ? 'mf_test_' : 'mf_live_';
+    const prefix = env === 'test' ? 'gl_test_' : 'gl_live_';
     const rawKey = crypto.randomBytes(24).toString('base64url');
     const fullKey = `${prefix}${rawKey}`;
     const displayPrefix = fullKey.slice(0, 12) + '...';

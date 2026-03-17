@@ -14,7 +14,7 @@ const navItems = [
 
 const linkClass = (isActive: boolean) =>
   `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-    isActive ? 'bg-[#FF6940]/10 text-[#FF6940]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+    isActive ? 'bg-[#0AF5D6]/10 text-[#0AF5D6]' : 'text-gray-400 hover:text-white hover:bg-white/5'
   }`;
 
 export default function DashboardLayout() {
@@ -28,12 +28,12 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#08090C] font-sans flex">
-      <aside className="hidden md:flex flex-col w-64 border-r border-white/[0.04] bg-[#08090C] shrink-0 sticky top-0 h-screen">
+    <div className="min-h-screen bg-[#000000] font-sans flex">
+      <aside className="hidden md:flex flex-col w-64 border-r border-white/[0.04] bg-[#000000] shrink-0 sticky top-0 h-screen">
         <div className="p-5 border-b border-white/[0.04]">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-8 h-8 rounded-lg object-cover" />
-            <span className="text-lg font-bold tracking-tight text-white">Molt.Fin</span>
+            <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
+            <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
           </Link>
         </div>
         <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
@@ -67,15 +67,15 @@ export default function DashboardLayout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-40 bg-[#08090C]/90 backdrop-blur-xl border-b border-white/[0.04] px-5 sm:px-6 py-4 flex items-center justify-between md:justify-end">
+        <header className="sticky top-0 z-40 bg-[#000000]/90 backdrop-blur-xl border-b border-white/[0.04] px-5 sm:px-6 py-4 flex items-center justify-between md:justify-end">
           <div className="flex items-center gap-2.5 md:hidden">
-            <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-7 h-7 rounded-lg object-cover" />
-            <span className="text-base font-bold tracking-tight text-white">Molt.Fin</span>
+            <img src="/ghostlane-logo.png" alt="GhostLane" className="w-7 h-7 rounded-lg object-cover" />
+            <span className="text-base font-bold tracking-tight text-white">GhostLane</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 bg-[#FF6940]/8 border border-[#FF6940]/15 rounded-lg px-3 py-1.5">
+            <div className="hidden md:flex items-center gap-2 bg-[#0AF5D6]/8 border border-[#0AF5D6]/15 rounded-lg px-3 py-1.5">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[#FF6940] text-xs font-semibold">Live</span>
+              <span className="text-[#0AF5D6] text-xs font-semibold">Live</span>
             </div>
             <button className="md:hidden text-gray-400 hover:text-white p-1.5" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -85,11 +85,11 @@ export default function DashboardLayout() {
 
         {mobileOpen && (
           <div className="fixed inset-0 z-50 bg-black/60 md:hidden" onClick={() => setMobileOpen(false)}>
-            <div className="absolute top-0 left-0 w-72 h-full bg-[#0D0E12] border-r border-white/[0.04] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 w-72 h-full bg-[#0A0A0A] border-r border-white/[0.04] flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
                 <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-                  <img src="/moltfin-logo.png" alt="Molt.Fin" className="w-8 h-8 rounded-lg object-cover" />
-                  <span className="text-lg font-bold tracking-tight text-white">Molt.Fin</span>
+                  <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
+                  <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
                 </Link>
                 <button className="text-gray-400 hover:text-white p-1" onClick={() => setMobileOpen(false)}>
                   <X size={20} />
@@ -131,7 +131,7 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
 
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0D0E12]/95 backdrop-blur-xl border-t border-white/[0.04] md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/[0.04] md:hidden">
           <div className="flex items-center justify-around py-2">
             {navItems.filter(item => item.group === 'Platform').map((item) => (
               <NavLink
@@ -140,7 +140,7 @@ export default function DashboardLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   `flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[10px] font-medium transition-colors ${
-                    isActive ? 'text-[#FF6940]' : 'text-gray-500'
+                    isActive ? 'text-[#0AF5D6]' : 'text-gray-500'
                   }`
                 }
               >

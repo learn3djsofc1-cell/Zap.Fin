@@ -41,7 +41,7 @@ export default function OverviewPage() {
   const statCards = stats ? [
     { label: 'Agent Accounts', value: String(stats.activeAgents), icon: Bot, color: 'text-blue-400', bg: 'bg-blue-400/8' },
     { label: 'Transactions (24h)', value: String(stats.transactions24h), icon: ArrowLeftRight, color: 'text-green-400', bg: 'bg-green-400/8' },
-    { label: 'Total Volume', value: formatCurrency(stats.totalVolume), icon: DollarSign, color: 'text-[#FF6940]', bg: 'bg-[#FF6940]/8' },
+    { label: 'Total Volume', value: formatCurrency(stats.totalVolume), icon: DollarSign, color: 'text-[#0AF5D6]', bg: 'bg-[#0AF5D6]/8' },
     { label: 'Avg Settlement', value: stats.avgSettlementMs > 0 ? `${stats.avgSettlementMs}ms` : '-', icon: Timer, color: 'text-purple-400', bg: 'bg-purple-400/8' },
   ] : [];
 
@@ -57,7 +57,7 @@ export default function OverviewPage() {
           Array.from({ length: 4 }).map((_, i) => <StatSkeleton key={i} />)
         ) : (
           statCards.map((s) => (
-            <div key={s.label} className="bg-[#0D0E12] rounded-2xl p-5 border border-white/[0.04]">
+            <div key={s.label} className="bg-[#0A0A0A] rounded-2xl p-5 border border-white/[0.04]">
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
                   <s.icon size={18} className={s.color} />
@@ -70,9 +70,9 @@ export default function OverviewPage() {
         )}
       </div>
 
-      <div className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] overflow-hidden">
+      <div className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-white/[0.04]">
-          <Activity size={16} className="text-[#FF6940]" />
+          <Activity size={16} className="text-[#0AF5D6]" />
           <span className="text-white text-sm font-bold">Recent Activity</span>
           {!loading && <span className="text-gray-600 text-xs ml-auto">{activity.length} transactions</span>}
         </div>
@@ -93,7 +93,7 @@ export default function OverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#111318]">
+                <tr className="bg-[#111111]">
                   <th className="text-left text-gray-500 font-medium px-6 py-3 text-xs uppercase tracking-wider">Agent</th>
                   <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider hidden sm:table-cell">Recipient</th>
                   <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Amount</th>

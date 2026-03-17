@@ -10,7 +10,7 @@ function getJwtSecret(): string {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('JWT_SECRET must be set and at least 32 characters in production');
     }
-    return 'moltfin-dev-jwt-secret-not-for-production-use-only';
+    return 'ghostlane-dev-jwt-secret-not-for-production-use-only';
   }
   return secret;
 }

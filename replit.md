@@ -1,6 +1,6 @@
-# Molt.Fin
+# GhostLane
 
-AI-agent banking infrastructure platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page, documentation, and a full dashboard for managing AI agents.
+Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page, documentation, and a full dashboard for managing privacy operations.
 
 ## Tech Stack
 
@@ -8,9 +8,9 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 - **Build Tool**: Vite 6
 - **Routing**: React Router DOM v7 (client-side SPA routing)
 - **Styling**: Tailwind CSS v4 (via @tailwindcss/vite)
-- **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations, parallax code mockup)
+- **Animations**: Framer Motion (scroll-triggered section transitions, staggered card reveals, hero entrance animations, parallax effects)
 - **Icons**: Lucide React
-- **Font**: Outfit (Google Fonts) set as --font-sans in index.css
+- **Font**: Chakra Petch (Google Fonts) set as --font-sans in index.css
 - **Backend**: Express 4 with TypeScript (run via tsx)
 - **Database**: PostgreSQL (Replit built-in)
 - **Auth**: JWT (jsonwebtoken) + bcryptjs for password hashing
@@ -18,13 +18,14 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 
 ## Brand
 
-- **Name**: Molt.Fin
-- **Domain**: https://moltfin.app
-- **Main Accent**: #FF6940
-- **Background**: #08090C (hero/features), #0D0E12 (cards/sections)
-- **Font**: Outfit (Google Fonts)
-- **Logo**: public/moltfin-logo.png (lobster mascot)
-- **Social**: X/Twitter at https://x.com/MoltFinApp
+- **Name**: GhostLane
+- **Main Accent**: #0AF5D6 (cyan), hover: #08D4B8
+- **Background**: #000000 (primary), #0A0A0A (cards/sections), #050505 (alternate sections)
+- **Font**: Chakra Petch (Google Fonts)
+- **Logo**: public/ghostlane-logo.png
+- **Social**: X/Twitter at https://x.com/GhostLane_
+- **API Key Prefixes**: gl_live_ (production), gl_test_ (sandbox)
+- **localStorage Token Key**: ghostlane_token
 
 ## Project Structure
 
@@ -33,8 +34,8 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 ├── index.html              # HTML entry point with SEO meta, OG/Twitter cards, structured data
 ├── src/
 │   ├── main.tsx            # React entry with BrowserRouter, Routes, AuthProvider, ToastProvider
-│   ├── App.tsx             # Landing page
-│   ├── index.css           # Global styles, animations, scrollbar
+│   ├── App.tsx             # Landing page (Hero, Products, Ux402 Protocol, Why, How It Works, Technology, Supported Assets, Comparison, Security, FAQ, CTA, Footer)
+│   ├── index.css           # Global styles, animations, scrollbar, Chakra Petch font
 │   ├── auth/
 │   │   ├── LoginPage.tsx   # /login - Sign in form
 │   │   └── SignupPage.tsx  # /signup - Registration form
@@ -46,23 +47,22 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 │   │   ├── Modal.tsx       # Reusable modal dialog
 │   │   ├── ConfirmDialog.tsx # Delete confirmation dialog
 │   │   ├── Skeleton.tsx    # Loading skeleton components
+│   │   ├── CurrencyBadge.tsx # Currency display with logos
+│   │   ├── ErrorBoundary.tsx # Error boundary component
 │   │   └── EmptyState.tsx  # Empty state placeholder
 │   ├── docs/
 │   │   └── DocsPage.tsx    # /docs - Full platform documentation
 │   └── dashboard/
 │       ├── DashboardLayout.tsx  # Sidebar + bottom nav layout with Outlet, logout
-│       ├── OverviewPage.tsx     # /app - Agent stats + recent activity (real API)
+│       ├── OverviewPage.tsx     # /app - Stats + recent activity (real API)
 │       ├── AgentsPage.tsx       # /app/agents - Full CRUD agent management (real API)
 │       ├── TransactionsPage.tsx # /app/transactions - Transaction list + create (real API)
 │       ├── PoliciesPage.tsx     # /app/policies - Full CRUD policy management (real API)
 │       ├── ApiKeysPage.tsx     # /app/api-keys - API key management (create/revoke)
 │       └── IntegrationsPage.tsx # /app/integrations - OpenClaw + Claude integration config
 ├── public/
-│   ├── moltfin-logo.png    # Lobster mascot logo
-│   ├── solana-logo.png     # Partner logo
-│   ├── usdc-logo-new.png   # Partner logo
-│   ├── mastercard-logo.png # Partner logo
-│   └── aws-logo.png        # Partner logo
+│   ├── ghostlane-logo.png  # GhostLane brand logo
+│   └── ...                 # Favicons and other static assets
 ├── server/
 │   ├── index.ts            # Express server entry: initializes DB, mounts all API routes
 │   ├── db.ts               # PostgreSQL connection pool (pg)
@@ -73,6 +73,8 @@ AI-agent banking infrastructure platform built with React, Vite, TypeScript, and
 │   │   ├── agents.ts       # CRUD /api/agents
 │   │   ├── transactions.ts # GET+POST /api/transactions (immutable records)
 │   │   ├── policies.ts     # CRUD /api/policies
+│   │   ├── apiKeys.ts      # API key management routes
+│   │   ├── integrations.ts # Integration configuration routes
 │   │   └── overview.ts     # GET /api/overview (aggregated stats)
 │   └── tsconfig.json       # Server TS config
 ├── vite.config.ts          # Vite config with /api proxy to Express
@@ -132,7 +134,7 @@ Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyB
 
 ## Auth System
 
-- JWT stored in localStorage key `moltfin_token` with 7-day expiry
+- JWT stored in localStorage key `ghostlane_token` with 7-day expiry
 - API client auto-injects Authorization header and redirects to /login on 401
 - ProtectedRoute component wraps /app/* routes, redirecting unauthenticated users
 - Passwords hashed with bcryptjs (10 rounds)
@@ -156,7 +158,7 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - **RevealOnScroll**: Directional (up/down/left/right) fade+translate with `useInView`
 - **ScaleReveal**: Scale-up fade with `useInView`
 - **StaggerWrap**: Staggered children reveal using `motion` variants
-- **Hero parallax**: `useScroll` + `useTransform` for code mockup vertical offset
+- **Hero parallax**: `useScroll` + `useTransform` for vertical offset
 
 ## Environment Variables
 

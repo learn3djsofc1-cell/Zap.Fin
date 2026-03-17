@@ -110,18 +110,18 @@ export default function ApiKeysPage() {
             {loading ? 'Loading...' : `${activeKeys.length} active key${activeKeys.length !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#FF6940]/20 self-start sm:self-auto">
+        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
           <Plus size={16} /> Create API Key
         </button>
       </div>
 
-      <div className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] p-5 mb-6">
+      <div className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] p-5 mb-6">
         <div className="flex items-start gap-3">
-          <Shield size={16} className="text-[#FF6940] mt-0.5 shrink-0" />
+          <Shield size={16} className="text-[#0AF5D6] mt-0.5 shrink-0" />
           <div>
             <span className="text-white text-sm font-semibold block mb-1">API Key Security</span>
             <p className="text-gray-500 text-xs leading-relaxed">
-              API keys grant programmatic access to your Molt.Fin account. Keys prefixed with <code className="text-[#FF6940]">mf_live_</code> access production data. Keys prefixed with <code className="text-[#FF6940]">mf_test_</code> are sandboxed. The full key is only shown once at creation — store it securely.
+              API keys grant programmatic access to your GhostLane account. Keys prefixed with <code className="text-[#0AF5D6]">gl_live_</code> access production data. Keys prefixed with <code className="text-[#0AF5D6]">gl_test_</code> are sandboxed. The full key is only shown once at creation — store it securely.
             </p>
           </div>
         </div>
@@ -135,9 +135,9 @@ export default function ApiKeysPage() {
         <EmptyState
           icon={<Key size={28} />}
           title="No API keys yet"
-          description="Create an API key to integrate Molt.Fin into your applications."
+          description="Create an API key to integrate GhostLane into your applications."
           action={
-            <button onClick={openCreate} className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
+            <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
               <Plus size={16} /> Create API Key
             </button>
           }
@@ -145,11 +145,11 @@ export default function ApiKeysPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {activeKeys.map((k) => (
-            <div key={k.id} className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] hover:border-[#FF6940]/10 transition-colors p-5">
+            <div key={k.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/10 transition-colors p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#FF6940]/8 flex items-center justify-center">
-                    <Key size={18} className="text-[#FF6940]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center">
+                    <Key size={18} className="text-[#0AF5D6]" />
                   </div>
                   <div>
                     <span className="text-white font-bold text-sm block">{k.label}</span>
@@ -189,7 +189,7 @@ export default function ApiKeysPage() {
             <>
               <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-1 mt-4">Revoked</span>
               {revokedKeys.map((k) => (
-                <div key={k.id} className="bg-[#0D0E12] rounded-2xl border border-white/[0.04] p-5 opacity-50">
+                <div key={k.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] p-5 opacity-50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-white/[0.03] flex items-center justify-center">
                       <Key size={18} className="text-gray-600" />
@@ -216,8 +216,8 @@ export default function ApiKeysPage() {
               <span className="text-yellow-400 text-xs font-semibold block mb-1">Copy your key now</span>
               <span className="text-yellow-400/70 text-[11px]">This key will only be shown once. Store it in a secure location.</span>
             </div>
-            <div className="bg-[#111318] rounded-xl px-4 py-3 flex items-center gap-3 border border-white/[0.06]">
-              <code className="text-[#FF6940] text-xs font-mono flex-1 break-all select-all">{newKey}</code>
+            <div className="bg-[#111111] rounded-xl px-4 py-3 flex items-center gap-3 border border-white/[0.06]">
+              <code className="text-[#0AF5D6] text-xs font-mono flex-1 break-all select-all">{newKey}</code>
               <button
                 onClick={() => copyToClipboard(newKey, 'new-key')}
                 className="shrink-0 text-gray-400 hover:text-white transition-colors"
@@ -228,7 +228,7 @@ export default function ApiKeysPage() {
             <div className="flex justify-end">
               <button
                 onClick={() => { setShowCreate(false); setNewKey(null); }}
-                className="bg-[#FF6940] hover:bg-[#E85C38] text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+                className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
               >
                 Done
               </button>
@@ -243,7 +243,7 @@ export default function ApiKeysPage() {
                 value={formLabel}
                 onChange={(e) => setFormLabel(e.target.value)}
                 placeholder="e.g. Production Backend"
-                className="w-full bg-[#111318] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF6940]/40 transition-colors"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
               />
             </div>
             <div>
@@ -262,7 +262,7 @@ export default function ApiKeysPage() {
                         : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
                     }`}
                   >
-                    {env === 'live' ? 'Live (mf_live_)' : 'Test (mf_test_)'}
+                    {env === 'live' ? 'Live (gl_live_)' : 'Test (gl_test_)'}
                   </button>
                 ))}
               </div>
@@ -277,7 +277,7 @@ export default function ApiKeysPage() {
               <button
                 onClick={handleCreate}
                 disabled={saving}
-                className="bg-[#FF6940] hover:bg-[#E85C38] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+                className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
               >
                 {saving ? 'Creating...' : 'Create Key'}
               </button>
