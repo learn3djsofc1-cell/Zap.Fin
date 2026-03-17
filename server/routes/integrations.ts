@@ -16,7 +16,7 @@ const AVAILABLE_PROVIDERS = [
   {
     id: 'claude',
     name: 'Claude (Anthropic)',
-    description: 'AI assistant powered by Anthropic via Replit AI Integration. No API key required — charges are billed to your Replit credits.',
+    description: 'AI assistant powered by Anthropic via Replit AI Integration. No API key required - charges are billed to your Replit credits.',
     category: 'ai',
     configFields: ['model', 'max_tokens'],
   },
