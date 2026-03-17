@@ -1,16 +1,19 @@
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Bot, ArrowLeftRight, ShieldCheck, Key, Plug, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Shuffle, MessageSquare, ArrowLeftRight, Wifi, Settings, Menu, X, LogOut, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
-  { to: '/app', icon: LayoutDashboard, label: 'Overview', end: true, group: 'Platform' },
-  { to: '/app/agents', icon: Bot, label: 'Agents', end: false, group: 'Platform' },
-  { to: '/app/transactions', icon: ArrowLeftRight, label: 'Transactions', end: false, group: 'Platform' },
-  { to: '/app/policies', icon: ShieldCheck, label: 'Policies', end: false, group: 'Platform' },
-  { to: '/app/api-keys', icon: Key, label: 'API Keys', end: false, group: 'Developer' },
-  { to: '/app/integrations', icon: Plug, label: 'Integrations', end: false, group: 'Developer' },
+  { to: '/app', icon: LayoutDashboard, label: 'Overview', end: true, group: 'Products' },
+  { to: '/app/mixer', icon: Shuffle, label: 'Mixer', end: false, group: 'Products' },
+  { to: '/app/messenger', icon: MessageSquare, label: 'Messenger', end: false, group: 'Products' },
+  { to: '/app/bridge', icon: ArrowLeftRight, label: 'Bridge', end: false, group: 'Products' },
+  { to: '/app/vpn', icon: Wifi, label: 'VPN', end: false, group: 'Products' },
+  { to: '/app/settings', icon: Settings, label: 'Settings', end: false, group: 'Account' },
 ];
+
+const mobileNavItems = navItems.filter(item => item.group === 'Products');
 
 function UserAvatar({ name }: { name: string }) {
   const initials = (name || '?')
@@ -56,7 +59,7 @@ export default function DashboardLayout() {
           </Link>
         </div>
         <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto relative z-10">
-          {(['Platform', 'Developer'] as const).map((group) => (
+          {(['Products', 'Account'] as const).map((group) => (
             <div key={group}>
               <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-2 block">{group}</span>
               {navItems.filter((item) => item.group === group).map((item) => (
@@ -96,8 +99,8 @@ export default function DashboardLayout() {
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 bg-[#0AF5D6]/8 border border-[#0AF5D6]/15 rounded-lg px-3 py-1.5">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[#0AF5D6] text-xs font-semibold">Live</span>
+              <Shield size={12} className="text-[#0AF5D6]" />
+              <span className="text-[#0AF5D6] text-xs font-semibold">Protected</span>
             </div>
             {user && (
               <div className="hidden md:block">
@@ -110,52 +113,67 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 bg-black/60 md:hidden" onClick={() => setMobileOpen(false)}>
-            <div className="absolute top-0 left-0 w-72 h-full bg-[#0A0A0A] border-r border-white/[0.04] flex flex-col" onClick={(e) => e.stopPropagation()}>
-              <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
-                <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-                  <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
-                  <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
-                </Link>
-                <button className="text-gray-400 hover:text-white p-1" onClick={() => setMobileOpen(false)}>
-                  <X size={20} />
-                </button>
-              </div>
-              <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
-                {(['Platform', 'Developer'] as const).map((group) => (
-                  <div key={group}>
-                    <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-2 block">{group}</span>
-                    {navItems.filter((item) => item.group === group).map((item) => (
-                      <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMobileOpen(false)} className={({ isActive }) => linkClass(isActive)}>
-                        <item.icon size={18} />
-                        <span>{item.label}</span>
-                      </NavLink>
-                    ))}
-                  </div>
-                ))}
-              </nav>
-              <div className="p-4 border-t border-white/[0.04]">
-                {user && (
-                  <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-white/[0.02]">
-                    <UserAvatar name={user.name} />
-                    <div className="min-w-0 flex-1">
-                      <span className="text-white text-sm font-medium block truncate">{user.name}</span>
-                      <span className="text-gray-500 text-[10px] block truncate">{user.email}</span>
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 md:hidden"
+              onClick={() => setMobileOpen(false)}
+            >
+              <motion.div
+                initial={{ x: -288 }}
+                animate={{ x: 0 }}
+                exit={{ x: -288 }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="absolute top-0 left-0 w-72 h-full bg-[#0A0A0A] border-r border-white/[0.04] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
+                  <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+                    <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
+                    <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
+                  </Link>
+                  <button className="text-gray-400 hover:text-white p-1" onClick={() => setMobileOpen(false)}>
+                    <X size={20} />
+                  </button>
+                </div>
+                <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
+                  {(['Products', 'Account'] as const).map((group) => (
+                    <div key={group}>
+                      <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-2 block">{group}</span>
+                      {navItems.filter((item) => item.group === group).map((item) => (
+                        <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMobileOpen(false)} className={({ isActive }) => linkClass(isActive)}>
+                          <item.icon size={18} />
+                          <span>{item.label}</span>
+                        </NavLink>
+                      ))}
                     </div>
-                  </div>
-                )}
-                <button
-                  onClick={() => { setMobileOpen(false); handleLogout(); }}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
-                >
-                  <LogOut size={18} />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                  ))}
+                </nav>
+                <div className="p-4 border-t border-white/[0.04]">
+                  {user && (
+                    <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-white/[0.02]">
+                      <UserAvatar name={user.name} />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-white text-sm font-medium block truncate">{user.name}</span>
+                        <span className="text-gray-500 text-[10px] block truncate">{user.email}</span>
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { setMobileOpen(false); handleLogout(); }}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
+                  >
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <main className="flex-1 p-5 sm:p-6 lg:p-8 pb-24 md:pb-8 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-[#0AF5D6]/[0.02] via-transparent to-transparent pointer-events-none" />
@@ -166,7 +184,7 @@ export default function DashboardLayout() {
 
         <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/[0.04] md:hidden">
           <div className="flex items-center justify-around py-2">
-            {navItems.filter(item => item.group === 'Platform').map((item) => (
+            {mobileNavItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

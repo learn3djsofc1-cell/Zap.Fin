@@ -5,11 +5,11 @@ import App from './App.tsx';
 import DocsPage from './docs/DocsPage.tsx';
 import DashboardLayout from './dashboard/DashboardLayout.tsx';
 import OverviewPage from './dashboard/OverviewPage.tsx';
-import AgentsPage from './dashboard/AgentsPage.tsx';
-import TransactionsPage from './dashboard/TransactionsPage.tsx';
-import PoliciesPage from './dashboard/PoliciesPage.tsx';
-import ApiKeysPage from './dashboard/ApiKeysPage.tsx';
-import IntegrationsPage from './dashboard/IntegrationsPage.tsx';
+import MixerPage from './dashboard/MixerPage.tsx';
+import MessengerPage from './dashboard/MessengerPage.tsx';
+import BridgePage from './dashboard/BridgePage.tsx';
+import VpnPage from './dashboard/VpnPage.tsx';
+import SettingsPage from './dashboard/SettingsPage.tsx';
 import LoginPage from './auth/LoginPage.tsx';
 import SignupPage from './auth/SignupPage.tsx';
 import { AuthProvider, ProtectedRoute } from './lib/AuthContext.tsx';
@@ -30,11 +30,11 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/app" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 <Route index element={<ErrorBoundary><OverviewPage /></ErrorBoundary>} />
-                <Route path="agents" element={<ErrorBoundary><AgentsPage /></ErrorBoundary>} />
-                <Route path="transactions" element={<ErrorBoundary><TransactionsPage /></ErrorBoundary>} />
-                <Route path="policies" element={<ErrorBoundary><PoliciesPage /></ErrorBoundary>} />
-                <Route path="api-keys" element={<ErrorBoundary><ApiKeysPage /></ErrorBoundary>} />
-                <Route path="integrations" element={<ErrorBoundary><IntegrationsPage /></ErrorBoundary>} />
+                <Route path="mixer" element={<ErrorBoundary><MixerPage /></ErrorBoundary>} />
+                <Route path="messenger" element={<ErrorBoundary><MessengerPage /></ErrorBoundary>} />
+                <Route path="bridge" element={<ErrorBoundary><BridgePage /></ErrorBoundary>} />
+                <Route path="vpn" element={<ErrorBoundary><VpnPage /></ErrorBoundary>} />
+                <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
               </Route>
             </Routes>
           </ToastProvider>

@@ -1,6 +1,6 @@
 # GhostLane
 
-Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page, documentation, and a full dashboard for managing privacy operations.
+Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeScript, and Tailwind CSS. Marketing landing page, documentation, and a full dashboard for managing privacy operations across 4 core products: Mixer, Encrypted Messenger, Privacy Bridge, and VPN.
 
 ## Tech Stack
 
@@ -24,8 +24,15 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - **Font**: Chakra Petch (Google Fonts)
 - **Logo**: public/ghostlane-logo.png
 - **Social**: X/Twitter at https://x.com/GhostLane_
-- **API Key Prefixes**: gl_live_ (production), gl_test_ (sandbox)
 - **localStorage Token Key**: ghostlane_token
+
+## GhostLane Products
+
+1. **Mixer** — Advanced cryptocurrency mixing with ZK proofs. Break transaction links with massive anonymity sets. Supports BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE.
+2. **Encrypted Messenger** — E2E encrypted messaging with disappearing messages and zero metadata collection.
+3. **Privacy Bridge** — Cross-chain asset transfers across 15+ chains with complete anonymity.
+4. **VPN** — Military-grade VPN with no-logs policy, Tor integration, kill switch, 50+ countries.
+5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Solana (developer SDK).
 
 ## Project Structure
 
@@ -40,59 +47,47 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   │   ├── LoginPage.tsx   # /login - Sign in form
 │   │   └── SignupPage.tsx  # /signup - Registration form
 │   ├── lib/
-│   │   ├── api.ts          # Centralized API client with JWT auth, auto-redirect on 401
+│   │   ├── api.ts          # Centralized API client with typed interfaces for all products (mixer, messenger, bridge, vpn, settings, overview)
 │   │   ├── AuthContext.tsx  # Auth context/provider + ProtectedRoute component
 │   │   └── toast.tsx       # Toast notification system (success/error/warning/info)
 │   ├── components/
 │   │   ├── Modal.tsx       # Reusable modal dialog
 │   │   ├── ConfirmDialog.tsx # Delete confirmation dialog
 │   │   ├── Skeleton.tsx    # Loading skeleton components
-│   │   ├── CurrencyBadge.tsx # Currency display with logos
+│   │   ├── CurrencyBadge.tsx # Currency display with logos (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE, SOL, USDC, USDT)
 │   │   ├── ErrorBoundary.tsx # Error boundary component
 │   │   └── EmptyState.tsx  # Empty state placeholder
 │   ├── docs/
 │   │   └── DocsPage.tsx    # /docs - Full platform documentation
 │   └── dashboard/
-│       ├── DashboardLayout.tsx  # Sidebar + bottom nav layout with Outlet, logout
-│       ├── OverviewPage.tsx     # /app - Stats + recent activity (real API)
-│       ├── AgentsPage.tsx       # /app/agents - Full CRUD agent management (real API)
-│       ├── TransactionsPage.tsx # /app/transactions - Transaction list + create (real API)
-│       ├── PoliciesPage.tsx     # /app/policies - Full CRUD policy management (real API)
-│       ├── ApiKeysPage.tsx     # /app/api-keys - API key management (create/revoke)
-│       └── IntegrationsPage.tsx # /app/integrations - OpenClaw + Claude integration config
+│       ├── DashboardLayout.tsx  # Sidebar (Products/Account groups) + bottom nav + mobile drawer
+│       ├── OverviewPage.tsx     # /app - Privacy score, stat cards, product quick-launch, activity feed
+│       ├── MixerPage.tsx        # /app/mixer - New mix form, coin selector, privacy levels, history
+│       ├── MessengerPage.tsx    # /app/messenger - Conversation list, chat view, self-destruct, new chat
+│       ├── BridgePage.tsx       # /app/bridge - Cross-chain form, chain swap, status tracker, history
+│       ├── VpnPage.tsx          # /app/vpn - Connection toggle, server list, kill switch, stats
+│       └── SettingsPage.tsx     # /app/settings - Profile, security (password, 2FA, sessions), notifications
 ├── public/
 │   ├── ghostlane-logo.png  # GhostLane brand logo
-│   └── ...                 # Favicons and other static assets
+│   └── ...                 # Favicons and crypto logos
 ├── server/
 │   ├── index.ts            # Express server entry: initializes DB, mounts all API routes
 │   ├── db.ts               # PostgreSQL connection pool (pg)
-│   ├── schema.ts           # Database schema initialization (users, agents, transactions, policies)
+│   ├── schema.ts           # Database schema initialization (users table)
 │   ├── auth.ts             # Auth routes (/api/auth/*) + JWT middleware
 │   ├── validate.ts         # ID validation helpers
 │   ├── routes/
-│   │   ├── agents.ts       # CRUD /api/agents
-│   │   ├── transactions.ts # GET+POST /api/transactions (immutable records)
-│   │   ├── policies.ts     # CRUD /api/policies
-│   │   ├── apiKeys.ts      # API key management routes
-│   │   ├── integrations.ts # Integration configuration routes
-│   │   └── overview.ts     # GET /api/overview (aggregated stats)
+│   │   ├── overview.ts     # GET /api/overview/stats, GET /api/overview/activity
+│   │   ├── mixer.ts        # CRUD /api/mixer (create mix, list, get, pools)
+│   │   ├── messenger.ts    # /api/messenger (conversations, messages, contacts)
+│   │   ├── bridge.ts       # /api/bridge (create transfer, list, chains)
+│   │   ├── vpn.ts          # /api/vpn (servers, session, connect, disconnect, kill-switch)
+│   │   └── settings.ts     # /api/settings (profile, password, 2fa, sessions)
 │   └── tsconfig.json       # Server TS config
 ├── vite.config.ts          # Vite config with /api proxy to Express
 ├── tsconfig.json           # Frontend TS config
 └── package.json            # Dependencies and scripts
 ```
-
-## Database Schema
-
-- **users**: id (serial PK), email (unique), password_hash, name, created_at
-- **agents**: id (serial PK), user_id (FK), name, agent_id_slug (unique per user), status, purpose, currency, balance, created_at, updated_at
-- **transactions**: id (serial PK), user_id (FK), agent_id (FK nullable), tx_hash, recipient, amount, currency, status, latency_ms, created_at
-- **policies**: id (serial PK), user_id (FK), name, policy_id_slug (unique per user), status, max_per_tx, daily_limit, monthly_limit, multi_sig, multi_sig_threshold, allowed_merchants[], allowed_currencies[], assigned_agent_ids[], created_at, updated_at
-- **api_keys**: id (serial PK), user_id (FK), name, key_hash (bcrypt), key_prefix (first 12 chars), environment (live/test), last_used_at, revoked_at, created_at
-- **integrations**: id (serial PK), user_id (FK), provider (openclaw/claude), status, config (jsonb), connected_at, updated_at
-
-All tables enforce user_id isolation - users can only access their own data.
-Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyBadge component).
 
 ## Routes
 
@@ -101,11 +96,11 @@ Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyB
 - `/login` Sign in page
 - `/signup` Registration page
 - `/app` Dashboard overview (protected - requires auth)
-- `/app/agents` Agent account management (protected)
-- `/app/transactions` Transaction history (protected)
-- `/app/policies` Spending policy management (protected)
-- `/app/api-keys` API key management (protected)
-- `/app/integrations` Integration configuration (protected)
+- `/app/mixer` Cryptocurrency mixer (protected)
+- `/app/messenger` Encrypted messenger (protected)
+- `/app/bridge` Privacy bridge (protected)
+- `/app/vpn` VPN management (protected)
+- `/app/settings` Account settings (protected)
 
 ## API Endpoints
 
@@ -113,24 +108,31 @@ Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyB
 - `POST /api/auth/register` User registration (email, password, name)
 - `POST /api/auth/login` User login (returns JWT)
 - `GET /api/auth/me` Get current user (requires auth)
-- `GET /api/agents` List user's agents (requires auth)
-- `POST /api/agents` Create agent (requires auth)
-- `PATCH /api/agents/:id` Update agent (requires auth)
-- `DELETE /api/agents/:id` Delete agent (requires auth)
-- `GET /api/transactions` List transactions with search/filter/pagination (requires auth)
-- `POST /api/transactions` Create transaction (requires auth)
-- `GET /api/policies` List user's policies (requires auth)
-- `POST /api/policies` Create policy (requires auth)
-- `PATCH /api/policies/:id` Update policy (requires auth)
-- `DELETE /api/policies/:id` Delete policy (requires auth)
-- `GET /api/overview` Dashboard stats + recent activity (requires auth)
-- `GET /api/api-keys` List user's API keys (requires auth)
-- `POST /api/api-keys` Create API key (requires auth, returns key once)
-- `DELETE /api/api-keys/:id` Revoke API key (requires auth)
-- `GET /api/integrations` List user's integrations (requires auth)
-- `POST /api/integrations/:provider/connect` Connect integration (requires auth)
-- `POST /api/integrations/:provider/disconnect` Disconnect integration (requires auth)
-- `PATCH /api/integrations/:provider/config` Update integration config (requires auth)
+- `GET /api/overview/stats` Dashboard stats (privacy score, totals)
+- `GET /api/overview/activity` Recent activity feed
+- `GET /api/mixer` List mix operations
+- `POST /api/mixer` Create mix operation (coin, amount, recipient, privacy level)
+- `GET /api/mixer/pools` Pool sizes
+- `GET /api/mixer/:id` Get mix details
+- `GET /api/messenger/conversations` List conversations
+- `POST /api/messenger/conversations` Create conversation
+- `GET /api/messenger/conversations/:id/messages` Get messages
+- `POST /api/messenger/conversations/:id/messages` Send message
+- `GET /api/messenger/contacts` List contacts
+- `GET /api/bridge` List bridge transfers
+- `POST /api/bridge` Create bridge transfer
+- `GET /api/bridge/chains` List supported chains
+- `GET /api/vpn/servers` List VPN servers
+- `GET /api/vpn/session` Get current VPN session
+- `POST /api/vpn/connect` Connect to VPN server
+- `POST /api/vpn/disconnect` Disconnect VPN
+- `POST /api/vpn/kill-switch` Toggle kill switch
+- `GET /api/settings/profile` Get user profile
+- `PATCH /api/settings/profile` Update profile
+- `POST /api/settings/password` Change password
+- `POST /api/settings/2fa` Toggle 2FA
+- `GET /api/settings/sessions` List active sessions
+- `DELETE /api/settings/sessions/:id` Revoke session
 
 ## Auth System
 
@@ -146,12 +148,6 @@ Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyB
 - **Build**: `npm run build` outputs to `dist/`
 - **Lint**: `npm run lint`
 
-## Deployment
-
-Configured as a **static** site deployment:
-- Build command: `npm run build`
-- Public directory: `dist`
-
 ## Animation System
 
 The landing page uses scroll-triggered animations built on Framer Motion:
@@ -160,13 +156,14 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - **StaggerWrap**: Staggered children reveal using `motion` variants
 - **Hero parallax**: `useScroll` + `useTransform` for vertical offset
 - **Auth pages**: Framer Motion entrance animations (fade+slide up) on login/signup forms
+- **Dashboard pages**: Framer Motion entrance animations on page load
 
 ## Visual Design System
 
 - **Auth pages**: Full-bleed gradient backgrounds with multiple teal orbs, glassmorphism form cards with backdrop-blur, teal CTA buttons with black text and shadow glow
-- **Dashboard layout**: Sidebar with subtle gradient overlay, user initials avatar with teal accent, nav items with active border+bg state, grouped nav (Platform/Developer), mobile bottom nav with hamburger for more
-- **Dashboard pages**: Consistent card styling with #0A0A0A bg, rounded-2xl corners, white/4% borders that glow teal on hover, stat cards with colored icon backgrounds
-- **Shared components**: Modal with backdrop-blur overlay, EmptyState with teal-tinted icon container, CurrencyBadge supports all crypto logos (BTC, ETH, SOL, USDC, USDT, XMR, LTC, DASH, ZEC, BCH, DOGE)
+- **Dashboard layout**: Sidebar with subtle gradient overlay, user initials avatar with teal accent, nav items with active border+bg state, grouped nav (Products/Account), mobile bottom nav with drawer
+- **Dashboard pages**: Consistent card styling with #0A0A0A bg, rounded-2xl corners, white/4% borders that glow on hover, stat cards with colored icon backgrounds, product-specific color coding (Mixer=purple, Messenger=blue, Bridge=green, VPN=orange)
+- **Shared components**: Modal with backdrop-blur overlay, EmptyState with teal-tinted icon container, CurrencyBadge supports all crypto logos
 - **Button convention**: Teal (#0AF5D6) primary buttons always use text-black; secondary buttons use bg-white/4% with text-gray-400; destructive buttons use red accents
 
 ## Environment Variables

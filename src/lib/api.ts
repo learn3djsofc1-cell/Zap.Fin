@@ -52,6 +52,96 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
+export interface MixRequest {
+  coin: string;
+  amount: string;
+  recipientAddress: string;
+  privacyLevel: 'standard' | 'enhanced' | 'maximum';
+  delayMinutes?: number;
+}
+
+export interface MixOperation {
+  id: string;
+  coin: string;
+  amount: string;
+  recipientAddress: string;
+  privacyLevel: string;
+  status: 'pending' | 'mixing' | 'complete' | 'failed';
+  createdAt: string;
+  completedAt?: string;
+  txHash?: string;
+}
+
+export interface Conversation {
+  id: string;
+  contactName: string;
+  contactAddress: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+  isEncrypted: boolean;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  content: string;
+  sender: 'me' | 'them';
+  timestamp: string;
+  isEncrypted: boolean;
+  selfDestructSeconds?: number;
+}
+
+export interface BridgeTransfer {
+  id: string;
+  sourceChain: string;
+  destChain: string;
+  token: string;
+  amount: string;
+  status: 'initiated' | 'confirming' | 'bridging' | 'complete' | 'failed';
+  createdAt: string;
+  completedAt?: string;
+  sourceTxHash?: string;
+  destTxHash?: string;
+}
+
+export interface VpnServer {
+  id: string;
+  country: string;
+  city: string;
+  latencyMs: number;
+  load: number;
+  protocol: string;
+}
+
+export interface VpnSession {
+  connected: boolean;
+  serverId?: string;
+  serverName?: string;
+  connectedAt?: string;
+  bytesUp?: number;
+  bytesDown?: number;
+  assignedIp?: string;
+  killSwitch: boolean;
+}
+
+export interface OverviewStats {
+  privacyScore: number;
+  totalMixes: number;
+  activeBridges: number;
+  messagesEncrypted: number;
+  vpnUptime: string;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: 'mix' | 'bridge' | 'message' | 'vpn';
+  title: string;
+  description: string;
+  timestamp: string;
+  status: string;
+}
+
 export const api = {
   auth: {
     register: (body: { email: string; password: string; name: string }) =>
@@ -60,54 +150,66 @@ export const api = {
       request<{ user: any; token: string }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
     me: () => request<{ user: any }>('/auth/me'),
   },
-  agents: {
-    list: () => request<{ agents: any[] }>('/agents'),
-    create: (body: { name: string; purpose?: string; currency?: string }) =>
-      request<{ agent: any }>('/agents', { method: 'POST', body: JSON.stringify(body) }),
-    update: (id: number, body: Record<string, any>) =>
-      request<{ agent: any }>(`/agents/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-    delete: (id: number) =>
-      request<{ success: boolean }>(`/agents/${id}`, { method: 'DELETE' }),
+  overview: {
+    stats: () => request<{ stats: OverviewStats }>('/overview/stats'),
+    activity: () => request<{ activity: ActivityItem[] }>('/overview/activity'),
   },
-  transactions: {
-    list: (params?: { search?: string; status?: string; limit?: number; offset?: number }) => {
+  mixer: {
+    create: (body: MixRequest) =>
+      request<{ mix: MixOperation }>('/mixer', { method: 'POST', body: JSON.stringify(body) }),
+    list: (params?: { status?: string; limit?: number; offset?: number }) => {
       const query = new URLSearchParams();
-      if (params?.search) query.set('search', params.search);
       if (params?.status && params.status !== 'all') query.set('status', params.status);
       if (params?.limit) query.set('limit', String(params.limit));
       if (params?.offset) query.set('offset', String(params.offset));
       const qs = query.toString();
-      return request<{ transactions: any[]; total: number; limit: number; offset: number }>(`/transactions${qs ? `?${qs}` : ''}`);
+      return request<{ mixes: MixOperation[]; total: number }>(`/mixer${qs ? `?${qs}` : ''}`);
     },
-    create: (body: { agentId?: number; recipient: string; amount: number; currency?: string; status?: string }) =>
-      request<{ transaction: any }>('/transactions', { method: 'POST', body: JSON.stringify(body) }),
+    get: (id: string) => request<{ mix: MixOperation }>(`/mixer/${id}`),
+    pools: () => request<{ pools: { coin: string; size: number; participants: number }[] }>('/mixer/pools'),
   },
-  policies: {
-    list: () => request<{ policies: any[] }>('/policies'),
-    create: (body: Record<string, any>) =>
-      request<{ policy: any }>('/policies', { method: 'POST', body: JSON.stringify(body) }),
-    update: (id: number, body: Record<string, any>) =>
-      request<{ policy: any }>(`/policies/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-    delete: (id: number) =>
-      request<{ success: boolean }>(`/policies/${id}`, { method: 'DELETE' }),
+  messenger: {
+    conversations: () => request<{ conversations: Conversation[] }>('/messenger/conversations'),
+    messages: (conversationId: string) =>
+      request<{ messages: Message[] }>(`/messenger/conversations/${conversationId}/messages`),
+    send: (conversationId: string, body: { content: string; selfDestructSeconds?: number }) =>
+      request<{ message: Message }>(`/messenger/conversations/${conversationId}/messages`, { method: 'POST', body: JSON.stringify(body) }),
+    createConversation: (body: { contactAddress: string; contactName: string }) =>
+      request<{ conversation: Conversation }>('/messenger/conversations', { method: 'POST', body: JSON.stringify(body) }),
+    contacts: () => request<{ contacts: { id: string; name: string; address: string }[] }>('/messenger/contacts'),
   },
-  overview: {
-    get: () => request<{ stats: any; recentActivity: any[] }>('/overview'),
+  bridge: {
+    create: (body: { sourceChain: string; destChain: string; token: string; amount: string; recipientAddress: string }) =>
+      request<{ transfer: BridgeTransfer }>('/bridge', { method: 'POST', body: JSON.stringify(body) }),
+    list: (params?: { status?: string; limit?: number }) => {
+      const query = new URLSearchParams();
+      if (params?.status && params.status !== 'all') query.set('status', params.status);
+      if (params?.limit) query.set('limit', String(params.limit));
+      const qs = query.toString();
+      return request<{ transfers: BridgeTransfer[]; total: number }>(`/bridge${qs ? `?${qs}` : ''}`);
+    },
+    chains: () => request<{ chains: { id: string; name: string; icon: string; tokens: string[] }[] }>('/bridge/chains'),
   },
-  apiKeys: {
-    list: () => request<{ apiKeys: any[] }>('/api-keys'),
-    create: (body: { label: string; environment: string }) =>
-      request<{ apiKey: any; fullKey: string }>('/api-keys', { method: 'POST', body: JSON.stringify(body) }),
-    revoke: (id: number) =>
-      request<{ success: boolean }>(`/api-keys/${id}`, { method: 'DELETE' }),
+  vpn: {
+    servers: () => request<{ servers: VpnServer[] }>('/vpn/servers'),
+    session: () => request<{ session: VpnSession }>('/vpn/session'),
+    connect: (serverId: string) =>
+      request<{ session: VpnSession }>(`/vpn/connect`, { method: 'POST', body: JSON.stringify({ serverId }) }),
+    disconnect: () =>
+      request<{ session: VpnSession }>('/vpn/disconnect', { method: 'POST' }),
+    toggleKillSwitch: (enabled: boolean) =>
+      request<{ session: VpnSession }>('/vpn/kill-switch', { method: 'POST', body: JSON.stringify({ enabled }) }),
   },
-  integrations: {
-    list: () => request<{ integrations: any[] }>('/integrations'),
-    connect: (provider: string, config?: Record<string, any>) =>
-      request<{ integration: any }>(`/integrations/${provider}/connect`, { method: 'POST', body: JSON.stringify({ config }) }),
-    disconnect: (provider: string) =>
-      request<{ integration: any }>(`/integrations/${provider}/disconnect`, { method: 'POST' }),
-    updateConfig: (provider: string, config: Record<string, any>) =>
-      request<{ integration: any }>(`/integrations/${provider}/config`, { method: 'PATCH', body: JSON.stringify({ config }) }),
+  settings: {
+    profile: () => request<{ profile: any }>('/settings/profile'),
+    updateProfile: (body: { name?: string; email?: string }) =>
+      request<{ profile: any }>('/settings/profile', { method: 'PATCH', body: JSON.stringify(body) }),
+    changePassword: (body: { currentPassword: string; newPassword: string }) =>
+      request<{ success: boolean }>('/settings/password', { method: 'POST', body: JSON.stringify(body) }),
+    toggle2FA: (enabled: boolean) =>
+      request<{ twoFactor: any }>('/settings/2fa', { method: 'POST', body: JSON.stringify({ enabled }) }),
+    sessions: () => request<{ sessions: any[] }>('/settings/sessions'),
+    revokeSession: (id: string) =>
+      request<{ success: boolean }>(`/settings/sessions/${id}`, { method: 'DELETE' }),
   },
 };

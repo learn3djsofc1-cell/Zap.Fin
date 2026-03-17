@@ -3,12 +3,12 @@ import path from 'path';
 import fs from 'fs';
 import { initializeDatabase } from './schema.js';
 import { authRouter } from './auth.js';
-import { agentsRouter } from './routes/agents.js';
-import { transactionsRouter } from './routes/transactions.js';
-import { policiesRouter } from './routes/policies.js';
 import { overviewRouter } from './routes/overview.js';
-import { apiKeysRouter } from './routes/apiKeys.js';
-import { integrationsRouter } from './routes/integrations.js';
+import { mixerRouter } from './routes/mixer.js';
+import { messengerRouter } from './routes/messenger.js';
+import { bridgeRouter } from './routes/bridge.js';
+import { vpnRouter } from './routes/vpn.js';
+import { settingsRouter } from './routes/settings.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
@@ -24,12 +24,12 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
-app.use('/api/agents', agentsRouter);
-app.use('/api/transactions', transactionsRouter);
-app.use('/api/policies', policiesRouter);
 app.use('/api/overview', overviewRouter);
-app.use('/api/api-keys', apiKeysRouter);
-app.use('/api/integrations', integrationsRouter);
+app.use('/api/mixer', mixerRouter);
+app.use('/api/messenger', messengerRouter);
+app.use('/api/bridge', bridgeRouter);
+app.use('/api/vpn', vpnRouter);
+app.use('/api/settings', settingsRouter);
 
 app.use('/api', (err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Unhandled API error:', err);
