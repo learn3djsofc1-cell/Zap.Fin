@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bot, ArrowLeftRight, DollarSign, Timer, Activity } from 'lucide-react';
+import { Bot, ArrowLeftRight, DollarSign, Timer, Activity, TrendingUp } from 'lucide-react';
 import { api } from '../lib/api';
 import { StatSkeleton, TableRowSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
@@ -39,17 +39,23 @@ export default function OverviewPage() {
   }, []);
 
   const statCards = stats ? [
-    { label: 'Agent Accounts', value: String(stats.activeAgents), icon: Bot, color: 'text-blue-400', bg: 'bg-blue-400/8' },
-    { label: 'Transactions (24h)', value: String(stats.transactions24h), icon: ArrowLeftRight, color: 'text-green-400', bg: 'bg-green-400/8' },
-    { label: 'Total Volume', value: formatCurrency(stats.totalVolume), icon: DollarSign, color: 'text-[#0AF5D6]', bg: 'bg-[#0AF5D6]/8' },
-    { label: 'Avg Settlement', value: stats.avgSettlementMs > 0 ? `${stats.avgSettlementMs}ms` : '-', icon: Timer, color: 'text-purple-400', bg: 'bg-purple-400/8' },
+    { label: 'Agent Accounts', value: String(stats.activeAgents), icon: Bot, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/10' },
+    { label: 'Transactions (24h)', value: String(stats.transactions24h), icon: ArrowLeftRight, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/10' },
+    { label: 'Total Volume', value: formatCurrency(stats.totalVolume), icon: DollarSign, color: 'text-[#0AF5D6]', bg: 'bg-[#0AF5D6]/10', border: 'border-[#0AF5D6]/10' },
+    { label: 'Avg Settlement', value: stats.avgSettlementMs > 0 ? `${stats.avgSettlementMs}ms` : '-', icon: Timer, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/10' },
   ] : [];
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Real-time overview of your agent infrastructure</p>
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
+          <div className="flex items-center gap-1.5 bg-[#0AF5D6]/8 border border-[#0AF5D6]/15 rounded-lg px-2.5 py-1">
+            <TrendingUp size={12} className="text-[#0AF5D6]" />
+            <span className="text-[#0AF5D6] text-[10px] font-bold uppercase tracking-wider">Live</span>
+          </div>
+        </div>
+        <p className="text-gray-500 text-sm">Real-time overview of your agent infrastructure</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -57,9 +63,9 @@ export default function OverviewPage() {
           Array.from({ length: 4 }).map((_, i) => <StatSkeleton key={i} />)
         ) : (
           statCards.map((s) => (
-            <div key={s.label} className="bg-[#0A0A0A] rounded-2xl p-5 border border-white/[0.04]">
+            <div key={s.label} className={`bg-[#0A0A0A] rounded-2xl p-5 border ${s.border} hover:border-[#0AF5D6]/20 transition-all group`}>
               <div className="flex items-center justify-between mb-3">
-                <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                   <s.icon size={18} className={s.color} />
                 </div>
               </div>
@@ -127,6 +133,12 @@ export default function OverviewPage() {
                         tx.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
                         'bg-gray-500/10 text-gray-400'
                       }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          tx.status === 'settled' ? 'bg-green-400' :
+                          tx.status === 'blocked' ? 'bg-red-400' :
+                          tx.status === 'pending' ? 'bg-yellow-400' :
+                          'bg-gray-400'
+                        }`} />
                         {tx.status}
                       </span>
                     </td>

@@ -139,7 +139,7 @@ export default function PoliciesPage() {
             {loading ? 'Loading...' : `${policies.length} ${policies.length === 1 ? 'policy' : 'policies'}`}
           </p>
         </div>
-        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
+        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
           <Plus size={16} /> Create Policy
         </button>
       </div>
@@ -154,7 +154,7 @@ export default function PoliciesPage() {
           title="No policies yet"
           description="Create spending policies to enforce limits and controls on your agent accounts."
           action={
-            <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
+            <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
               <Plus size={16} /> Create Policy
             </button>
           }
@@ -162,11 +162,11 @@ export default function PoliciesPage() {
       ) : (
         <div className="flex flex-col gap-4">
           {policies.map((policy) => (
-            <div key={policy.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/10 transition-colors overflow-hidden">
+            <div key={policy.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/15 transition-all group overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center group-hover:bg-[#0AF5D6]/15 transition-colors">
                       <ShieldCheck size={18} className="text-[#0AF5D6]" />
                     </div>
                     <div>
@@ -204,28 +204,28 @@ export default function PoliciesPage() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <div className="flex items-center gap-1 mb-1">
                       <DollarSign size={10} className="text-gray-600" />
                       <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Max/TX</span>
                     </div>
                     <span className="text-white text-sm font-bold">{formatNumber(parseFloat(policy.max_per_tx) || 0)}</span>
                   </div>
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <div className="flex items-center gap-1 mb-1">
                       <Clock size={10} className="text-gray-600" />
                       <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Daily</span>
                     </div>
                     <span className="text-white text-sm font-bold">{formatNumber(parseFloat(policy.daily_limit) || 0)}</span>
                   </div>
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <div className="flex items-center gap-1 mb-1">
                       <Users size={10} className="text-gray-600" />
                       <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Agents</span>
                     </div>
                     <span className="text-white text-sm font-bold">{(policy.assigned_agent_ids || []).length}</span>
                   </div>
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider block mb-1">Multi-Sig</span>
                     {policy.multi_sig ? (
                       <span className="text-[#0AF5D6] text-sm font-bold">{policy.multi_sig_threshold} of 3</span>
@@ -238,10 +238,10 @@ export default function PoliciesPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">Merchants:</span>
                   {(policy.allowed_merchants || []).length === 0 ? (
-                    <span className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-medium">None</span>
+                    <span className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-medium border border-white/[0.03]">None</span>
                   ) : (
                     (policy.allowed_merchants || []).map((m: string) => (
-                      <span key={m} className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-mono">{m}</span>
+                      <span key={m} className="bg-white/[0.03] text-gray-400 px-2 py-0.5 rounded text-[10px] font-mono border border-white/[0.03]">{m}</span>
                     ))
                   )}
                   <span className="text-gray-700 text-[10px] mx-1">|</span>
@@ -273,7 +273,7 @@ export default function PoliciesPage() {
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               placeholder="e.g. Default Spending Policy"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
             />
           </div>
 
@@ -281,17 +281,17 @@ export default function PoliciesPage() {
             <div>
               <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Max/TX ($)</label>
               <input type="number" min="0" step="1" value={formMaxPerTx} onChange={(e) => setFormMaxPerTx(e.target.value)}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-colors" />
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all" />
             </div>
             <div>
               <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Daily ($)</label>
               <input type="number" min="0" step="1" value={formDailyLimit} onChange={(e) => setFormDailyLimit(e.target.value)}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-colors" />
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all" />
             </div>
             <div>
               <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Monthly ($)</label>
               <input type="number" min="0" step="1" value={formMonthlyLimit} onChange={(e) => setFormMonthlyLimit(e.target.value)}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-colors" />
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all" />
             </div>
           </div>
 
@@ -302,7 +302,7 @@ export default function PoliciesPage() {
               value={formMerchants}
               onChange={(e) => setFormMerchants(e.target.value)}
               placeholder="Comma-separated (leave empty for none)"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
             />
           </div>
 
@@ -329,7 +329,7 @@ export default function PoliciesPage() {
                 max="10"
                 value={formMultiSigThreshold}
                 onChange={(e) => setFormMultiSigThreshold(e.target.value)}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
                 placeholder="Threshold (e.g. 2)"
               />
             )}
@@ -344,7 +344,7 @@ export default function PoliciesPage() {
                     key={a.id}
                     type="button"
                     onClick={() => toggleAgentId(a.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                       formAgentIds.includes(a.id)
                         ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                         : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
@@ -367,7 +367,7 @@ export default function PoliciesPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+              className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-black px-5 py-2 rounded-xl font-bold text-sm transition-all"
             >
               {saving ? 'Saving...' : editPolicy ? 'Update' : 'Create'}
             </button>

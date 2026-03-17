@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bot, Plus, Circle, Wallet, Clock, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { Bot, Plus, Circle, Wallet, Clock, MoreVertical, Edit2, Trash2, Pause, Play } from 'lucide-react';
 import { api } from '../lib/api';
 import { useToast } from '../lib/toast';
 import { CardSkeleton } from '../components/Skeleton';
@@ -114,7 +114,7 @@ export default function AgentsPage() {
             {loading ? 'Loading...' : `${activeCount} active, ${pausedCount} paused`}
           </p>
         </div>
-        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
+        <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-md shadow-[#0AF5D6]/20 self-start sm:self-auto">
           <Plus size={16} /> Create Agent Account
         </button>
       </div>
@@ -127,9 +127,9 @@ export default function AgentsPage() {
         <EmptyState
           icon={<Bot size={28} />}
           title="No agent accounts yet"
-          description="Create your first AI agent account - a programmable bank account for autonomous financial operations."
+          description="Create your first AI agent account to start autonomous financial operations."
           action={
-            <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
+            <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
               <Plus size={16} /> Create Agent Account
             </button>
           }
@@ -137,11 +137,11 @@ export default function AgentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {agents.map((agent) => (
-            <div key={agent.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/10 transition-colors overflow-hidden">
+            <div key={agent.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/15 transition-all group overflow-hidden">
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center group-hover:bg-[#0AF5D6]/15 transition-colors">
                       <Bot size={18} className="text-[#0AF5D6]" />
                     </div>
                     <div>
@@ -153,7 +153,7 @@ export default function AgentsPage() {
                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${
                       agent.status === 'active' ? 'bg-green-500/10' : 'bg-yellow-500/10'
                     }`}>
-                      <Circle size={6} className={`fill-current ${agent.status === 'active' ? 'text-green-400' : 'text-yellow-400'}`} />
+                      <Circle size={6} className={`fill-current ${agent.status === 'active' ? 'text-green-400 animate-pulse' : 'text-yellow-400'}`} />
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${agent.status === 'active' ? 'text-green-400' : 'text-yellow-400'}`}>{agent.status}</span>
                     </div>
                     <div className="relative">
@@ -172,7 +172,7 @@ export default function AgentsPage() {
                             onClick={() => toggleStatus(agent)}
                             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/[0.04] transition-colors"
                           >
-                            <Circle size={13} /> {agent.status === 'active' ? 'Pause' : 'Activate'}
+                            {agent.status === 'active' ? <><Pause size={13} /> Pause</> : <><Play size={13} /> Activate</>}
                           </button>
                           <button
                             onClick={() => { setDeleteAgent(agent); setMenuOpen(null); }}
@@ -189,7 +189,7 @@ export default function AgentsPage() {
                 {agent.purpose && <p className="text-gray-500 text-xs mb-4 leading-relaxed">{agent.purpose}</p>}
 
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Wallet size={10} className="text-gray-600" />
                       <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Balance</span>
@@ -199,14 +199,14 @@ export default function AgentsPage() {
                       <CurrencyBadge currency={agent.currency || 'USDC'} size="sm" />
                     </div>
                   </div>
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Clock size={10} className="text-gray-600" />
                       <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider">Updated</span>
                     </div>
                     <span className="text-white text-sm font-bold">{timeAgo(agent.updated_at)}</span>
                   </div>
-                  <div className="bg-white/[0.02] rounded-lg p-3">
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.03]">
                     <span className="text-gray-600 text-[9px] font-bold uppercase tracking-wider block mb-1">TXs</span>
                     <span className="text-white text-sm font-bold">{parseInt(agent.tx_count || '0').toLocaleString()}</span>
                   </div>
@@ -230,7 +230,7 @@ export default function AgentsPage() {
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               placeholder="e.g. payment_processor_01"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
             />
           </div>
           <div>
@@ -240,7 +240,7 @@ export default function AgentsPage() {
               onChange={(e) => setFormPurpose(e.target.value)}
               placeholder="Describe what this agent account is used for"
               rows={3}
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors resize-none"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all resize-none"
             />
           </div>
           {!editAgent && (
@@ -259,7 +259,7 @@ export default function AgentsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+              className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 text-black px-5 py-2 rounded-xl font-bold text-sm transition-all"
             >
               {saving ? 'Saving...' : editAgent ? 'Update' : 'Create'}
             </button>

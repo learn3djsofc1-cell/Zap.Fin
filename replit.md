@@ -159,6 +159,15 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - **ScaleReveal**: Scale-up fade with `useInView`
 - **StaggerWrap**: Staggered children reveal using `motion` variants
 - **Hero parallax**: `useScroll` + `useTransform` for vertical offset
+- **Auth pages**: Framer Motion entrance animations (fade+slide up) on login/signup forms
+
+## Visual Design System
+
+- **Auth pages**: Full-bleed gradient backgrounds with multiple teal orbs, glassmorphism form cards with backdrop-blur, teal CTA buttons with black text and shadow glow
+- **Dashboard layout**: Sidebar with subtle gradient overlay, user initials avatar with teal accent, nav items with active border+bg state, grouped nav (Platform/Developer), mobile bottom nav with hamburger for more
+- **Dashboard pages**: Consistent card styling with #0A0A0A bg, rounded-2xl corners, white/4% borders that glow teal on hover, stat cards with colored icon backgrounds
+- **Shared components**: Modal with backdrop-blur overlay, EmptyState with teal-tinted icon container, CurrencyBadge supports all crypto logos (BTC, ETH, SOL, USDC, USDT, XMR, LTC, DASH, ZEC, BCH, DOGE)
+- **Button convention**: Teal (#0AF5D6) primary buttons always use text-black; secondary buttons use bg-white/4% with text-gray-400; destructive buttons use red accents
 
 ## Environment Variables
 

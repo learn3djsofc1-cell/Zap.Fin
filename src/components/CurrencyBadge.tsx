@@ -2,6 +2,14 @@ const CURRENCY_LOGOS: Record<string, string> = {
   SOL: '/sol-logo.png',
   USDC: '/usdc-logo.png',
   USDT: '/usdt-logo.png',
+  BTC: '/crypto-btc.png',
+  ETH: '/crypto-eth.png',
+  XMR: '/crypto-xmr.png',
+  LTC: '/crypto-ltc.png',
+  DASH: '/crypto-dash.png',
+  ZEC: '/crypto-zec.png',
+  BCH: '/crypto-bch.png',
+  DOGE: '/crypto-doge.png',
 };
 
 interface CurrencyBadgeProps {
@@ -20,7 +28,11 @@ export default function CurrencyBadge({ currency, size = 'sm', showLabel = true,
     <span className={`inline-flex items-center gap-1 ${className}`}>
       {logo ? (
         <img src={logo} alt={currency} className={`${iconSize} object-contain`} />
-      ) : null}
+      ) : (
+        <span className={`${iconSize} rounded-full bg-[#0AF5D6]/10 flex items-center justify-center`}>
+          <span className="text-[#0AF5D6] text-[7px] font-bold">{currency.slice(0, 1)}</span>
+        </span>
+      )}
       {showLabel && (
         <span className={`${textSize} font-bold text-[#0AF5D6]`}>{currency}</span>
       )}
@@ -45,10 +57,10 @@ export function CurrencySelect({ value, onChange, currencies = ['USDC', 'SOL', '
             key={c}
             type="button"
             onClick={() => onChange(c)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               value === c
                 ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
-                : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
+                : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
             }`}
           >
             {logo && <img src={logo} alt={c} className="w-4 h-4 object-contain" />}
@@ -84,10 +96,10 @@ export function CurrencyToggle({ selected, onChange, currencies = ['USDC', 'SOL'
             key={c}
             type="button"
             onClick={() => toggle(c)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               selected.includes(c)
                 ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
-                : 'bg-white/[0.03] text-gray-500 border border-white/[0.06]'
+                : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
             }`}
           >
             {logo && <img src={logo} alt={c} className="w-4 h-4 object-contain" />}

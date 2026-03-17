@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Shield, Lock } from 'lucide-react';
 import { ApiError } from '../lib/api';
+import { motion } from 'framer-motion';
 
 interface LocationState {
   from?: { pathname: string };
@@ -57,12 +58,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] flex items-center justify-center px-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-gradient-radial from-[#0AF5D6]/5 via-transparent to-transparent rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#000000] flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[800px] bg-gradient-radial from-[#0AF5D6]/15 via-[#0AF5D6]/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#0AF5D6]/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-[#0AF5D6]/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[200px] bg-gradient-to-t from-[#0AF5D6]/8 via-transparent to-transparent" />
       </div>
 
-      <div className="w-full max-w-md relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md relative z-10"
+      >
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
             <img src="/ghostlane-logo.png" alt="GhostLane" className="w-10 h-10 rounded-xl object-cover" />
@@ -72,11 +81,15 @@ export default function LoginPage() {
           <p className="text-gray-500 text-sm mt-2">Sign in to access your privacy dashboard</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.06] p-6 sm:p-8">
+        <form onSubmit={handleSubmit} className="bg-[#0A0A0A]/80 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 sm:p-8 shadow-2xl shadow-black/50">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-4 py-3 mb-6">
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-4 py-3 mb-6"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
           <div className="mb-5">
@@ -86,7 +99,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
               autoComplete="email"
             />
           </div>
@@ -99,7 +112,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 pr-12 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 pr-12 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
                 autoComplete="current-password"
               />
               <button
@@ -115,7 +128,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
+            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20 hover:shadow-[#0AF5D6]/30"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -131,7 +144,18 @@ export default function LoginPage() {
             </Link>
           </p>
         </form>
-      </div>
+
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <div className="flex items-center gap-2 text-gray-600 text-xs">
+            <Shield size={12} className="text-[#0AF5D6]/60" />
+            <span>Zero-knowledge</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600 text-xs">
+            <Lock size={12} className="text-[#0AF5D6]/60" />
+            <span>End-to-end encrypted</span>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

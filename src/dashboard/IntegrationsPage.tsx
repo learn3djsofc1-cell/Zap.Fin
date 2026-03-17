@@ -111,11 +111,11 @@ export default function IntegrationsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {integrations.map((integration) => (
-            <div key={integration.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/10 transition-colors overflow-hidden">
+            <div key={integration.id} className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] hover:border-[#0AF5D6]/15 transition-all group overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center text-2xl">
+                    <div className="w-12 h-12 rounded-xl bg-[#0AF5D6]/8 flex items-center justify-center text-2xl group-hover:bg-[#0AF5D6]/15 transition-colors">
                       {PROVIDER_ICONS[integration.id] || '\uD83D\uDD0C'}
                     </div>
                     <div>
@@ -127,7 +127,7 @@ export default function IntegrationsPage() {
                     integration.status === 'connected' ? 'bg-green-500/10' : 'bg-gray-500/10'
                   }`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${
-                      integration.status === 'connected' ? 'bg-green-400' : 'bg-gray-500'
+                      integration.status === 'connected' ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
                     }`} />
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${
                       integration.status === 'connected' ? 'text-green-400' : 'text-gray-500'
@@ -144,14 +144,14 @@ export default function IntegrationsPage() {
                     <>
                       <button
                         onClick={() => openConfig(integration)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all"
                       >
                         <Settings size={13} /> Configure
                       </button>
                       <button
                         onClick={() => handleDisconnect(integration.id)}
                         disabled={connecting === integration.id}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 transition-all disabled:opacity-50"
                       >
                         <Unplug size={13} /> {connecting === integration.id ? 'Disconnecting...' : 'Disconnect'}
                       </button>
@@ -166,7 +166,7 @@ export default function IntegrationsPage() {
                         }
                       }}
                       disabled={connecting === integration.id}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-[#0AF5D6] hover:bg-[#08D4B8] transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-black bg-[#0AF5D6] hover:bg-[#08D4B8] transition-all disabled:opacity-50"
                     >
                       <Plug size={13} /> {connecting === integration.id ? 'Connecting...' : 'Connect'}
                     </button>
@@ -193,13 +193,13 @@ export default function IntegrationsPage() {
           {configModal?.id === 'claude' && (
             <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl px-4 py-3">
               <span className="text-blue-400 text-xs font-semibold block mb-1">Replit AI Integration</span>
-              <span className="text-blue-400/70 text-[11px]">Claude is available through Replit AI Integration. No API key required - charges are billed to your Replit credits.</span>
+              <span className="text-blue-400/70 text-[11px]">Claude is available through Replit AI Integration. No API key required.</span>
             </div>
           )}
           {configModal?.id === 'openclaw' && (
             <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl px-4 py-3">
               <span className="text-purple-400 text-xs font-semibold block mb-1">MCP Integration</span>
-              <span className="text-purple-400/70 text-[11px]">OpenClaw uses the Model Context Protocol to enable AI agents to interact with GhostLane financial operations through natural language.</span>
+              <span className="text-purple-400/70 text-[11px]">OpenClaw uses the Model Context Protocol to enable AI agents to interact with GhostLane financial operations.</span>
             </div>
           )}
           {(configModal?.configFields || []).map((field: string) => (
@@ -212,7 +212,7 @@ export default function IntegrationsPage() {
                 value={configValues[field] || ''}
                 onChange={(e) => setConfigValues({ ...configValues, [field]: e.target.value })}
                 placeholder={field === 'mcp_endpoint' ? 'https://your-mcp-server.example.com' : field === 'agent_id' ? 'agent_prod_01' : field === 'model' ? 'claude-sonnet-4-5' : field === 'max_tokens' ? '4096' : ''}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-colors"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
               />
             </div>
           ))}
@@ -225,7 +225,7 @@ export default function IntegrationsPage() {
             </button>
             <button
               onClick={saveConfig}
-              className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2 rounded-xl font-bold text-sm transition-all"
+              className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-5 py-2 rounded-xl font-bold text-sm transition-all"
             >
               {configModal?.status === 'connected' ? 'Save Changes' : 'Connect & Save'}
             </button>

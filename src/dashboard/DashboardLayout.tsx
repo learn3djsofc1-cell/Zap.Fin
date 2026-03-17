@@ -12,9 +12,27 @@ const navItems = [
   { to: '/app/integrations', icon: Plug, label: 'Integrations', end: false, group: 'Developer' },
 ];
 
+function UserAvatar({ name }: { name: string }) {
+  const initials = (name || '?')
+    .split(' ')
+    .filter(Boolean)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '?';
+
+  return (
+    <div className="w-8 h-8 rounded-lg bg-[#0AF5D6]/10 border border-[#0AF5D6]/20 flex items-center justify-center">
+      <span className="text-[#0AF5D6] text-[10px] font-bold">{initials}</span>
+    </div>
+  );
+}
+
 const linkClass = (isActive: boolean) =>
-  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-    isActive ? 'bg-[#0AF5D6]/10 text-[#0AF5D6]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+  `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all relative ${
+    isActive
+      ? 'bg-[#0AF5D6]/10 text-[#0AF5D6] border border-[#0AF5D6]/15'
+      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
   }`;
 
 export default function DashboardLayout() {
@@ -29,17 +47,18 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-[#000000] font-sans flex">
-      <aside className="hidden md:flex flex-col w-64 border-r border-white/[0.04] bg-[#000000] shrink-0 sticky top-0 h-screen">
-        <div className="p-5 border-b border-white/[0.04]">
+      <aside className="hidden md:flex flex-col w-64 border-r border-white/[0.04] bg-[#000000] shrink-0 sticky top-0 h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0AF5D6]/[0.03] via-transparent to-[#0AF5D6]/[0.02] pointer-events-none" />
+        <div className="p-5 border-b border-white/[0.04] relative z-10">
           <Link to="/" className="flex items-center gap-2.5">
             <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
             <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
           </Link>
         </div>
-        <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
+        <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto relative z-10">
           {(['Platform', 'Developer'] as const).map((group) => (
             <div key={group}>
-              <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-0 block">{group}</span>
+              <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-2 block">{group}</span>
               {navItems.filter((item) => item.group === group).map((item) => (
                 <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => linkClass(isActive)}>
                   <item.icon size={18} />
@@ -49,16 +68,19 @@ export default function DashboardLayout() {
             </div>
           ))}
         </nav>
-        <div className="p-4 border-t border-white/[0.04]">
+        <div className="p-4 border-t border-white/[0.04] relative z-10">
           {user && (
-            <div className="px-4 py-2 mb-2">
-              <span className="text-white text-sm font-medium block truncate">{user.name}</span>
-              <span className="text-gray-500 text-xs block truncate">{user.email}</span>
+            <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-white/[0.02]">
+              <UserAvatar name={user.name} />
+              <div className="min-w-0 flex-1">
+                <span className="text-white text-sm font-medium block truncate">{user.name}</span>
+                <span className="text-gray-500 text-[10px] block truncate">{user.email}</span>
+              </div>
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
           >
             <LogOut size={18} />
             <span>Logout</span>
@@ -77,6 +99,11 @@ export default function DashboardLayout() {
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <span className="text-[#0AF5D6] text-xs font-semibold">Live</span>
             </div>
+            {user && (
+              <div className="hidden md:block">
+                <UserAvatar name={user.name} />
+              </div>
+            )}
             <button className="md:hidden text-gray-400 hover:text-white p-1.5" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -95,10 +122,10 @@ export default function DashboardLayout() {
                   <X size={20} />
                 </button>
               </div>
-              <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
+              <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
                 {(['Platform', 'Developer'] as const).map((group) => (
                   <div key={group}>
-                    <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-0 block">{group}</span>
+                    <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest px-4 mb-2 mt-4 first:mt-2 block">{group}</span>
                     {navItems.filter((item) => item.group === group).map((item) => (
                       <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setMobileOpen(false)} className={({ isActive }) => linkClass(isActive)}>
                         <item.icon size={18} />
@@ -110,14 +137,17 @@ export default function DashboardLayout() {
               </nav>
               <div className="p-4 border-t border-white/[0.04]">
                 {user && (
-                  <div className="px-4 py-2 mb-2">
-                    <span className="text-white text-sm font-medium block truncate">{user.name}</span>
-                    <span className="text-gray-500 text-xs block truncate">{user.email}</span>
+                  <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-white/[0.02]">
+                    <UserAvatar name={user.name} />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-white text-sm font-medium block truncate">{user.name}</span>
+                      <span className="text-gray-500 text-[10px] block truncate">{user.email}</span>
+                    </div>
                   </div>
                 )}
                 <button
                   onClick={() => { setMobileOpen(false); handleLogout(); }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
                 >
                   <LogOut size={18} />
                   <span>Logout</span>
@@ -127,8 +157,11 @@ export default function DashboardLayout() {
           </div>
         )}
 
-        <main className="flex-1 p-5 sm:p-6 lg:p-8 pb-24 md:pb-8">
-          <Outlet />
+        <main className="flex-1 p-5 sm:p-6 lg:p-8 pb-24 md:pb-8 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0AF5D6]/[0.02] via-transparent to-transparent pointer-events-none" />
+          <div className="relative z-10">
+            <Outlet />
+          </div>
         </main>
 
         <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/[0.04] md:hidden">
