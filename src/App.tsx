@@ -57,7 +57,7 @@ function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-2xl border-b border-white/[0.04]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
+        <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
           <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
           <span className="text-xl font-bold tracking-tight text-white">GhostLane</span>
         </Link>
