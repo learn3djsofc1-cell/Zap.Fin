@@ -1,6 +1,6 @@
 # GhostLane
 
-Privacy-focused cryptocurrency ecosystem. Advanced mixing, encrypted messaging, privacy bridge, and VPN — powered by zero-knowledge technology.
+Privacy-focused cryptocurrency ecosystem. Advanced mixing, encrypted messaging, privacy bridge, and VPN - powered by zero-knowledge technology.
 
 ## Development
 

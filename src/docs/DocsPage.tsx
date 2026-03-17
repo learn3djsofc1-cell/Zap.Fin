@@ -175,7 +175,7 @@ export default function DocsPage() {
             <Section id="security" title="Security Framework">
               <H3>Zero-Knowledge Architecture</H3>
               <P>
-                GhostLane's security is built on zero-knowledge proofs that ensure no party — including GhostLane itself — can link deposits to withdrawals. All cryptographic operations are verified on-chain.
+                GhostLane's security is built on zero-knowledge proofs that ensure no party - including GhostLane itself - can link deposits to withdrawals. All cryptographic operations are verified on-chain.
               </P>
               <H3>Security Measures</H3>
               <Table
@@ -184,13 +184,13 @@ export default function DocsPage() {
                   ['Encryption', 'AES-256-GCM for all data at rest and in transit'],
                   ['Key Management', 'Multi-signature cold storage for treasury funds'],
                   ['Infrastructure', 'Distributed nodes across 50+ countries'],
-                  ['Logging', 'Zero-log policy — no transaction data stored'],
+                  ['Logging', 'Zero-log policy - no transaction data stored'],
                   ['Network', 'Full Tor network compatibility'],
                   ['Insurance', 'Insurance fund for asset protection'],
                 ]}
               />
               <Callout type="warning" title="Security Notice">
-                Never share your API keys or wallet private keys. GhostLane will never ask for your private keys. All mixing operations are non-custodial — you maintain full control of your assets.
+                Never share your API keys or wallet private keys. GhostLane will never ask for your private keys. All mixing operations are non-custodial - you maintain full control of your assets.
               </Callout>
             </Section>
 
@@ -219,7 +219,7 @@ export default function DocsPage() {
             </Section>
 
             <Section id="faq" title="Frequently Asked Questions">
-              <FAQ q="What is GhostLane?" a="GhostLane is a complete privacy ecosystem for cryptocurrency users. It provides advanced mixing, encrypted messaging, cross-chain privacy bridges, and VPN services — all powered by zero-knowledge cryptography." />
+              <FAQ q="What is GhostLane?" a="GhostLane is a complete privacy ecosystem for cryptocurrency users. It provides advanced mixing, encrypted messaging, cross-chain privacy bridges, and VPN services - all powered by zero-knowledge cryptography." />
               <FAQ q="Is using GhostLane legal?" a="GhostLane is a privacy tool, similar to encrypted messaging apps or VPNs. The legality of privacy tools varies by jurisdiction. We encourage users to comply with their local laws." />
               <FAQ q="Which assets are supported?" a="GhostLane supports mixing for BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE, and more. The Ux402 protocol supports cross-chain transfers across 15+ blockchains." />
               <FAQ q="How does the mixer ensure privacy?" a="The mixer uses zero-knowledge proofs (zk-SNARKs), ring signatures, and large anonymity sets to break the link between deposit and withdrawal addresses. No logs are stored." />

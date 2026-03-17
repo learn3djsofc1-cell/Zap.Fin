@@ -121,7 +121,7 @@ export default function ApiKeysPage() {
           <div>
             <span className="text-white text-sm font-semibold block mb-1">API Key Security</span>
             <p className="text-gray-500 text-xs leading-relaxed">
-              API keys grant programmatic access to your GhostLane account. Keys prefixed with <code className="text-[#0AF5D6]">gl_live_</code> access production data. Keys prefixed with <code className="text-[#0AF5D6]">gl_test_</code> are sandboxed. The full key is only shown once at creation — store it securely.
+              API keys grant programmatic access to your GhostLane account. Keys prefixed with <code className="text-[#0AF5D6]">gl_live_</code> access production data. Keys prefixed with <code className="text-[#0AF5D6]">gl_test_</code> are sandboxed. The full key is only shown once at creation - store it securely.
             </p>
           </div>
         </div>

@@ -57,27 +57,22 @@ function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-2xl border-b border-white/[0.04]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
           <span className="text-xl font-bold tracking-tight text-white">GhostLane</span>
-        </a>
+        </Link>
         <div className="hidden md:flex items-center gap-7">
           {links.map((l) => (
             <a key={l.name} href={l.href} className="text-sm text-gray-500 hover:text-[#0AF5D6] font-medium transition-colors">{l.name}</a>
           ))}
         </div>
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/docs" className="text-gray-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">Docs</Link>
-          <a href="https://x.com/GhostLane_" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm font-medium transition-colors px-2 py-2">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </a>
           <Link to={appLink} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#0AF5D6]/20">{user ? 'Dashboard' : 'Launch App'}</Link>
         </div>
         <button className="md:hidden text-white p-1.5" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         {open && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 w-full bg-[#0A0A0A] border-b border-white/5 shadow-2xl md:hidden flex flex-col px-5 py-4 gap-3 z-50">
             {links.map((l) => (<a key={l.name} href={l.href} className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>{l.name}</a>))}
-            <Link to="/docs" className="text-gray-300 font-medium py-2 text-sm" onClick={() => setOpen(false)}>Docs</Link>
             <Link to={appLink} className="bg-[#0AF5D6] text-black px-5 py-3 rounded-xl font-semibold text-sm text-center mt-1" onClick={() => setOpen(false)}>{user ? 'Dashboard' : 'Launch App'}</Link>
           </motion.div>
         )}
@@ -112,16 +107,16 @@ function HeroSection() {
           </motion.h1>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-base sm:text-lg text-gray-400 leading-relaxed max-w-2xl mx-auto mb-10">
-            Advanced cryptocurrency mixing, encrypted messaging, privacy bridge, and secure VPN — all powered by zero-knowledge technology. Send and receive on-chain with complete privacy while protecting your digital assets with military-grade encryption.
+            Advanced cryptocurrency mixing, encrypted messaging, privacy bridge, and secure VPN - all powered by zero-knowledge technology. Send and receive on-chain with complete privacy while protecting your digital assets with military-grade encryption.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-16">
             <Link to={user ? '/app' : '/login'} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20">
               Launch App <ArrowRight size={16} />
             </Link>
-            <a href="#features" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-1.5 px-6 py-4 transition-colors border border-white/[0.06] rounded-xl hover:border-white/10">
-              Learn More <ChevronDown size={15} />
-            </a>
+            <Link to="/docs" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-1.5 px-6 py-4 transition-colors border border-white/[0.06] rounded-xl hover:border-white/10">
+              Documentation <ArrowRight size={15} />
+            </Link>
           </motion.div>
 
           <motion.div style={{ y: floatY }} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
@@ -152,8 +147,9 @@ function ProductsSection() {
   ];
 
   return (
-    <section id="features" className="py-24 lg:py-32 bg-[#000000]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section id="features" className="relative py-24 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Our Privacy Products</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -266,8 +262,9 @@ function Ux402Section() {
   ];
 
   return (
-    <section id="ux402" className="py-24 lg:py-32 bg-[#050505] border-y border-white/[0.03]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section id="ux402" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.04] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Next-Gen Protocol</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -344,11 +341,13 @@ function WhySection() {
     { icon: <Zap size={22} />, title: 'Instant Processing', desc: 'Lightning-fast mixing with customizable delay options for enhanced security.' },
     { icon: <Layers size={22} />, title: 'Large Liquidity Pools', desc: 'Massive anonymity sets ensure maximum privacy protection for every transaction.' },
     { icon: <Shield size={22} />, title: 'Decentralized Infrastructure', desc: 'No single point of failure with distributed nodes across the globe ensuring maximum uptime and security.' },
+    { icon: <Eye size={22} />, title: 'Fully Auditable', desc: 'Open-source smart contracts and third-party audits ensure transparency without compromising user privacy.' },
   ];
 
   return (
-    <section className="py-24 lg:py-32 bg-[#000000]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section className="relative py-24 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Why GhostLane</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -378,8 +377,9 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="py-24 lg:py-32 bg-[#050505] border-y border-white/[0.03]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section id="how-it-works" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.03] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">How GhostLane Works</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -425,8 +425,9 @@ function TechnologySection() {
   ];
 
   return (
-    <section className="py-24 lg:py-32 bg-[#000000]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section className="relative py-24 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Cutting-Edge Technology</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -455,19 +456,20 @@ function TechnologySection() {
 
 function SupportedAssetsSection() {
   const assets = [
-    { symbol: 'BTC', name: 'Bitcoin' },
-    { symbol: 'ETH', name: 'Ethereum' },
-    { symbol: 'XMR', name: 'Monero' },
-    { symbol: 'LTC', name: 'Litecoin' },
-    { symbol: 'DASH', name: 'Dash' },
-    { symbol: 'ZEC', name: 'Zcash' },
-    { symbol: 'BCH', name: 'Bitcoin Cash' },
-    { symbol: 'DOGE', name: 'Dogecoin' },
+    { symbol: 'BTC', name: 'Bitcoin', logo: '/crypto-btc.png' },
+    { symbol: 'ETH', name: 'Ethereum', logo: '/crypto-eth.png' },
+    { symbol: 'XMR', name: 'Monero', logo: '/crypto-xmr.png' },
+    { symbol: 'LTC', name: 'Litecoin', logo: '/crypto-ltc.png' },
+    { symbol: 'DASH', name: 'Dash', logo: '/crypto-dash.png' },
+    { symbol: 'ZEC', name: 'Zcash', logo: '/crypto-zec.png' },
+    { symbol: 'BCH', name: 'Bitcoin Cash', logo: '/crypto-bch.png' },
+    { symbol: 'DOGE', name: 'Dogecoin', logo: '/crypto-doge.png' },
   ];
 
   return (
-    <section id="assets" className="py-24 lg:py-32 bg-[#050505] border-y border-white/[0.03]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section id="assets" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.03] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Supported Assets</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -479,8 +481,8 @@ function SupportedAssetsSection() {
         <StaggerWrap className="grid grid-cols-2 sm:grid-cols-4 gap-4" gap={0.05}>
           {assets.map((a) => (
             <motion.div key={a.symbol} variants={cardReveal} className="bg-[#0A0A0A] rounded-2xl p-6 border border-white/[0.04] text-center group hover:border-[#0AF5D6]/15 transition-all duration-300">
-              <div className="w-14 h-14 bg-[#0AF5D6]/6 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#0AF5D6]/12 transition-colors">
-                <span className="text-[#0AF5D6] font-extrabold text-lg">{a.symbol.slice(0, 2)}</span>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <img src={a.logo} alt={a.name} className="w-10 h-10 object-contain" />
               </div>
               <h3 className="text-white font-bold text-sm mb-0.5">{a.name}</h3>
               <span className="text-gray-600 text-xs font-mono">{a.symbol}</span>
@@ -507,8 +509,9 @@ function ComparisonSection() {
   ];
 
   return (
-    <section className="py-24 lg:py-32 bg-[#000000]">
-      <div className="max-w-5xl mx-auto px-5 sm:px-6">
+    <section className="relative py-24 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Comparison</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -555,8 +558,9 @@ function SecuritySection() {
   ];
 
   return (
-    <section id="security" className="py-24 lg:py-32 bg-[#050505] border-y border-white/[0.03]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <section id="security" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.03] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Security & Privacy</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -590,8 +594,9 @@ function FAQSection() {
   ];
 
   return (
-    <section id="faq" className="py-24 lg:py-32 bg-[#000000]">
-      <div className="max-w-3xl mx-auto px-5 sm:px-6">
+    <section id="faq" className="relative py-24 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="max-w-3xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">FAQ</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
@@ -631,8 +636,9 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="py-24 lg:py-32 bg-[#050505] border-t border-white/[0.03]">
-      <div className="max-w-4xl mx-auto px-5 sm:px-6 text-center">
+    <section className="relative py-24 lg:py-32 border-t border-white/[0.03] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.04] to-[#000000]" />
+      <div className="max-w-4xl mx-auto px-5 sm:px-6 text-center relative z-10">
         <RevealOnScroll>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-5">
             Ready to Protect<br className="hidden sm:block" /> Your Privacy?

@@ -127,7 +127,7 @@ export default function AgentsPage() {
         <EmptyState
           icon={<Bot size={28} />}
           title="No agent accounts yet"
-          description="Create your first AI agent account — a programmable bank account for autonomous financial operations."
+          description="Create your first AI agent account - a programmable bank account for autonomous financial operations."
           action={
             <button onClick={openCreate} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all">
               <Plus size={16} /> Create Agent Account

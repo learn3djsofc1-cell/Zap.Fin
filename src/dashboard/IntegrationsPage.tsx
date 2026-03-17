@@ -193,7 +193,7 @@ export default function IntegrationsPage() {
           {configModal?.id === 'claude' && (
             <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl px-4 py-3">
               <span className="text-blue-400 text-xs font-semibold block mb-1">Replit AI Integration</span>
-              <span className="text-blue-400/70 text-[11px]">Claude is available through Replit AI Integration. No API key required — charges are billed to your Replit credits.</span>
+              <span className="text-blue-400/70 text-[11px]">Claude is available through Replit AI Integration. No API key required - charges are billed to your Replit credits.</span>
             </div>
           )}
           {configModal?.id === 'openclaw' && (

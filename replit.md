@@ -20,7 +20,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 
 - **Name**: GhostLane
 - **Main Accent**: #0AF5D6 (cyan), hover: #08D4B8
-- **Background**: #000000 (primary), #0A0A0A (cards/sections), #050505 (alternate sections)
+- **Background**: #000000 (primary) with #0AF5D6 gradient overlays on sections, #0A0A0A (cards)
 - **Font**: Chakra Petch (Google Fonts)
 - **Logo**: public/ghostlane-logo.png
 - **Social**: X/Twitter at https://x.com/GhostLane_
@@ -91,7 +91,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - **api_keys**: id (serial PK), user_id (FK), name, key_hash (bcrypt), key_prefix (first 12 chars), environment (live/test), last_used_at, revoked_at, created_at
 - **integrations**: id (serial PK), user_id (FK), provider (openclaw/claude), status, config (jsonb), connected_at, updated_at
 
-All tables enforce user_id isolation — users can only access their own data.
+All tables enforce user_id isolation - users can only access their own data.
 Supported currencies: USDC, SOL, ETH, USDT (with crypto token logos in CurrencyBadge component).
 
 ## Routes
