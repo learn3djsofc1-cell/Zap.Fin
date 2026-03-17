@@ -90,9 +90,10 @@ function HeroSection() {
   return (
     <section ref={containerRef} className="relative overflow-hidden bg-[#000000]">
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[700px] bg-gradient-radial from-[#0AF5D6]/6 via-transparent to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#0AF5D6]/3 rounded-full blur-3xl" />
-        <div className="absolute top-60 left-0 w-[300px] h-[300px] bg-emerald-500/3 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[900px] bg-gradient-radial from-[#0AF5D6]/20 via-[#0AF5D6]/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#0AF5D6]/12 rounded-full blur-3xl" />
+        <div className="absolute top-40 left-0 w-[400px] h-[400px] bg-[#0AF5D6]/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 w-[800px] h-[300px] bg-gradient-to-t from-[#0AF5D6]/10 via-transparent to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-20 pb-28 lg:pt-32 lg:pb-40 relative z-10">
@@ -148,7 +149,8 @@ function ProductsSection() {
 
   return (
     <section id="features" className="relative py-24 lg:py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-[#000000] via-[#0AF5D6]/[0.08] to-[#000000]" />
+      <div className="absolute top-0 left-1/4 w-[600px] h-[500px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Our Privacy Products</span>
@@ -263,7 +265,8 @@ function Ux402Section() {
 
   return (
     <section id="ux402" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.04] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.12] to-[#000000]" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0AF5D6]/8 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Next-Gen Protocol</span>
@@ -346,7 +349,8 @@ function WhySection() {
 
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-bl from-[#000000] via-[#0AF5D6]/[0.08] to-[#000000]" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[400px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Why GhostLane</span>
@@ -378,7 +382,8 @@ function HowItWorksSection() {
 
   return (
     <section id="how-it-works" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.03] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0AF5D6]/[0.08] via-[#0AF5D6]/[0.10] to-[#000000]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">How GhostLane Works</span>
@@ -426,7 +431,8 @@ function TechnologySection() {
 
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-tl from-[#000000] via-[#0AF5D6]/[0.08] to-[#000000]" />
+      <div className="absolute top-0 right-1/4 w-[500px] h-[400px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Cutting-Edge Technology</span>
@@ -468,7 +474,8 @@ function SupportedAssetsSection() {
 
   return (
     <section id="assets" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.03] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-l from-[#000000] via-[#0AF5D6]/[0.10] to-[#0AF5D6]/[0.05]" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[#0AF5D6]/8 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Supported Assets</span>
@@ -510,7 +517,8 @@ function ComparisonSection() {
 
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-[#000000] via-[#0AF5D6]/[0.08] to-[#000000]" />
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-5xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Comparison</span>
@@ -559,7 +567,8 @@ function SecuritySection() {
 
   return (
     <section id="security" className="relative py-24 lg:py-32 border-y border-white/[0.03] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.03] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.10] to-[#000000]" />
+      <div className="absolute top-1/2 right-0 w-[500px] h-[400px] bg-[#0AF5D6]/7 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Security & Privacy</span>
@@ -595,7 +604,8 @@ function FAQSection() {
 
   return (
     <section id="faq" className="relative py-24 lg:py-32 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#000000] via-[#0AF5D6]/[0.02] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-bl from-[#000000] via-[#0AF5D6]/[0.08] to-[#000000]" />
+      <div className="absolute bottom-0 left-1/3 w-[600px] h-[400px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-3xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">FAQ</span>
@@ -637,7 +647,8 @@ function CTASection() {
 
   return (
     <section className="relative py-24 lg:py-32 border-t border-white/[0.03] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#0AF5D6]/[0.04] to-[#000000]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#0AF5D6]/[0.12] to-[#000000]" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#0AF5D6]/10 rounded-full blur-3xl" />
       <div className="max-w-4xl mx-auto px-5 sm:px-6 text-center relative z-10">
         <RevealOnScroll>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-5">
@@ -680,8 +691,9 @@ function FooterSection() {
   ];
 
   return (
-    <footer className="bg-[#000000] border-t border-white/[0.04] pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+    <footer className="relative border-t border-white/[0.04] pt-16 pb-8 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0AF5D6]/[0.08] via-[#000000] to-[#000000]" />
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-14">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
