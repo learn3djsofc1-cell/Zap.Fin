@@ -42,12 +42,19 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
   }
 });
 
+function formatNum(val: string | number): string {
+  const n = typeof val === 'string' ? parseFloat(val) : val;
+  if (isNaN(n)) return '0';
+  if (n % 1 === 0) return n.toFixed(0);
+  return n.toString().replace(/\.?0+$/, '');
+}
+
 router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
 
     const result = await pool.query(
-      `SELECT id, coin, amount, status, created_at, recipient_address, privacy_level
+      `SELECT id, send_coin, receive_coin, send_amount, receive_amount, status, created_at, recipient_address, privacy_level
        FROM mix_operations
        WHERE user_id = $1
        ORDER BY created_at DESC
@@ -58,7 +65,7 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
     const activity = result.rows.map((row) => ({
       id: row.id,
       type: 'mix' as const,
-      title: `${row.coin} Mix — ${parseFloat(row.amount).toLocaleString()} ${row.coin}`,
+      title: `${formatNum(row.send_amount)} ${row.send_coin} → ${formatNum(row.receive_amount)} ${row.receive_coin}`,
       description: `${row.privacy_level} privacy to ${row.recipient_address.slice(0, 8)}...${row.recipient_address.slice(-6)}`,
       timestamp: row.created_at?.toISOString?.() || row.created_at,
       status: row.status,

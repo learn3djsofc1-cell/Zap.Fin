@@ -2,6 +2,7 @@ import { Response, Router } from 'express';
 import { authMiddleware, AuthRequest } from '../auth.js';
 import pool from '../db.js';
 import { validateAddress, generateDepositAddress, isSupportedCoin, SUPPORTED_COINS } from '../crypto-utils.js';
+import { getPrices, getConversion, MIXER_FEE_PERCENT } from '../coingecko.js';
 
 const router = Router();
 router.use(authMiddleware);
@@ -9,13 +10,22 @@ router.use(authMiddleware);
 const VALID_PRIVACY_LEVELS = ['standard', 'enhanced', 'maximum'];
 const VALID_STATUSES = ['pending', 'mixing', 'complete', 'failed'];
 
+function formatNum(val: string | number): string {
+  const n = typeof val === 'string' ? parseFloat(val) : val;
+  if (isNaN(n)) return '0';
+  if (n % 1 === 0) return n.toFixed(0);
+  return n.toString().replace(/\.?0+$/, '');
+}
+
 function formatMix(row: any) {
-  const rawAmount = parseFloat(row.amount);
-  const formattedAmount = rawAmount % 1 === 0 ? rawAmount.toFixed(0) : rawAmount.toString().replace(/\.?0+$/, '');
   return {
     id: row.id,
-    coin: row.coin,
-    amount: formattedAmount,
+    sendCoin: row.send_coin,
+    receiveCoin: row.receive_coin,
+    sendAmount: formatNum(row.send_amount),
+    receiveAmount: formatNum(row.receive_amount),
+    exchangeRate: formatNum(row.exchange_rate),
+    feePercent: parseFloat(row.fee_percent),
     recipientAddress: row.recipient_address,
     privacyLevel: row.privacy_level,
     delayMinutes: row.delay_minutes,
@@ -73,27 +83,37 @@ router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
 router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
-    const { coin, amount, recipientAddress, privacyLevel, delayMinutes } = req.body;
+    const { sendCoin, receiveCoin, sendAmount, recipientAddress, privacyLevel, delayMinutes } = req.body;
 
-    if (!coin || !amount || !recipientAddress || !privacyLevel) {
-      res.status(400).json({ error: 'Missing required fields: coin, amount, recipientAddress, privacyLevel' });
+    if (!sendCoin || !receiveCoin || !sendAmount || !recipientAddress || !privacyLevel) {
+      res.status(400).json({ error: 'Missing required fields: sendCoin, receiveCoin, sendAmount, recipientAddress, privacyLevel' });
       return;
     }
 
-    if (typeof coin !== 'string' || typeof recipientAddress !== 'string' || typeof privacyLevel !== 'string') {
+    if (typeof sendCoin !== 'string' || typeof receiveCoin !== 'string' || typeof recipientAddress !== 'string' || typeof privacyLevel !== 'string') {
       res.status(400).json({ error: 'Invalid input types' });
       return;
     }
 
-    const upperCoin = coin.toUpperCase();
-    if (!isSupportedCoin(upperCoin)) {
-      res.status(400).json({ error: `Unsupported coin. Supported: ${SUPPORTED_COINS.join(', ')}` });
+    const upperSend = sendCoin.toUpperCase();
+    const upperReceive = receiveCoin.toUpperCase();
+
+    if (!isSupportedCoin(upperSend)) {
+      res.status(400).json({ error: `Unsupported send coin. Supported: ${SUPPORTED_COINS.join(', ')}` });
+      return;
+    }
+    if (!isSupportedCoin(upperReceive)) {
+      res.status(400).json({ error: `Unsupported receive coin. Supported: ${SUPPORTED_COINS.join(', ')}` });
+      return;
+    }
+    if (upperSend === upperReceive) {
+      res.status(400).json({ error: 'Send and receive coins must be different' });
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      res.status(400).json({ error: 'Amount must be a positive number' });
+    const parsedSendAmount = parseFloat(sendAmount);
+    if (isNaN(parsedSendAmount) || parsedSendAmount <= 0) {
+      res.status(400).json({ error: 'Send amount must be a positive number' });
       return;
     }
 
@@ -102,7 +122,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    const addressValidation = validateAddress(upperCoin, recipientAddress.trim());
+    const addressValidation = validateAddress(upperReceive, recipientAddress.trim());
     if (!addressValidation.valid) {
       res.status(400).json({ error: addressValidation.error || 'Invalid recipient address' });
       return;
@@ -114,13 +134,22 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    const deposit = generateDepositAddress(upperCoin);
+    let conversion;
+    try {
+      conversion = await getConversion(upperSend, upperReceive, parsedSendAmount);
+    } catch (convErr) {
+      console.error('Rate conversion error:', convErr);
+      res.status(503).json({ error: 'Unable to fetch exchange rates. Please try again.' });
+      return;
+    }
+
+    const deposit = generateDepositAddress(upperSend);
 
     const result = await pool.query(
-      `INSERT INTO mix_operations (user_id, coin, amount, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc)
-       VALUES ($1, $2, $3, $4, $5, $6, 'pending', $7, $8)
+      `INSERT INTO mix_operations (user_id, send_coin, receive_coin, send_amount, receive_amount, exchange_rate, fee_percent, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11, $12)
        RETURNING *`,
-      [userId, upperCoin, parsedAmount, recipientAddress.trim(), privacyLevel, parsedDelay, deposit.address, deposit.encryptedPrivateKey]
+      [userId, upperSend, upperReceive, parsedSendAmount, conversion.receiveAmount, conversion.exchangeRate, conversion.feePercent, recipientAddress.trim(), privacyLevel, parsedDelay, deposit.address, deposit.encryptedPrivateKey]
     );
 
     res.status(201).json({ mix: formatMix(result.rows[0]) });
@@ -142,6 +171,16 @@ router.post('/validate-address', async (req: AuthRequest, res: Response): Promis
   } catch (err) {
     console.error('Address validation error:', err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/rates', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const prices = await getPrices();
+    res.json({ prices, feePercent: MIXER_FEE_PERCENT });
+  } catch (err) {
+    console.error('Rates fetch error:', err);
+    res.status(503).json({ error: 'Unable to fetch exchange rates' });
   }
 });
 

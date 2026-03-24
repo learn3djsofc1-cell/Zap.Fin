@@ -77,10 +77,11 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   ├── schema.ts           # Database schema initialization (users, mix_operations tables)
 │   ├── auth.ts             # Auth routes (/api/auth/*) + JWT middleware
 │   ├── crypto-utils.ts     # Address validation & deposit address generation (ethers.js, crypto)
+│   ├── coingecko.ts        # CoinGecko price service (60s TTL cache, rate conversion with 1.5% fee)
 │   ├── validate.ts         # ID validation helpers
 │   ├── routes/
-│   │   ├── overview.ts     # GET /api/overview/stats (real DB), GET /api/overview/activity (real DB)
-│   │   ├── mixer.ts        # CRUD /api/mixer (DB-backed), validate-address, pools, deposit address gen
+│   │   ├── overview.ts     # GET /api/overview/stats (real DB), GET /api/overview/activity (real DB, "X BTC → Y ETH" format)
+│   │   ├── mixer.ts        # Cross-asset swap CRUD /api/mixer (DB-backed), rates, validate-address, pools
 │   │   ├── messenger.ts    # /api/messenger (conversations, messages, contacts)
 │   │   ├── bridge.ts       # /api/bridge (create transfer, list, chains)
 │   │   ├── vpn.ts          # /api/vpn (servers, session, connect, disconnect, kill-switch)
@@ -113,8 +114,9 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/overview/stats` Dashboard stats (privacy score, totals)
 - `GET /api/overview/activity` Recent activity feed
 - `GET /api/mixer` List mix operations
-- `POST /api/mixer` Create mix operation (coin, amount, recipient, privacy level) — generates deposit address, persists to DB
+- `POST /api/mixer` Create cross-asset swap (sendCoin, receiveCoin, sendAmount, recipientAddress, privacyLevel) — fetches live CoinGecko rates, generates deposit address for send coin, validates recipient against receive coin format
 - `POST /api/mixer/validate-address` Validate recipient address by coin type
+- `GET /api/mixer/rates` Live exchange rates from CoinGecko (60s cache)
 - `GET /api/mixer/pools` Pool sizes
 - `GET /api/mixer/:id` Get mix details
 - `GET /api/messenger/conversations` List conversations
@@ -175,11 +177,12 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - Individual DB connection params
 - `JWT_SECRET` - Secret key for JWT signing (defaults to a dev fallback if not set)
 - `DEPOSIT_KEY_SECRET` - AES-256 encryption key for deposit private keys (defaults to a dev fallback if not set)
+- `COINGECKO_API_KEY` - CoinGecko API key for live cryptocurrency price feeds (used by mixer cross-asset swap rates)
 
 ## Database Tables
 
 - `users` - User accounts (email, password_hash, name)
-- `mix_operations` - Cryptocurrency mix operations (coin, amount, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
+- `mix_operations` - Cross-asset swap operations (send_coin, receive_coin, send_amount, receive_amount, exchange_rate, fee_percent, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
 - `agents` - Agent configurations and balances
 - `transactions` - General transaction records
 - `policies` - Security policy configurations

@@ -124,8 +124,12 @@ export async function initializeDatabase(): Promise<void> {
       CREATE TABLE IF NOT EXISTS mix_operations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        coin VARCHAR(10) NOT NULL,
-        amount NUMERIC(30, 18) NOT NULL,
+        send_coin VARCHAR(10) NOT NULL,
+        receive_coin VARCHAR(10) NOT NULL,
+        send_amount NUMERIC(30, 18) NOT NULL,
+        receive_amount NUMERIC(30, 18) NOT NULL,
+        exchange_rate NUMERIC(30, 18) NOT NULL DEFAULT 1,
+        fee_percent NUMERIC(5, 2) NOT NULL DEFAULT 1.5,
         recipient_address VARCHAR(255) NOT NULL,
         privacy_level VARCHAR(20) NOT NULL DEFAULT 'standard',
         delay_minutes INTEGER NOT NULL DEFAULT 0,
@@ -137,6 +141,30 @@ export async function initializeDatabase(): Promise<void> {
         completed_at TIMESTAMP WITH TIME ZONE
       )
     `);
+
+    const hasOldCoinCol = await client.query(`
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'mix_operations' AND column_name = 'coin'
+    `);
+    if (hasOldCoinCol.rows.length > 0) {
+      await client.query(`ALTER TABLE mix_operations RENAME COLUMN coin TO send_coin`);
+      await client.query(`ALTER TABLE mix_operations RENAME COLUMN amount TO send_amount`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS receive_coin VARCHAR(10) NOT NULL DEFAULT 'ETH'`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS receive_amount NUMERIC(30, 18) NOT NULL DEFAULT 0`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS exchange_rate NUMERIC(30, 18) NOT NULL DEFAULT 1`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS fee_percent NUMERIC(5, 2) NOT NULL DEFAULT 1.5`);
+      await client.query(`
+        UPDATE mix_operations
+        SET receive_coin = send_coin, receive_amount = send_amount, exchange_rate = 1, fee_percent = 1.5
+        WHERE receive_amount = 0
+      `);
+      console.log('Migrated mix_operations from single-coin to cross-asset schema');
+    } else {
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS receive_coin VARCHAR(10) NOT NULL DEFAULT 'ETH'`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS receive_amount NUMERIC(30, 18) NOT NULL DEFAULT 0`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS exchange_rate NUMERIC(30, 18) NOT NULL DEFAULT 1`);
+      await client.query(`ALTER TABLE mix_operations ADD COLUMN IF NOT EXISTS fee_percent NUMERIC(5, 2) NOT NULL DEFAULT 1.5`);
+    }
 
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_mix_operations_user_id ON mix_operations(user_id)

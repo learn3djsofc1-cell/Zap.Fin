@@ -53,8 +53,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export interface MixRequest {
-  coin: string;
-  amount: string;
+  sendCoin: string;
+  receiveCoin: string;
+  sendAmount: string;
   recipientAddress: string;
   privacyLevel: 'standard' | 'enhanced' | 'maximum';
   delayMinutes?: number;
@@ -62,8 +63,12 @@ export interface MixRequest {
 
 export interface MixOperation {
   id: string;
-  coin: string;
-  amount: string;
+  sendCoin: string;
+  receiveCoin: string;
+  sendAmount: string;
+  receiveAmount: string;
+  exchangeRate: string;
+  feePercent: number;
   recipientAddress: string;
   privacyLevel: string;
   delayMinutes: number;
@@ -180,6 +185,11 @@ export interface AddressValidation {
   error?: string;
 }
 
+export interface MixRates {
+  prices: Record<string, number>;
+  feePercent: number;
+}
+
 export interface Chain {
   id: string;
   name: string;
@@ -219,6 +229,7 @@ export const api = {
     },
     get: (id: string) => request<{ mix: MixOperation }>(`/mixer/${id}`),
     pools: () => request<{ pools: MixPool[] }>('/mixer/pools'),
+    rates: () => request<MixRates>('/mixer/rates'),
     validateAddress: (coin: string, address: string) =>
       request<AddressValidation>('/mixer/validate-address', { method: 'POST', body: JSON.stringify({ coin, address }) }),
   },
