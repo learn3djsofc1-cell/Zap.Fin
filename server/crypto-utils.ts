@@ -224,7 +224,7 @@ function base58Encode(buffer: Buffer): string {
   return result;
 }
 
-function generateBase58Address(versionByte: number): DepositAddressResult {
+function generateBase58Address(versionBytes: number[]): DepositAddressResult {
   const privKey = crypto.randomBytes(32);
   const signingKey = new ethers.SigningKey('0x' + privKey.toString('hex'));
   const compressedPubKey = Buffer.from(signingKey.compressedPublicKey.slice(2), 'hex');
@@ -232,7 +232,7 @@ function generateBase58Address(versionByte: number): DepositAddressResult {
   const sha256Hash = crypto.createHash('sha256').update(compressedPubKey).digest();
   const ripemd = crypto.createHash('ripemd160').update(sha256Hash).digest();
 
-  const versionedPayload = Buffer.concat([Buffer.from([versionByte]), ripemd]);
+  const versionedPayload = Buffer.concat([Buffer.from(versionBytes), ripemd]);
   const checksum = crypto.createHash('sha256').update(
     crypto.createHash('sha256').update(versionedPayload).digest()
   ).digest().subarray(0, 4);
@@ -243,6 +243,33 @@ function generateBase58Address(versionByte: number): DepositAddressResult {
     address: base58Encode(addressBuffer),
     encryptedPrivateKey: encrypt(privKey.toString('hex')),
   };
+}
+
+function moneroBase58Encode(data: Buffer): string {
+  const fullBlockSize = 8;
+  const encodedBlockSizes = [0, 2, 3, 5, 6, 7, 9, 10, 11];
+  let result = '';
+
+  for (let i = 0; i < data.length; i += fullBlockSize) {
+    const remaining = data.length - i;
+    const blockSize = Math.min(fullBlockSize, remaining);
+    const block = data.subarray(i, i + blockSize);
+
+    let num = BigInt(0);
+    for (const byte of block) {
+      num = (num << 8n) | BigInt(byte);
+    }
+
+    const encodedSize = blockSize === fullBlockSize ? 11 : encodedBlockSizes[blockSize];
+    let encoded = '';
+    for (let j = 0; j < encodedSize; j++) {
+      const remainder = Number(num % 58n);
+      num = num / 58n;
+      encoded = BASE58_ALPHABET[remainder] + encoded;
+    }
+    result += encoded;
+  }
+  return result;
 }
 
 function generateXmrAddress(): DepositAddressResult {
@@ -256,9 +283,10 @@ function generateXmrAddress(): DepositAddressResult {
 
   const networkByte = Buffer.from([0x12]);
   const payload = Buffer.concat([networkByte, spendPub, viewPub]);
-  const checkHash = crypto.createHash('sha256').update(payload).digest().subarray(0, 4);
-  const fullAddr = Buffer.concat([payload, checkHash]);
-  const address = base58Encode(fullAddr);
+  const keccakHash = Buffer.from(ethers.keccak256(payload).slice(2), 'hex');
+  const checksum = keccakHash.subarray(0, 4);
+  const fullData = Buffer.concat([payload, checksum]);
+  const address = moneroBase58Encode(fullData);
 
   return {
     address,
@@ -270,14 +298,14 @@ function generateXmrAddress(): DepositAddressResult {
 }
 
 const COIN_ADDRESS_GENERATORS: Record<SupportedCoin, () => DepositAddressResult> = {
-  BTC: () => generateBase58Address(0x00),
+  BTC: () => generateBase58Address([0x00]),
   ETH: () => generateEthLikeAddress(),
   XMR: () => generateXmrAddress(),
-  LTC: () => generateBase58Address(0x30),
-  DASH: () => generateBase58Address(0x4C),
-  ZEC: () => generateBase58Address(0x1C),
-  BCH: () => generateBase58Address(0x00),
-  DOGE: () => generateBase58Address(0x1E),
+  LTC: () => generateBase58Address([0x30]),
+  DASH: () => generateBase58Address([0x4C]),
+  ZEC: () => generateBase58Address([0x1C, 0xB8]),
+  BCH: () => generateBase58Address([0x00]),
+  DOGE: () => generateBase58Address([0x1E]),
 };
 
 export function generateDepositAddress(coin: string): DepositAddressResult {
@@ -285,7 +313,12 @@ export function generateDepositAddress(coin: string): DepositAddressResult {
   if (!SUPPORTED_COINS.includes(upperCoin)) {
     throw new Error(`Unsupported coin: ${coin}`);
   }
-  return COIN_ADDRESS_GENERATORS[upperCoin]();
+  const result = COIN_ADDRESS_GENERATORS[upperCoin]();
+  const validation = validateAddress(upperCoin, result.address);
+  if (!validation.valid) {
+    throw new Error(`Generated deposit address failed self-validation for ${upperCoin}: ${validation.error}`);
+  }
+  return result;
 }
 
 export { SUPPORTED_COINS };
