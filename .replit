@@ -53,7 +53,6 @@ run = ["node", "./dist/index.cjs"]
 [userenv]
 
 [userenv.shared]
-SERPAPI_KEY = "6a1dbeaff00a11fe8a193d926bef1df1d71837a33ee99b07be083188f0acc6ba"
 
 [userenv.production]
 NODE_ENV = "production"
