@@ -28,7 +28,10 @@ async function fetchPricesFromApi(): Promise<Record<string, number>> {
   }
 
   const ids = Object.values(COINGECKO_IDS).join(',');
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&x_cg_demo_api_key=${apiKey}`;
+  const isProKey = apiKey.startsWith('CG-') && apiKey.length > 20;
+  const baseUrl = isProKey ? 'https://pro-api.coingecko.com' : 'https://api.coingecko.com';
+  const keyParam = isProKey ? 'x_cg_pro_api_key' : 'x_cg_demo_api_key';
+  const url = `${baseUrl}/api/v3/simple/price?ids=${ids}&vs_currencies=usd&${keyParam}=${apiKey}`;
 
   const response = await fetch(url, {
     headers: {

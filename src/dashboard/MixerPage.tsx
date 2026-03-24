@@ -65,6 +65,7 @@ export default function MixerPage() {
 
   const [rates, setRates] = useState<MixRates | null>(null);
   const [ratesLoading, setRatesLoading] = useState(false);
+  const [ratesError, setRatesError] = useState(false);
   const [receiveAmount, setReceiveAmount] = useState('');
 
   const [addressValid, setAddressValid] = useState<boolean | null>(null);
@@ -93,8 +94,8 @@ export default function MixerPage() {
   function loadRates() {
     setRatesLoading(true);
     api.mixer.rates()
-      .then((data) => setRates(data))
-      .catch(() => {})
+      .then((data) => { setRates(data); setRatesError(false); })
+      .catch(() => { setRatesError(true); toast('error', 'Unable to fetch exchange rates. Prices may be unavailable.'); })
       .finally(() => setRatesLoading(false));
   }
 
@@ -483,7 +484,7 @@ export default function MixerPage() {
             </div>
           </div>
 
-          {(receiveAmount || ratesLoading) && (
+          {(receiveAmount || ratesLoading || ratesError) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -493,6 +494,12 @@ export default function MixerPage() {
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
                   <span className="text-gray-500 text-xs">Loading rates...</span>
+                </div>
+              ) : ratesError ? (
+                <div className="flex items-center justify-center gap-2 text-red-400">
+                  <AlertCircle size={14} />
+                  <span className="text-xs">Unable to fetch rates.</span>
+                  <button type="button" onClick={loadRates} className="text-[#0AF5D6] text-xs underline hover:no-underline">Retry</button>
                 </div>
               ) : (
                 <>
