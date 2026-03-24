@@ -84,16 +84,17 @@ export default function DepositPendingModal({ open, onClose, depositAddress, sen
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4"
+          className="fixed inset-0 z-[100] overflow-y-auto"
           onClick={onClose}
         >
           <div className="absolute inset-0 bg-black/90 backdrop-blur-lg" />
+          <div className="min-h-full flex items-start sm:items-center justify-center px-3 py-4 sm:p-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#0A0A0A] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60 w-full max-w-md overflow-y-auto max-h-[95vh]"
+            className="relative bg-[#0A0A0A] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#0AF5D6]/50 to-transparent" />
@@ -237,6 +238,7 @@ export default function DepositPendingModal({ open, onClose, depositAddress, sen
               </motion.button>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
