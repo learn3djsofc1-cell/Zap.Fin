@@ -12,6 +12,8 @@ interface BridgeDepositModalProps {
   sourceChain: string;
   destChain: string;
   recipientAddress: string;
+  sourceChainLogo?: string | null;
+  destChainLogo?: string | null;
 }
 
 function BridgeSpinner() {
@@ -39,7 +41,14 @@ function BridgeSpinner() {
   );
 }
 
-export default function BridgeDepositModal({ open, onClose, depositAddress, amount, token, sourceChain, destChain, recipientAddress }: BridgeDepositModalProps) {
+function ChainIcon({ chainId, logo, size = 11 }: { chainId: string; logo?: string | null; size?: number }) {
+  if (logo) {
+    return <img src={logo} alt={chainId} style={{ width: size, height: size }} className="object-contain" />;
+  }
+  return <Globe size={size} className="text-green-400" />;
+}
+
+export default function BridgeDepositModal({ open, onClose, depositAddress, amount, token, sourceChain, destChain, recipientAddress, sourceChainLogo, destChainLogo }: BridgeDepositModalProps) {
   const [copied, setCopied] = useState<'deposit' | 'recipient' | null>(null);
 
   async function handleCopy(text: string, type: 'deposit' | 'recipient') {
@@ -100,12 +109,12 @@ export default function BridgeDepositModal({ open, onClose, depositAddress, amou
 
                   <div className="flex items-center justify-center gap-2 sm:gap-3 py-1.5">
                     <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-2.5 py-1.5">
-                      <Globe size={11} className="text-green-400" />
+                      <ChainIcon chainId={sourceChain} logo={sourceChainLogo} size={14} />
                       <span className="text-white text-xs font-semibold capitalize">{sourceChain}</span>
                     </div>
                     <ArrowRight size={14} className="text-green-400 shrink-0" />
                     <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-2.5 py-1.5">
-                      <Globe size={11} className="text-green-400" />
+                      <ChainIcon chainId={destChain} logo={destChainLogo} size={14} />
                       <span className="text-white text-xs font-semibold capitalize">{destChain}</span>
                     </div>
                   </div>

@@ -367,7 +367,7 @@ export default function BridgePage() {
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">From Chain</label>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            <div className="flex gap-1.5 overflow-x-auto md:overflow-visible md:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
               {chains.map((c) => (
                 <button
                   key={`src-${c.id}`}
@@ -408,7 +408,7 @@ export default function BridgePage() {
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">To Chain</label>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            <div className="flex gap-1.5 overflow-x-auto md:overflow-visible md:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
               {chains.map((c) => (
                 <button
                   key={`dst-${c.id}`}
@@ -444,7 +444,7 @@ export default function BridgePage() {
           ) : (
             <div>
               <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Token</label>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+              <div className="flex gap-1.5 overflow-x-auto md:overflow-visible md:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
                 {availableTokens.map((t) => (
                   <button
                     key={t}
@@ -563,6 +563,8 @@ export default function BridgePage() {
           sourceChain={pendingTransfer.sourceChain}
           destChain={pendingTransfer.destChain}
           recipientAddress={pendingTransfer.recipientAddress}
+          sourceChainLogo={resolveChainLogo(pendingTransfer.sourceChain)}
+          destChainLogo={resolveChainLogo(pendingTransfer.destChain)}
         />
       )}
     </div>

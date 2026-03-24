@@ -391,7 +391,7 @@ export default function MixerPage() {
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">You Send</label>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            <div className="flex gap-1.5 overflow-x-auto md:overflow-visible md:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
               {SUPPORTED_COINS.map((c) => (
                 <button
                   key={`send-${c}`}
@@ -452,7 +452,7 @@ export default function MixerPage() {
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">You Receive</label>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            <div className="flex gap-1.5 overflow-x-auto md:overflow-visible md:flex-wrap pb-1 -mx-1 px-1 scrollbar-hide">
               {SUPPORTED_COINS.map((c) => (
                 <button
                   key={`recv-${c}`}
