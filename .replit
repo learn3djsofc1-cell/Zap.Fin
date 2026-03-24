@@ -56,3 +56,4 @@ run = ["node", "./dist/index.cjs"]
 
 [userenv.production]
 NODE_ENV = "production"
+JWT_SECRET = "ff0225f8f0a158019db7f51311e37cf555b7a9f8f8f9ad3192e674288fa29eeb"
