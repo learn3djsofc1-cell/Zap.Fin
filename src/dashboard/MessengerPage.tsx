@@ -169,8 +169,7 @@ export default function MessengerPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] overflow-hidden"
-        style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}
+        className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] overflow-hidden h-[calc(100vh-320px)] sm:h-[calc(100vh-280px)] md:h-[calc(100vh-220px)] min-h-[300px]"
       >
         <div className="flex h-full">
           <div className={`w-full md:w-80 border-r border-white/[0.04] flex flex-col shrink-0 ${showMobileChat ? 'hidden md:flex' : 'flex'}`}>
@@ -248,24 +247,41 @@ export default function MessengerPage() {
               </div>
             ) : (
               <>
-                <div className="px-4 py-3 border-b border-white/[0.04] flex items-center gap-3">
-                  <button
-                    onClick={() => { setShowMobileChat(false); setActiveConversation(null); }}
-                    className="md:hidden text-gray-400 hover:text-white p-1"
-                  >
-                    ←
-                  </button>
-                  <div className="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center">
-                    <span className="text-purple-400 text-[10px] font-bold font-mono">{activeConversation.contactAddress.slice(0, 2)}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate font-mono">{truncateAddress(activeConversation.contactAddress)}</span>
-                    <div className="flex items-center gap-1">
-                      <Lock size={8} className="text-[#0AF5D6]" />
-                      <span className="text-[#0AF5D6] text-[10px] font-semibold">Encrypted</span>
+                <div className="px-3 py-2 border-b border-white/[0.04]">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { setShowMobileChat(false); setActiveConversation(null); }}
+                      className="md:hidden text-gray-400 hover:text-white p-1 shrink-0"
+                    >
+                      ←
+                    </button>
+                    <div className="w-7 h-7 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center shrink-0">
+                      <span className="text-purple-400 text-[9px] font-bold font-mono">{activeConversation.contactAddress.slice(0, 2)}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-white text-xs font-semibold block truncate font-mono">{truncateAddress(activeConversation.contactAddress)}</span>
+                      <div className="flex items-center gap-1">
+                        <Lock size={8} className="text-[#0AF5D6]" />
+                        <span className="text-[#0AF5D6] text-[10px] font-semibold">Encrypted</span>
+                      </div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-1 shrink-0">
+                      {SELF_DESTRUCT_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setSelfDestruct(opt.value)}
+                          className={`px-2 py-1 rounded text-[9px] font-bold transition-all ${
+                            selfDestruct === opt.value
+                              ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
+                              : 'text-gray-600 hover:text-gray-400'
+                          }`}
+                        >
+                          {opt.value === 0 ? <Timer size={10} /> : opt.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex sm:hidden items-center gap-1 mt-2 pl-9">
                     {SELF_DESTRUCT_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
@@ -282,7 +298,7 @@ export default function MessengerPage() {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
                   {messagesLoading ? (
                     Array.from({ length: 4 }).map((_, i) => (
                       <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
@@ -321,22 +337,22 @@ export default function MessengerPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <form onSubmit={handleSend} className="p-3 border-t border-white/[0.04]">
+                <form onSubmit={handleSend} className="p-2 sm:p-3 border-t border-white/[0.04]">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 relative">
                       <input
                         type="text"
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type an encrypted message..."
-                        className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 pr-10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-all"
+                        placeholder="Type a message..."
+                        className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 pr-8 sm:pr-10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-all"
                       />
-                      <Lock size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0AF5D6]/30" />
+                      <Lock size={10} className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-[#0AF5D6]/30" />
                     </div>
                     <button
                       type="submit"
                       disabled={sending || !messageText.trim()}
-                      className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black p-3 rounded-xl transition-all"
+                      className="bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black p-2.5 sm:p-3 rounded-xl transition-all shrink-0"
                     >
                       {sending ? (
                         <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
