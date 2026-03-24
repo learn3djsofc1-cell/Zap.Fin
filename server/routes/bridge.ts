@@ -8,22 +8,40 @@ router.use(authMiddleware);
 
 const VALID_STATUSES = ['initiated', 'confirming', 'bridging', 'complete', 'failed'];
 
+const CHAIN_LOGO_MAP: Record<string, string> = {
+  ethereum: '/crypto-eth.png',
+  bitcoin: '/crypto-btc.png',
+  solana: '/sol-logo.png',
+  polygon: '/crypto-matic.png',
+  avalanche: '/crypto-avax.png',
+  bsc: '/crypto-bnb.png',
+  arbitrum: '/crypto-arb.png',
+  optimism: '/crypto-op.png',
+  base: '/crypto-eth.png',
+  monero: '/crypto-xmr.png',
+  litecoin: '/crypto-ltc.png',
+  zcash: '/crypto-zec.png',
+  dash: '/crypto-dash.png',
+  dogecoin: '/crypto-doge.png',
+  fantom: '/crypto-ftm.png',
+};
+
 const CHAINS = [
-  { id: 'ethereum', name: 'Ethereum', icon: 'eth', tokens: ['ETH', 'USDC', 'USDT'] },
-  { id: 'bitcoin', name: 'Bitcoin', icon: 'btc', tokens: ['BTC'] },
-  { id: 'solana', name: 'Solana', icon: 'sol', tokens: ['SOL', 'USDC'] },
-  { id: 'polygon', name: 'Polygon', icon: 'matic', tokens: ['MATIC', 'USDC', 'USDT'] },
-  { id: 'avalanche', name: 'Avalanche', icon: 'avax', tokens: ['AVAX', 'USDC'] },
-  { id: 'bsc', name: 'BNB Chain', icon: 'bnb', tokens: ['BNB', 'USDT'] },
-  { id: 'arbitrum', name: 'Arbitrum', icon: 'eth', tokens: ['ETH', 'USDC'] },
-  { id: 'optimism', name: 'Optimism', icon: 'eth', tokens: ['ETH', 'USDC'] },
-  { id: 'base', name: 'Base', icon: 'eth', tokens: ['ETH', 'USDC'] },
-  { id: 'monero', name: 'Monero', icon: 'xmr', tokens: ['XMR'] },
-  { id: 'litecoin', name: 'Litecoin', icon: 'ltc', tokens: ['LTC'] },
-  { id: 'zcash', name: 'Zcash', icon: 'zec', tokens: ['ZEC'] },
-  { id: 'dash', name: 'Dash', icon: 'dash', tokens: ['DASH'] },
-  { id: 'dogecoin', name: 'Dogecoin', icon: 'doge', tokens: ['DOGE'] },
-  { id: 'fantom', name: 'Fantom', icon: 'ftm', tokens: ['FTM'] },
+  { id: 'ethereum', name: 'Ethereum', icon: 'eth', tokens: ['ETH', 'USDC', 'USDT'], logo: CHAIN_LOGO_MAP['ethereum'] },
+  { id: 'bitcoin', name: 'Bitcoin', icon: 'btc', tokens: ['BTC'], logo: CHAIN_LOGO_MAP['bitcoin'] },
+  { id: 'solana', name: 'Solana', icon: 'sol', tokens: ['SOL', 'USDC'], logo: CHAIN_LOGO_MAP['solana'] },
+  { id: 'polygon', name: 'Polygon', icon: 'matic', tokens: ['MATIC', 'USDC', 'USDT'], logo: CHAIN_LOGO_MAP['polygon'] },
+  { id: 'avalanche', name: 'Avalanche', icon: 'avax', tokens: ['AVAX', 'USDC'], logo: CHAIN_LOGO_MAP['avalanche'] },
+  { id: 'bsc', name: 'BNB Chain', icon: 'bnb', tokens: ['BNB', 'USDT'], logo: CHAIN_LOGO_MAP['bsc'] },
+  { id: 'arbitrum', name: 'Arbitrum', icon: 'eth', tokens: ['ETH', 'USDC'], logo: CHAIN_LOGO_MAP['arbitrum'] },
+  { id: 'optimism', name: 'Optimism', icon: 'eth', tokens: ['ETH', 'USDC'], logo: CHAIN_LOGO_MAP['optimism'] },
+  { id: 'base', name: 'Base', icon: 'eth', tokens: ['ETH', 'USDC'], logo: CHAIN_LOGO_MAP['base'] },
+  { id: 'monero', name: 'Monero', icon: 'xmr', tokens: ['XMR'], logo: CHAIN_LOGO_MAP['monero'] },
+  { id: 'litecoin', name: 'Litecoin', icon: 'ltc', tokens: ['LTC'], logo: CHAIN_LOGO_MAP['litecoin'] },
+  { id: 'zcash', name: 'Zcash', icon: 'zec', tokens: ['ZEC'], logo: CHAIN_LOGO_MAP['zcash'] },
+  { id: 'dash', name: 'Dash', icon: 'dash', tokens: ['DASH'], logo: CHAIN_LOGO_MAP['dash'] },
+  { id: 'dogecoin', name: 'Dogecoin', icon: 'doge', tokens: ['DOGE'], logo: CHAIN_LOGO_MAP['dogecoin'] },
+  { id: 'fantom', name: 'Fantom', icon: 'ftm', tokens: ['FTM'], logo: CHAIN_LOGO_MAP['fantom'] },
 ];
 
 const VALID_CHAIN_IDS = CHAINS.map(c => c.id);
@@ -126,6 +144,12 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
     const sourceChainData = CHAINS.find(c => c.id === sourceChain);
     if (!sourceChainData || !sourceChainData.tokens.includes(token.toUpperCase())) {
       res.status(400).json({ error: `Token ${token} is not available on ${sourceChain}` });
+      return;
+    }
+
+    const destChainData = CHAINS.find(c => c.id === destChain);
+    if (!destChainData || !destChainData.tokens.includes(token.toUpperCase())) {
+      res.status(400).json({ error: `Token ${token} is not available on ${destChain}` });
       return;
     }
 

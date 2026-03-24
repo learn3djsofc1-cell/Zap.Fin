@@ -35,10 +35,10 @@ const statusDots: Record<string, string> = {
   failed: 'bg-red-400',
 };
 
-function ChainLogo({ chainId, size = 14, className = '' }: { chainId: string; size?: number; className?: string }) {
-  const logo = getChainLogo(chainId);
-  if (logo) {
-    return <img src={logo} alt={chainId} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
+function ChainLogo({ chainId, logo, size = 14, className = '' }: { chainId: string; logo?: string; size?: number; className?: string }) {
+  const resolvedLogo = logo || getChainLogo(chainId);
+  if (resolvedLogo) {
+    return <img src={resolvedLogo} alt={chainId} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
   }
   return <Globe size={size} className={className} />;
 }
@@ -116,8 +116,9 @@ export default function BridgePage() {
 
   const availableTokens = useMemo(() => {
     if (!sourceChainData) return [];
-    return sourceChainData.tokens;
-  }, [sourceChainData]);
+    if (!destChainData) return sourceChainData.tokens;
+    return sourceChainData.tokens.filter((t) => destChainData.tokens.includes(t));
+  }, [sourceChainData, destChainData]);
 
   useEffect(() => {
     api.bridge.chains()
@@ -141,7 +142,7 @@ export default function BridgePage() {
     if (availableTokens.length > 0 && !availableTokens.includes(token)) {
       setToken(availableTokens[0]);
     }
-  }, [sourceChain, availableTokens, token]);
+  }, [sourceChain, destChain, availableTokens, token]);
 
   useEffect(() => {
     setAddressValid(null);
@@ -382,7 +383,7 @@ export default function BridgePage() {
                   }`}
                   disabled={c.id === destChain}
                 >
-                  <ChainLogo chainId={c.id} size={14} />
+                  <ChainLogo chainId={c.id} logo={c.logo} size={14} />
                   <span>{c.name}</span>
                 </button>
               ))}
@@ -423,33 +424,40 @@ export default function BridgePage() {
                   }`}
                   disabled={c.id === sourceChain}
                 >
-                  <ChainLogo chainId={c.id} size={14} />
+                  <ChainLogo chainId={c.id} logo={c.logo} size={14} />
                   <span>{c.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Token</label>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-              {availableTokens.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setToken(t)}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                    token === t
-                      ? 'bg-green-500/15 text-green-400 border border-green-500/30'
-                      : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
-                  }`}
-                >
-                  <TokenLogo token={t} size={14} />
-                  <span>{t}</span>
-                </button>
-              ))}
+          {availableTokens.length === 0 && sourceChain && destChain ? (
+            <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-3 flex items-start gap-2">
+              <AlertCircle size={14} className="text-red-400 shrink-0 mt-0.5" />
+              <p className="text-red-400 text-xs leading-relaxed">No tokens available for this chain pair. Select different source or destination chains.</p>
             </div>
-          </div>
+          ) : (
+            <div>
+              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Token</label>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                {availableTokens.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setToken(t)}
+                    className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      token === t
+                        ? 'bg-green-500/15 text-green-400 border border-green-500/30'
+                        : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
+                    }`}
+                  >
+                    <CurrencyBadge currency={t} size="sm" showLabel={false} />
+                    <span>{t}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Amount</label>
@@ -528,7 +536,7 @@ export default function BridgePage() {
 
           <button
             type="submit"
-            disabled={creating || addressValid === false || sourceChain === destChain || !amount}
+            disabled={creating || addressValid === false || sourceChain === destChain || !amount || availableTokens.length === 0}
             className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
           >
             {creating ? (
