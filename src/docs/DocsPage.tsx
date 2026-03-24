@@ -326,7 +326,7 @@ export default function DocsPage() {
               <P>
                 Ux402 supports cross-chain transfers between 15+ blockchains including Ethereum, Solana, Bitcoin (via wrapped BTC), Polygon, Avalanche, Arbitrum, Optimism, Base, BSC, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chain integrations are deployed quarterly.
               </P>
-              <CodeBlock code={`import { Ux402Client } from '@ghostlane/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.ghostlane.io/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'solana',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n  hops: 3,              // number of intermediate pools\n});\n\nconsole.log(transfer.proofHash);     // zk-SNARK proof identifier\nconsole.log(transfer.estimatedTime); // '~45 seconds'\nconsole.log(transfer.status);        // 'routing' -> 'complete'`} />
+              <CodeBlock code={`import { Ux402Client } from '@ghostlane/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.ghostlane.net/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'solana',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n  hops: 3,              // number of intermediate pools\n});\n\nconsole.log(transfer.proofHash);     // zk-SNARK proof identifier\nconsole.log(transfer.estimatedTime); // '~45 seconds'\nconsole.log(transfer.status);        // 'routing' -> 'complete'`} />
               <Callout type="info" title="Liquidity Requirements">
                 Multi-hop routing requires sufficient liquidity in intermediate pools. For transfers exceeding $100,000 USD equivalent, the protocol may split the amount across multiple routing paths to maintain anonymity set density.
               </Callout>
@@ -359,7 +359,7 @@ export default function DocsPage() {
                 ]}
               />
               <Callout type="warning" title="Security Notice">
-                Never share your API keys or wallet private keys. GhostLane will never ask for your private keys through any communication channel. All mixing and bridge operations are non-custodial — you maintain full control of your assets throughout the entire process. Report any suspicious communications to security@ghostlane.io.
+                Never share your API keys or wallet private keys. GhostLane will never ask for your private keys through any communication channel. All mixing and bridge operations are non-custodial — you maintain full control of your assets throughout the entire process. Report any suspicious communications to security@ghostlane.net.
               </Callout>
             </Section>
 
