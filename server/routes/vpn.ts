@@ -541,11 +541,20 @@ router.get('/searches', async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId;
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    const sessionId = req.query.session_id as string | undefined;
 
-    const result = await pool.query(
-      `SELECT * FROM vpn_searches WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
-      [userId, limit]
-    );
+    let query = `SELECT * FROM vpn_searches WHERE user_id = $1`;
+    const params: any[] = [userId];
+
+    if (sessionId) {
+      params.push(sessionId);
+      query += ` AND session_id = $${params.length}`;
+    }
+
+    params.push(limit);
+    query += ` ORDER BY created_at DESC LIMIT $${params.length}`;
+
+    const result = await pool.query(query, params);
 
     const searches = result.rows.map((row) => ({
       id: row.id,
