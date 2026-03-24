@@ -117,20 +117,45 @@ export interface VpnServer {
   id: string;
   country: string;
   city: string;
+  flag: string;
   latencyMs: number;
   load: number;
   protocol: string;
+  region: string;
 }
 
 export interface VpnSession {
+  id?: string;
   connected: boolean;
   serverId?: string;
   serverName?: string;
+  serverCountry?: string;
+  serverCity?: string;
   connectedAt?: string;
+  disconnectedAt?: string;
   bytesUp?: number;
   bytesDown?: number;
   assignedIp?: string;
+  fingerprintHash?: string;
+  relayNode?: string;
   killSwitch: boolean;
+  status?: string;
+}
+
+export interface VpnSearchResult {
+  title: string;
+  link: string;
+  snippet: string;
+  position: number;
+}
+
+export interface VpnSearchEntry {
+  id: string;
+  sessionId: string;
+  query: string;
+  resultsCount: number;
+  urlOpened?: string;
+  createdAt: string;
 }
 
 export interface OverviewStats {
@@ -270,6 +295,23 @@ export const api = {
       request<{ session: VpnSession }>('/vpn/disconnect', { method: 'POST' }),
     toggleKillSwitch: (enabled: boolean) =>
       request<{ session: VpnSession }>('/vpn/kill-switch', { method: 'POST', body: JSON.stringify({ enabled }) }),
+    history: (params?: { limit?: number; offset?: number }) => {
+      const query = new URLSearchParams();
+      if (params?.limit) query.set('limit', String(params.limit));
+      if (params?.offset) query.set('offset', String(params.offset));
+      const qs = query.toString();
+      return request<{ sessions: VpnSession[]; total: number }>(`/vpn/history${qs ? `?${qs}` : ''}`);
+    },
+    search: (query: string) =>
+      request<{ results: VpnSearchResult[]; query: string }>('/vpn/search', { method: 'POST', body: JSON.stringify({ query }) }),
+    logOpen: (url: string, query?: string) =>
+      request<{ success: boolean }>('/vpn/search/log-open', { method: 'POST', body: JSON.stringify({ url, query }) }),
+    searches: (limit?: number) => {
+      const query = new URLSearchParams();
+      if (limit) query.set('limit', String(limit));
+      const qs = query.toString();
+      return request<{ searches: VpnSearchEntry[] }>(`/vpn/searches${qs ? `?${qs}` : ''}`);
+    },
   },
   settings: {
     profile: () => request<{ profile: UserProfile }>('/settings/profile'),

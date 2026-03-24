@@ -31,7 +31,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 1. **Mixer** — Advanced cryptocurrency mixing with ZK proofs. Break transaction links with massive anonymity sets. Supports BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE.
 2. **Encrypted Messenger** — E2E encrypted messaging with disappearing messages and zero metadata collection.
 3. **Privacy Bridge** — Cross-chain asset transfers across 15+ chains with complete anonymity.
-4. **VPN** — Military-grade VPN with no-logs policy, Tor integration, kill switch, 50+ countries.
+4. **VPN** — Military-grade VPN with no-logs policy, kill switch, 24 global servers, SerpAPI-powered private search, session history with DB persistence.
 5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Solana (developer SDK).
 
 ## Project Structure
@@ -66,7 +66,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │       ├── MixerPage.tsx        # /app/mixer - New mix form, coin selector, privacy levels, history
 │       ├── MessengerPage.tsx    # /app/messenger - Conversation list, chat view, self-destruct, new chat
 │       ├── BridgePage.tsx       # /app/bridge - Cross-chain form, chain swap, status tracker, history
-│       ├── VpnPage.tsx          # /app/vpn - Connection toggle, server list, kill switch, stats
+│       ├── VpnPage.tsx          # /app/vpn - Connection toggle, 24 global servers, real-time stats (duration, fingerprint, IP cloak, relayer), bandwidth, kill switch, SerpAPI private search, session history
 │       └── SettingsPage.tsx     # /app/settings - Profile, security (password, 2FA, sessions), notifications
 ├── public/
 │   ├── ghostlane-logo.png  # GhostLane brand logo
@@ -127,11 +127,15 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/bridge` List bridge transfers
 - `POST /api/bridge` Create bridge transfer
 - `GET /api/bridge/chains` List supported chains
-- `GET /api/vpn/servers` List VPN servers
-- `GET /api/vpn/session` Get current VPN session
-- `POST /api/vpn/connect` Connect to VPN server
-- `POST /api/vpn/disconnect` Disconnect VPN
-- `POST /api/vpn/kill-switch` Toggle kill switch
+- `GET /api/vpn/servers` List 24 global VPN servers (flag, latency, load, protocol)
+- `GET /api/vpn/session` Get active VPN session (DB-backed with IP, fingerprint, relay)
+- `POST /api/vpn/connect` Connect to VPN server (creates DB session)
+- `POST /api/vpn/disconnect` Disconnect VPN (persists bandwidth data)
+- `POST /api/vpn/kill-switch` Toggle kill switch (persisted per session)
+- `GET /api/vpn/history` Session history (paginated)
+- `POST /api/vpn/search` Private search via SerpAPI (requires active VPN)
+- `POST /api/vpn/search/log-open` Log URL opened from search results
+- `GET /api/vpn/searches` Search history for user
 - `GET /api/settings/profile` Get user profile
 - `PATCH /api/settings/profile` Update profile
 - `POST /api/settings/password` Change password
@@ -178,6 +182,7 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `JWT_SECRET` - Secret key for JWT signing (defaults to a dev fallback if not set)
 - `DEPOSIT_KEY_SECRET` - AES-256 encryption key for deposit private keys (defaults to a dev fallback if not set)
 - `COINGECKO_API_KEY` - CoinGecko API key for live cryptocurrency price feeds (used by mixer cross-asset swap rates)
+- `SERPAPI_KEY` - SerpAPI key for VPN private search feature (server-side proxied Google search)
 
 ## Database Tables
 
@@ -185,6 +190,9 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `mix_operations` - Cross-asset swap operations (send_coin, receive_coin, send_amount, receive_amount, exchange_rate, fee_percent, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
 - `conversations` - Messenger conversations per user (contact_address as Solana address, last_message, last_message_at, UNIQUE per user+address)
 - `messages` - Messenger messages (conversation_id FK, user_id FK, content, sender, self_destruct_seconds)
+- `bridge_transfers` - Cross-chain bridge transfers (source_chain, dest_chain, token, amount, recipient_address, status, deposit_address)
+- `vpn_sessions` - VPN session records (server_id, server_name, server_country, server_city, assigned_ip, fingerprint_hash, relay_node, bytes_up, bytes_down, kill_switch, status, connected_at, disconnected_at)
+- `vpn_searches` - VPN search history (session_id FK, query, results_count, url_opened)
 - `agents` - Agent configurations and balances
 - `transactions` - General transaction records
 - `policies` - Security policy configurations

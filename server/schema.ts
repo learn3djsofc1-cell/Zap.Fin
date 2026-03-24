@@ -252,6 +252,61 @@ export async function initializeDatabase(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_bridge_transfers_user_status ON bridge_transfers(user_id, status)
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS vpn_sessions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        server_id VARCHAR(50) NOT NULL,
+        server_name VARCHAR(255) NOT NULL,
+        server_country VARCHAR(100) NOT NULL,
+        server_city VARCHAR(100) NOT NULL,
+        assigned_ip VARCHAR(45) NOT NULL,
+        fingerprint_hash VARCHAR(64) NOT NULL,
+        relay_node VARCHAR(100) NOT NULL,
+        bytes_up BIGINT NOT NULL DEFAULT 0,
+        bytes_down BIGINT NOT NULL DEFAULT 0,
+        kill_switch BOOLEAN NOT NULL DEFAULT FALSE,
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
+        connected_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        disconnected_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_sessions_user_id ON vpn_sessions(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_sessions_status ON vpn_sessions(status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_sessions_user_status ON vpn_sessions(user_id, status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_sessions_connected_at ON vpn_sessions(connected_at)
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS vpn_searches (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        session_id UUID REFERENCES vpn_sessions(id) ON DELETE SET NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        query TEXT NOT NULL,
+        results_count INTEGER NOT NULL DEFAULT 0,
+        url_opened TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_searches_user_id ON vpn_searches(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_searches_session_id ON vpn_searches(session_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_searches_created_at ON vpn_searches(created_at)
+    `);
+
     await client.query('COMMIT');
     console.log('Database schema initialized successfully');
   } catch (err) {

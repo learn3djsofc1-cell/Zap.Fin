@@ -9,7 +9,7 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
 
-    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult, bridgeCountResult, activeBridgeResult] = await Promise.all([
+    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult, bridgeCountResult, activeBridgeResult, vpnUptimeResult, vpnActiveResult] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM mix_operations WHERE user_id = $1', [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND status = 'complete'", [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
@@ -17,6 +17,15 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
       pool.query("SELECT COUNT(*) FROM messages WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
       pool.query('SELECT COUNT(*) FROM bridge_transfers WHERE user_id = $1', [userId]),
       pool.query("SELECT COUNT(*) FROM bridge_transfers WHERE user_id = $1 AND status IN ('initiated', 'confirming', 'bridging')", [userId]),
+      pool.query(
+        `SELECT COALESCE(
+          SUM(EXTRACT(EPOCH FROM (COALESCE(disconnected_at, NOW()) - connected_at))),
+          0
+        ) as total_seconds
+        FROM vpn_sessions WHERE user_id = $1`,
+        [userId]
+      ),
+      pool.query("SELECT COUNT(*) FROM vpn_sessions WHERE user_id = $1 AND status = 'active'", [userId]),
     ]);
 
     const totalMixes = parseInt(mixCountResult.rows[0].count);
@@ -26,6 +35,23 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
     const recentMessages = parseInt(recentMessageResult.rows[0].count);
     const totalBridges = parseInt(bridgeCountResult.rows[0].count);
     const activeBridges = parseInt(activeBridgeResult.rows[0].count);
+    const vpnTotalSeconds = parseFloat(vpnUptimeResult.rows[0].total_seconds) || 0;
+    const vpnActive = parseInt(vpnActiveResult.rows[0].count) > 0;
+
+    const vpnHours = Math.floor(vpnTotalSeconds / 3600);
+    const vpnMins = Math.floor((vpnTotalSeconds % 3600) / 60);
+    let vpnUptime: string;
+    if (vpnHours >= 24) {
+      const days = Math.floor(vpnHours / 24);
+      const remHours = vpnHours % 24;
+      vpnUptime = `${days}d ${remHours}h`;
+    } else if (vpnHours > 0) {
+      vpnUptime = `${vpnHours}h ${vpnMins}m`;
+    } else if (vpnMins > 0) {
+      vpnUptime = `${vpnMins}m`;
+    } else {
+      vpnUptime = '0h';
+    }
 
     let privacyScore = 0;
     const mixBase = Math.min(totalMixes * 5, 30);
@@ -34,7 +60,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
     const msgBase = Math.min(messagesEncrypted * 2, 15);
     const msgRecency = Math.min(recentMessages * 1, 15);
     const bridgeBase = Math.min(totalBridges * 3, 10);
-    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency + bridgeBase, 100);
+    const vpnScore = vpnActive ? 10 : Math.min(Math.floor(vpnHours), 5);
+    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency + bridgeBase + vpnScore, 100);
 
     res.json({
       stats: {
@@ -42,7 +69,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
         totalMixes,
         activeBridges,
         messagesEncrypted,
-        vpnUptime: '0h',
+        vpnUptime,
+        vpnActive,
       },
     });
   } catch (err) {
@@ -62,7 +90,7 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId;
 
-    const [mixResult, msgResult, bridgeResult] = await Promise.all([
+    const [mixResult, msgResult, bridgeResult, vpnResult] = await Promise.all([
       pool.query(
         `SELECT id, send_coin, receive_coin, send_amount, receive_amount, status, created_at, recipient_address, privacy_level
          FROM mix_operations
@@ -85,6 +113,14 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
          FROM bridge_transfers
          WHERE user_id = $1
          ORDER BY created_at DESC
+         LIMIT 15`,
+        [userId]
+      ),
+      pool.query(
+        `SELECT id, server_name, server_country, server_city, status, connected_at, disconnected_at, assigned_ip
+         FROM vpn_sessions
+         WHERE user_id = $1
+         ORDER BY connected_at DESC
          LIMIT 15`,
         [userId]
       ),
@@ -117,7 +153,16 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
       status: row.status,
     }));
 
-    const activity = [...mixActivity, ...msgActivity, ...bridgeActivity]
+    const vpnActivity = vpnResult.rows.map((row) => ({
+      id: row.id,
+      type: 'vpn' as const,
+      title: `VPN ${row.status === 'active' ? 'Connected' : 'Session'} — ${row.server_city}, ${row.server_country}`,
+      description: `IP: ${row.assigned_ip}${row.disconnected_at ? ' (ended)' : ' (active)'}`,
+      timestamp: row.connected_at?.toISOString?.() || row.connected_at,
+      status: row.status === 'active' ? 'active' : 'complete',
+    }));
+
+    const activity = [...mixActivity, ...msgActivity, ...bridgeActivity, ...vpnActivity]
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 20);
 
