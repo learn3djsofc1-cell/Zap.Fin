@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Wifi, WifiOff, Shield, Globe, Zap, Power, Search, MapPin, Signal, Lock, Fingerprint, Radio, Clock, ExternalLink, History, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { api, type VpnServer, type VpnSession, type VpnSearchResult, type VpnSearchEntry } from '../lib/api';
+import { Wifi, WifiOff, Shield, Globe, Zap, Power, Search, MapPin, Signal, Lock, Fingerprint, Radio, Clock, ExternalLink, History, X, ChevronDown, ChevronUp, StopCircle, Activity } from 'lucide-react';
+import { api, type VpnServer, type VpnSession, type VpnSearchResult, type VpnDappSession } from '../lib/api';
 import { useToast } from '../lib/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,7 +26,8 @@ function formatSessionDuration(connectedAt: string, disconnectedAt?: string | nu
   const hours = Math.floor(diff / 3600);
   const mins = Math.floor((diff % 3600) / 60);
   if (hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
+  if (mins > 0) return `${mins}m`;
+  return '<1m';
 }
 
 function latencyColor(ms: number): string {
@@ -49,7 +50,15 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-type Tab = 'search' | 'history';
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
+type Tab = 'search' | 'dapps' | 'history';
 
 export default function VpnPage() {
   const { toast } = useToast();
@@ -70,7 +79,12 @@ export default function VpnPage() {
   const [history, setHistory] = useState<VpnSession[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  const [dapps, setDapps] = useState<VpnDappSession[]>([]);
+  const [dappsLoading, setDappsLoading] = useState(false);
+  const [dappDurations, setDappDurations] = useState<Record<string, string>>({});
+
   const [serversExpanded, setServersExpanded] = useState(false);
+  const [endingSession, setEndingSession] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = useCallback(async () => {
@@ -102,6 +116,20 @@ export default function VpnPage() {
     return () => clearInterval(interval);
   }, [session?.connected, session?.connectedAt]);
 
+  useEffect(() => {
+    if (dapps.length === 0) return;
+    const activeDapps = dapps.filter(d => d.status === 'active');
+    if (activeDapps.length === 0) return;
+    const interval = setInterval(() => {
+      const durations: Record<string, string> = {};
+      for (const d of activeDapps) {
+        durations[d.id] = formatDuration(d.openedAt);
+      }
+      setDappDurations(durations);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [dapps]);
+
   async function handleToggleConnection() {
     if (connecting) return;
     setConnecting(true);
@@ -111,6 +139,7 @@ export default function VpnPage() {
         setSession(data.session);
         setSearchResults([]);
         setLastSearchQuery('');
+        setDapps(prev => prev.map(d => d.status === 'active' ? { ...d, status: 'closed' as const, closedAt: new Date().toISOString() } : d));
         toast('info', 'VPN disconnected');
       } else {
         if (!selectedServer) {
@@ -158,11 +187,59 @@ export default function VpnPage() {
     }
   }
 
-  async function handleOpenResult(url: string) {
+  async function handleOpenResult(url: string, title: string) {
     try {
-      await api.vpn.logOpen(url, lastSearchQuery);
+      const [, dappRes] = await Promise.allSettled([
+        api.vpn.logOpen(url, lastSearchQuery),
+        api.vpn.openDapp(url, title),
+      ]);
+      if (dappRes.status === 'fulfilled') {
+        setDapps(prev => [dappRes.value.dapp, ...prev]);
+      }
     } catch {}
     window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  async function handleCloseDapp(dappId: string) {
+    try {
+      const data = await api.vpn.closeDapp(dappId);
+      setDapps(prev => prev.map(d => d.id === dappId ? data.dapp : d));
+      toast('info', 'dApp session closed');
+    } catch (err) {
+      toast('error', err instanceof Error ? err.message : 'Failed to close dApp session');
+    }
+  }
+
+  async function handleEndSession(sessionId: string) {
+    setEndingSession(sessionId);
+    try {
+      const data = await api.vpn.endSession(sessionId);
+      if (session?.id === sessionId) {
+        setSession({ connected: false, killSwitch: false });
+        setSearchResults([]);
+        setLastSearchQuery('');
+      }
+      const now = new Date().toISOString();
+      if (data.session) {
+        setHistory(prev => prev.map(s =>
+          s.id === sessionId ? { ...data.session, connected: false } : s
+        ));
+      } else {
+        setHistory(prev => prev.map(s =>
+          s.id === sessionId ? { ...s, connected: false, status: 'disconnected', disconnectedAt: now } : s
+        ));
+      }
+      setDapps(prev => prev.map(d =>
+        d.vpnSessionId === sessionId && d.status === 'active'
+          ? { ...d, status: 'closed' as const, closedAt: now }
+          : d
+      ));
+      toast('info', 'Session ended');
+    } catch (err) {
+      toast('error', err instanceof Error ? err.message : 'Failed to end session');
+    } finally {
+      setEndingSession(null);
+    }
   }
 
   async function loadHistory() {
@@ -177,8 +254,21 @@ export default function VpnPage() {
     }
   }
 
+  async function loadDapps() {
+    setDappsLoading(true);
+    try {
+      const data = await api.vpn.dapps();
+      setDapps(data.dapps);
+    } catch {
+      toast('error', 'Failed to load dApp sessions');
+    } finally {
+      setDappsLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (activeTab === 'history') loadHistory();
+    if (activeTab === 'dapps') loadDapps();
   }, [activeTab]);
 
   const countriesMap = new Map<string, VpnServer[]>();
@@ -195,6 +285,8 @@ export default function VpnPage() {
 
   const visibleServerCount = serversExpanded ? filteredCountries.length : Math.min(filteredCountries.length, 6);
   const visibleCountries = filteredCountries.slice(0, visibleServerCount);
+
+  const activeDapps = dapps.filter(d => d.status === 'active');
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -214,6 +306,7 @@ export default function VpnPage() {
         <p className="text-gray-500 text-sm">Secure VPN with no-logs policy and encrypted tunneling</p>
       </motion.div>
 
+      {/* Connection + Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -254,7 +347,6 @@ export default function VpnPage() {
           {!session?.connected && selectedServerData && (
             <span className="text-gray-600 text-xs mb-3">{selectedServerData.flag} {selectedServerData.city}, {selectedServerData.country}</span>
           )}
-
           {!session?.connected && !selectedServer && (
             <span className="text-gray-600 text-[11px] mb-3">Select a server below</span>
           )}
@@ -339,6 +431,7 @@ export default function VpnPage() {
         </motion.div>
       </div>
 
+      {/* Bandwidth + Kill Switch */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -390,6 +483,7 @@ export default function VpnPage() {
         </motion.div>
       </div>
 
+      {/* Server List */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -432,7 +526,7 @@ export default function VpnPage() {
                 countryServers.map((server) => (
                   <button
                     key={server.id}
-                    onClick={() => setSelectedServer(server.id)}
+                    onClick={() => !session?.connected && setSelectedServer(server.id)}
                     disabled={session?.connected}
                     className={`w-full px-5 py-3 flex items-center gap-3 text-left transition-colors ${
                       session?.connected ? 'cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'
@@ -476,6 +570,7 @@ export default function VpnPage() {
         )}
       </motion.div>
 
+      {/* Tabbed Section: Search + dApps + History */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -485,28 +580,43 @@ export default function VpnPage() {
         <div className="flex border-b border-white/[0.04]">
           <button
             onClick={() => setActiveTab('search')}
-            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center transition-colors flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center transition-colors flex items-center justify-center gap-1.5 ${
               activeTab === 'search'
                 ? 'text-[#0AF5D6] border-b-2 border-[#0AF5D6] bg-[#0AF5D6]/5'
                 : 'text-gray-500 hover:text-gray-400'
             }`}
           >
-            <Search size={14} />
-            Private Search
+            <Search size={13} />
+            <span className="hidden sm:inline">Private</span> Search
+          </button>
+          <button
+            onClick={() => setActiveTab('dapps')}
+            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center transition-colors flex items-center justify-center gap-1.5 ${
+              activeTab === 'dapps'
+                ? 'text-[#0AF5D6] border-b-2 border-[#0AF5D6] bg-[#0AF5D6]/5'
+                : 'text-gray-500 hover:text-gray-400'
+            }`}
+          >
+            <Activity size={13} />
+            dApps
+            {activeDapps.length > 0 && (
+              <span className="bg-[#0AF5D6]/20 text-[#0AF5D6] text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-1">{activeDapps.length}</span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center transition-colors flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center transition-colors flex items-center justify-center gap-1.5 ${
               activeTab === 'history'
                 ? 'text-[#0AF5D6] border-b-2 border-[#0AF5D6] bg-[#0AF5D6]/5'
                 : 'text-gray-500 hover:text-gray-400'
             }`}
           >
-            <History size={14} />
-            Session History
+            <History size={13} />
+            History
           </button>
         </div>
 
+        {/* Search Tab */}
         {activeTab === 'search' && (
           <div>
             <form onSubmit={handleSearch} className="p-4 border-b border-white/[0.04]">
@@ -566,7 +676,7 @@ export default function VpnPage() {
                   exit={{ opacity: 0 }}
                 >
                   <div className="px-4 py-2.5 border-b border-white/[0.04] flex items-center justify-between">
-                    <span className="text-gray-500 text-xs">{searchResults.length} results for "{lastSearchQuery}"</span>
+                    <span className="text-gray-500 text-xs">{searchResults.length} results for &quot;{lastSearchQuery}&quot;</span>
                     <button
                       onClick={() => { setSearchResults([]); setSearchQuery(''); setLastSearchQuery(''); }}
                       className="text-gray-600 hover:text-gray-400 transition-colors"
@@ -578,7 +688,7 @@ export default function VpnPage() {
                     {searchResults.map((result, i) => (
                       <div key={i} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
                         <button
-                          onClick={() => handleOpenResult(result.link)}
+                          onClick={() => handleOpenResult(result.link, result.title)}
                           className="w-full text-left group"
                         >
                           <div className="flex items-start gap-2">
@@ -604,7 +714,7 @@ export default function VpnPage() {
                   exit={{ opacity: 0 }}
                   className="p-8 text-center"
                 >
-                  <p className="text-gray-500 text-sm">No results found for "{lastSearchQuery}"</p>
+                  <p className="text-gray-500 text-sm">No results found for &quot;{lastSearchQuery}&quot;</p>
                 </motion.div>
               )}
 
@@ -627,6 +737,62 @@ export default function VpnPage() {
           </div>
         )}
 
+        {/* dApps Tab */}
+        {activeTab === 'dapps' && (
+          <div>
+            {dappsLoading ? (
+              <div className="p-8 flex justify-center">
+                <div className="w-8 h-8 border-2 border-white/10 border-t-[#0AF5D6] rounded-full animate-spin" />
+              </div>
+            ) : dapps.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-3">
+                  <Activity size={20} className="text-gray-600" />
+                </div>
+                <p className="text-gray-400 text-sm font-medium mb-1">No dApp Sessions</p>
+                <p className="text-gray-600 text-xs">Search and open dApps through the VPN to track them here</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/[0.03] max-h-[500px] overflow-y-auto">
+                {dapps.map((dapp) => (
+                  <div key={dapp.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${dapp.status === 'active' ? 'bg-[#0AF5D6] animate-pulse' : 'bg-gray-600'}`} />
+                        <span className="text-white text-sm font-medium truncate">{dapp.title || extractDomain(dapp.url)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        {dapp.status === 'active' && (
+                          <>
+                            <span className="text-[#0AF5D6] text-[10px] font-mono">{dappDurations[dapp.id] || '00:00:00'}</span>
+                            <button
+                              onClick={() => handleCloseDapp(dapp.id)}
+                              className="text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-500/10"
+                              title="Close dApp session"
+                            >
+                              <StopCircle size={14} />
+                            </button>
+                          </>
+                        )}
+                        {dapp.status === 'closed' && (
+                          <span className="text-gray-600 text-[10px]">{dapp.openedAt ? formatSessionDuration(dapp.openedAt, dapp.closedAt) : '--'}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] text-gray-500 pl-4">
+                      <a href={dapp.url} target="_blank" rel="noopener noreferrer" className="truncate hover:text-[#0AF5D6] transition-colors">{extractDomain(dapp.url)}</a>
+                      <span>{dapp.openedAt ? timeAgo(dapp.openedAt) : ''}</span>
+                      {dapp.status === 'active' && <span className="text-[#0AF5D6] text-[9px] font-bold uppercase bg-[#0AF5D6]/10 px-1.5 py-0.5 rounded">Active</span>}
+                      {dapp.status === 'closed' && <span className="text-gray-600 text-[9px] font-bold uppercase">Closed</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* History Tab */}
         {activeTab === 'history' && (
           <div>
             {historyLoading ? (
@@ -646,24 +812,36 @@ export default function VpnPage() {
                 {history.map((s) => (
                   <div key={s.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
                     <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${s.connected ? 'bg-[#0AF5D6] animate-pulse' : 'bg-gray-600'}`} />
-                        <span className="text-white text-sm font-medium">{s.serverName}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${s.connected ? 'bg-[#0AF5D6] animate-pulse' : 'bg-gray-600'}`} />
+                        <span className="text-white text-sm font-medium truncate">{s.serverName}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
                         {s.connected && (
-                          <span className="text-[#0AF5D6] text-[9px] font-bold uppercase bg-[#0AF5D6]/10 px-1.5 py-0.5 rounded">Active</span>
+                          <button
+                            onClick={() => s.id && handleEndSession(s.id)}
+                            disabled={endingSession === s.id}
+                            className="flex items-center gap-1 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors disabled:opacity-50"
+                          >
+                            {endingSession === s.id ? (
+                              <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <StopCircle size={10} />
+                            )}
+                            End Session
+                          </button>
                         )}
                         <span className="text-gray-600 text-[10px]">{s.connectedAt ? timeAgo(s.connectedAt) : ''}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-[11px] text-gray-500">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500 pl-4">
                       <span className="font-mono">{s.assignedIp}</span>
                       <span>{s.connectedAt ? formatSessionDuration(s.connectedAt, s.disconnectedAt) : '--'}</span>
-                      {(s.bytesUp || s.bytesDown) && (
-                        <span>↑{formatBytes(s.bytesUp || 0)} ↓{formatBytes(s.bytesDown || 0)}</span>
+                      {(s.bytesUp !== undefined && s.bytesDown !== undefined && (s.bytesUp > 0 || s.bytesDown > 0)) && (
+                        <span>↑{formatBytes(s.bytesUp)} ↓{formatBytes(s.bytesDown)}</span>
                       )}
                       {s.killSwitch && <span className="text-red-400">Kill Switch ON</span>}
+                      {s.connected && <span className="text-[#0AF5D6] text-[9px] font-bold uppercase bg-[#0AF5D6]/10 px-1.5 py-0.5 rounded">Active</span>}
                     </div>
                   </div>
                 ))}

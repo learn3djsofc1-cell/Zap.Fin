@@ -158,6 +158,16 @@ export interface VpnSearchEntry {
   createdAt: string;
 }
 
+export interface VpnDappSession {
+  id: string;
+  vpnSessionId?: string;
+  url: string;
+  title: string;
+  status: 'active' | 'closed';
+  openedAt: string;
+  closedAt?: string | null;
+}
+
 export interface OverviewStats {
   privacyScore: number;
   totalMixes: number;
@@ -311,6 +321,18 @@ export const api = {
       if (limit) query.set('limit', String(limit));
       const qs = query.toString();
       return request<{ searches: VpnSearchEntry[] }>(`/vpn/searches${qs ? `?${qs}` : ''}`);
+    },
+    endSession: (sessionId: string) =>
+      request<{ success: boolean; session: VpnSession }>(`/vpn/end-session/${sessionId}`, { method: 'POST' }),
+    openDapp: (url: string, title: string) =>
+      request<{ dapp: VpnDappSession }>('/vpn/dapp/open', { method: 'POST', body: JSON.stringify({ url, title }) }),
+    closeDapp: (dappId: string) =>
+      request<{ dapp: VpnDappSession }>(`/vpn/dapp/${dappId}/close`, { method: 'POST' }),
+    dapps: (status?: string) => {
+      const query = new URLSearchParams();
+      if (status) query.set('status', status);
+      const qs = query.toString();
+      return request<{ dapps: VpnDappSession[] }>(`/vpn/dapps${qs ? `?${qs}` : ''}`);
     },
   },
   settings: {

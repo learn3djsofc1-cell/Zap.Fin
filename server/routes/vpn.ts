@@ -163,6 +163,10 @@ router.post('/connect', async (req: AuthRequest, res: Response): Promise<void> =
         `UPDATE vpn_sessions SET status = 'disconnected', disconnected_at = NOW(), bytes_up = $2, bytes_down = $3 WHERE id = $1`,
         [prev.id, prevBw.bytesUp, prevBw.bytesDown]
       );
+      await pool.query(
+        `UPDATE vpn_dapp_sessions SET status = 'closed', closed_at = NOW() WHERE vpn_session_id = $1 AND status = 'active'`,
+        [prev.id]
+      );
     }
 
     const assignedIp = generateVpnIp();
@@ -204,6 +208,11 @@ router.post('/disconnect', async (req: AuthRequest, res: Response): Promise<void
       `UPDATE vpn_sessions SET status = 'disconnected', disconnected_at = NOW(), bytes_up = $2, bytes_down = $3
        WHERE id = $1 RETURNING *`,
       [row.id, bw.bytesUp, bw.bytesDown]
+    );
+
+    await pool.query(
+      `UPDATE vpn_dapp_sessions SET status = 'closed', closed_at = NOW() WHERE vpn_session_id = $1 AND status = 'active'`,
+      [row.id]
     );
 
     const endedSession = formatSessionRow(updated.rows[0]);
@@ -379,6 +388,151 @@ router.post('/search/log-open', async (req: AuthRequest, res: Response): Promise
     res.json({ success: true });
   } catch (err) {
     console.error('VPN log-open error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/end-session/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const sessionId = req.params.id;
+
+    const session = await pool.query(
+      `SELECT * FROM vpn_sessions WHERE id = $1 AND user_id = $2 AND status = 'active'`,
+      [sessionId, userId]
+    );
+
+    if (session.rows.length === 0) {
+      res.status(404).json({ error: 'Active session not found' });
+      return;
+    }
+
+    const row = session.rows[0];
+    const bw = simulateBandwidth(new Date(row.connected_at));
+
+    const updated = await pool.query(
+      `UPDATE vpn_sessions SET status = 'disconnected', disconnected_at = NOW(), bytes_up = $2, bytes_down = $3 WHERE id = $1 RETURNING *`,
+      [sessionId, bw.bytesUp, bw.bytesDown]
+    );
+
+    await pool.query(
+      `UPDATE vpn_dapp_sessions SET status = 'closed', closed_at = NOW() WHERE vpn_session_id = $1 AND status = 'active'`,
+      [sessionId]
+    );
+
+    res.json({ success: true, session: formatSessionRow(updated.rows[0]) });
+  } catch (err) {
+    console.error('VPN end-session error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/dapp/open', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const { url, title } = req.body;
+
+    if (!url) {
+      res.status(400).json({ error: 'URL required' });
+      return;
+    }
+
+    const active = await pool.query(
+      `SELECT id FROM vpn_sessions WHERE user_id = $1 AND status = 'active' LIMIT 1`,
+      [userId]
+    );
+
+    const vpnSessionId = active.rows.length > 0 ? active.rows[0].id : null;
+
+    const result = await pool.query(
+      `INSERT INTO vpn_dapp_sessions (vpn_session_id, user_id, url, title) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [vpnSessionId, userId, url, title || '']
+    );
+
+    const row = result.rows[0];
+    res.json({
+      dapp: {
+        id: row.id,
+        vpnSessionId: row.vpn_session_id,
+        url: row.url,
+        title: row.title,
+        status: row.status,
+        openedAt: row.opened_at?.toISOString?.() || row.opened_at,
+        closedAt: null,
+      },
+    });
+  } catch (err) {
+    console.error('VPN dapp open error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/dapp/:id/close', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const dappId = req.params.id;
+
+    const result = await pool.query(
+      `UPDATE vpn_dapp_sessions SET status = 'closed', closed_at = NOW()
+       WHERE id = $1 AND user_id = $2 AND status = 'active' RETURNING *`,
+      [dappId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Active dApp session not found' });
+      return;
+    }
+
+    const row = result.rows[0];
+    res.json({
+      dapp: {
+        id: row.id,
+        url: row.url,
+        title: row.title,
+        status: row.status,
+        openedAt: row.opened_at?.toISOString?.() || row.opened_at,
+        closedAt: row.closed_at?.toISOString?.() || row.closed_at,
+      },
+    });
+  } catch (err) {
+    console.error('VPN dapp close error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/dapps', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const status = req.query.status as string || 'all';
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+
+    let query = `SELECT * FROM vpn_dapp_sessions WHERE user_id = $1`;
+    const params: any[] = [userId];
+
+    if (status === 'active') {
+      query += ` AND status = 'active'`;
+    } else if (status === 'closed') {
+      query += ` AND status = 'closed'`;
+    }
+
+    query += ` ORDER BY opened_at DESC LIMIT $${params.length + 1}`;
+    params.push(limit);
+
+    const result = await pool.query(query, params);
+
+    const dapps = result.rows.map((row) => ({
+      id: row.id,
+      vpnSessionId: row.vpn_session_id,
+      url: row.url,
+      title: row.title,
+      status: row.status,
+      openedAt: row.opened_at?.toISOString?.() || row.opened_at,
+      closedAt: row.closed_at?.toISOString?.() || row.closed_at || null,
+    }));
+
+    res.json({ dapps });
+  } catch (err) {
+    console.error('VPN dapps error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

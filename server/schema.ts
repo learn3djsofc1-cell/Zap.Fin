@@ -307,6 +307,29 @@ export async function initializeDatabase(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_vpn_searches_created_at ON vpn_searches(created_at)
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS vpn_dapp_sessions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        vpn_session_id UUID REFERENCES vpn_sessions(id) ON DELETE SET NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        url TEXT NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
+        opened_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        closed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_dapp_sessions_user_id ON vpn_dapp_sessions(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_dapp_sessions_vpn_session ON vpn_dapp_sessions(vpn_session_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_vpn_dapp_sessions_status ON vpn_dapp_sessions(user_id, status)
+    `);
+
     await client.query('COMMIT');
     console.log('Database schema initialized successfully');
   } catch (err) {

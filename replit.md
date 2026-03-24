@@ -66,7 +66,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │       ├── MixerPage.tsx        # /app/mixer - New mix form, coin selector, privacy levels, history
 │       ├── MessengerPage.tsx    # /app/messenger - Conversation list, chat view, self-destruct, new chat
 │       ├── BridgePage.tsx       # /app/bridge - Cross-chain form, chain swap, status tracker, history
-│       ├── VpnPage.tsx          # /app/vpn - Connection toggle, 24 global servers, real-time stats (duration, fingerprint, IP cloak, relayer), bandwidth, kill switch, SerpAPI private search, session history
+│       ├── VpnPage.tsx          # /app/vpn - Connection toggle, 24 global servers, real-time stats (duration, fingerprint, IP cloak, relayer), bandwidth, kill switch, SerpAPI private search, dApp session tracking with duration/status, session history with end-session control
 │       └── SettingsPage.tsx     # /app/settings - Profile, security (password, 2FA, sessions), notifications
 ├── public/
 │   ├── ghostlane-logo.png  # GhostLane brand logo
@@ -136,6 +136,10 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `POST /api/vpn/search` Private search via SerpAPI (requires active VPN)
 - `POST /api/vpn/search/log-open` Log URL opened from search results
 - `GET /api/vpn/searches` Search history for user
+- `POST /api/vpn/end-session/:id` End active VPN session by ID (persists bandwidth, closes dApps)
+- `POST /api/vpn/dapp/open` Track opening a dApp URL (creates dApp session)
+- `POST /api/vpn/dapp/:id/close` Close active dApp session
+- `GET /api/vpn/dapps` List dApp sessions (filter by status: active/closed/all)
 - `GET /api/settings/profile` Get user profile
 - `PATCH /api/settings/profile` Update profile
 - `POST /api/settings/password` Change password
@@ -193,6 +197,7 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `bridge_transfers` - Cross-chain bridge transfers (source_chain, dest_chain, token, amount, recipient_address, status, deposit_address)
 - `vpn_sessions` - VPN session records (server_id, server_name, server_country, server_city, assigned_ip, fingerprint_hash, relay_node, bytes_up, bytes_down, kill_switch, status, connected_at, disconnected_at)
 - `vpn_searches` - VPN search history (session_id FK, query, results_count, url_opened)
+- `vpn_dapp_sessions` - dApp session tracking (vpn_session_id FK, url, title, status, opened_at, closed_at)
 - `agents` - Agent configurations and balances
 - `transactions` - General transaction records
 - `policies` - Security policy configurations
