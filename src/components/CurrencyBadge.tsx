@@ -10,7 +10,39 @@ const CURRENCY_LOGOS: Record<string, string> = {
   ZEC: '/crypto-zec.png',
   BCH: '/crypto-bch.png',
   DOGE: '/crypto-doge.png',
+  MATIC: '/crypto-matic.png',
+  AVAX: '/crypto-avax.png',
+  BNB: '/crypto-bnb.png',
+  FTM: '/crypto-ftm.png',
+  ARB: '/crypto-arb.png',
+  OP: '/crypto-op.png',
 };
+
+export const CHAIN_LOGOS: Record<string, string> = {
+  ethereum: '/crypto-eth.png',
+  bitcoin: '/crypto-btc.png',
+  solana: '/sol-logo.png',
+  polygon: '/crypto-matic.png',
+  avalanche: '/crypto-avax.png',
+  bsc: '/crypto-bnb.png',
+  arbitrum: '/crypto-arb.png',
+  optimism: '/crypto-op.png',
+  base: '/crypto-eth.png',
+  monero: '/crypto-xmr.png',
+  litecoin: '/crypto-ltc.png',
+  zcash: '/crypto-zec.png',
+  dash: '/crypto-dash.png',
+  dogecoin: '/crypto-doge.png',
+  fantom: '/crypto-ftm.png',
+};
+
+export function getTokenLogo(token: string): string | undefined {
+  return CURRENCY_LOGOS[token];
+}
+
+export function getChainLogo(chainId: string): string | undefined {
+  return CHAIN_LOGOS[chainId];
+}
 
 interface CurrencyBadgeProps {
   currency: string;

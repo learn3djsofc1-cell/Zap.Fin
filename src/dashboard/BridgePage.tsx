@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { ArrowLeftRight, ArrowRight, Plus, Globe, AlertCircle, CheckCircle, ArrowDownUp } from 'lucide-react';
-import { api, type BridgeTransfer, type Chain, type AddressValidation } from '../lib/api';
+import { api, type BridgeTransfer, type Chain } from '../lib/api';
 import { useToast } from '../lib/toast';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import CurrencyBadge, { getChainLogo, getTokenLogo } from '../components/CurrencyBadge';
 import BridgeDepositModal from '../components/BridgeDepositModal';
 import { motion } from 'framer-motion';
 
@@ -33,6 +34,29 @@ const statusDots: Record<string, string> = {
   complete: 'bg-green-400',
   failed: 'bg-red-400',
 };
+
+function ChainLogo({ chainId, size = 14, className = '' }: { chainId: string; size?: number; className?: string }) {
+  const logo = getChainLogo(chainId);
+  if (logo) {
+    return <img src={logo} alt={chainId} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
+  }
+  return <Globe size={size} className={className} />;
+}
+
+function TokenLogo({ token, size = 14, className = '' }: { token: string; size?: number; className?: string }) {
+  const logo = getTokenLogo(token);
+  if (logo) {
+    return <img src={logo} alt={token} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
+  }
+  return (
+    <span
+      style={{ width: size, height: size }}
+      className={`rounded-full bg-green-500/10 flex items-center justify-center ${className}`}
+    >
+      <span className="text-green-400 font-bold" style={{ fontSize: size * 0.45 }}>{token.slice(0, 1)}</span>
+    </span>
+  );
+}
 
 function BridgeStatusTracker({ status }: { status: string }) {
   const currentIdx = statusSteps.indexOf(status);
@@ -90,6 +114,11 @@ export default function BridgePage() {
   const sourceChainData = chains.find((c) => c.id === sourceChain);
   const destChainData = chains.find((c) => c.id === destChain);
 
+  const availableTokens = useMemo(() => {
+    if (!sourceChainData) return [];
+    return sourceChainData.tokens;
+  }, [sourceChainData]);
+
   useEffect(() => {
     api.bridge.chains()
       .then((data) => {
@@ -109,11 +138,10 @@ export default function BridgePage() {
   }, [filter]);
 
   useEffect(() => {
-    const chain = chains.find((c) => c.id === sourceChain);
-    if (chain && !chain.tokens.includes(token)) {
-      setToken(chain.tokens[0] || '');
+    if (availableTokens.length > 0 && !availableTokens.includes(token)) {
+      setToken(availableTokens[0]);
     }
-  }, [sourceChain, chains, token]);
+  }, [sourceChain, availableTokens, token]);
 
   useEffect(() => {
     setAddressValid(null);
@@ -299,15 +327,17 @@ export default function BridgePage() {
                 }}
               >
                 <div className="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
-                  <ArrowLeftRight size={16} className="text-green-400" />
+                  <TokenLogo token={transfer.token} size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                     <span className="text-white text-sm font-semibold">{parseFloat(transfer.amount).toLocaleString()} {transfer.token}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-500 text-xs">
+                  <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                    <ChainLogo chainId={transfer.sourceChain} size={12} />
                     <span className="capitalize">{transfer.sourceChain}</span>
                     <ArrowRight size={10} />
+                    <ChainLogo chainId={transfer.destChain} size={12} />
                     <span className="capitalize">{transfer.destChain}</span>
                   </div>
                 </div>
@@ -343,7 +373,7 @@ export default function BridgePage() {
                       if (other) setDestChain(other.id);
                     }
                   }}
-                  className={`shrink-0 flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-w-0 ${
                     sourceChain === c.id
                       ? 'bg-green-500/15 text-green-400 border border-green-500/30'
                       : c.id === destChain
@@ -352,8 +382,8 @@ export default function BridgePage() {
                   }`}
                   disabled={c.id === destChain}
                 >
-                  <Globe size={11} className={sourceChain === c.id ? 'text-green-400' : 'text-gray-600'} />
-                  <span className="whitespace-nowrap">{c.name}</span>
+                  <ChainLogo chainId={c.id} size={14} />
+                  <span>{c.name}</span>
                 </button>
               ))}
             </div>
@@ -384,7 +414,7 @@ export default function BridgePage() {
                       if (other) setSourceChain(other.id);
                     }
                   }}
-                  className={`shrink-0 flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-w-0 ${
                     destChain === c.id
                       ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                       : c.id === sourceChain
@@ -393,8 +423,8 @@ export default function BridgePage() {
                   }`}
                   disabled={c.id === sourceChain}
                 >
-                  <Globe size={11} className={destChain === c.id ? 'text-[#0AF5D6]' : 'text-gray-600'} />
-                  <span className="whitespace-nowrap">{c.name}</span>
+                  <ChainLogo chainId={c.id} size={14} />
+                  <span>{c.name}</span>
                 </button>
               ))}
             </div>
@@ -403,18 +433,19 @@ export default function BridgePage() {
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Token</label>
             <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-              {sourceChainData?.tokens.map((t) => (
+              {availableTokens.map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setToken(t)}
-                  className={`shrink-0 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                     token === t
                       ? 'bg-green-500/15 text-green-400 border border-green-500/30'
                       : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
                   }`}
                 >
-                  {t}
+                  <TokenLogo token={t} size={14} />
+                  <span>{t}</span>
                 </button>
               ))}
             </div>
@@ -429,10 +460,10 @@ export default function BridgePage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-3 sm:px-4 py-3 pr-16 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-green-500/40 focus:ring-1 focus:ring-green-500/20 transition-all"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 pr-24 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-green-500/40 focus:ring-1 focus:ring-green-500/20 transition-all"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <span className="text-green-400 text-xs font-bold">{token}</span>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                <CurrencyBadge currency={token} size="sm" />
               </div>
             </div>
           </div>
