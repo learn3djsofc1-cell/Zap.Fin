@@ -133,8 +133,8 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
 router.post('/validate-address', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { coin, address } = req.body;
-    if (!coin || !address) {
-      res.status(400).json({ error: 'coin and address are required' });
+    if (!coin || typeof coin !== 'string' || !address || typeof address !== 'string') {
+      res.status(400).json({ error: 'coin and address must be non-empty strings' });
       return;
     }
     const result = validateAddress(coin, address);
