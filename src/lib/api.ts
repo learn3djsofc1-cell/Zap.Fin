@@ -104,7 +104,9 @@ export interface BridgeTransfer {
   destChain: string;
   token: string;
   amount: string;
+  recipientAddress: string;
   status: 'initiated' | 'confirming' | 'bridging' | 'complete' | 'failed';
+  depositAddress?: string;
   createdAt: string;
   completedAt?: string;
   sourceTxHash?: string;
@@ -252,7 +254,10 @@ export const api = {
       const qs = query.toString();
       return request<{ transfers: BridgeTransfer[]; total: number }>(`/bridge${qs ? `?${qs}` : ''}`);
     },
+    get: (id: string) => request<{ transfer: BridgeTransfer }>(`/bridge/${id}`),
     chains: () => request<{ chains: Chain[] }>('/bridge/chains'),
+    validateAddress: (chain: string, token: string, address: string) =>
+      request<AddressValidation>('/bridge/validate-address', { method: 'POST', body: JSON.stringify({ chain, token, address }) }),
   },
   vpn: {
     servers: () => request<{ servers: VpnServer[] }>('/vpn/servers'),

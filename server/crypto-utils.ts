@@ -322,3 +322,119 @@ export function generateDepositAddress(coin: string): DepositAddressResult {
 }
 
 export { SUPPORTED_COINS };
+
+const BRIDGE_CHAIN_TOKEN_MAP: Record<string, string> = {
+  'ethereum:ETH': 'ETH',
+  'ethereum:USDC': 'ETH',
+  'ethereum:USDT': 'ETH',
+  'bitcoin:BTC': 'BTC',
+  'solana:SOL': 'SOL',
+  'solana:USDC': 'SOL',
+  'polygon:MATIC': 'MATIC',
+  'polygon:USDC': 'MATIC',
+  'polygon:USDT': 'MATIC',
+  'avalanche:AVAX': 'AVAX',
+  'avalanche:USDC': 'AVAX',
+  'bsc:BNB': 'BNB',
+  'bsc:USDT': 'BNB',
+  'arbitrum:ETH': 'ETH',
+  'arbitrum:USDC': 'ETH',
+  'optimism:ETH': 'ETH',
+  'optimism:USDC': 'ETH',
+  'base:ETH': 'ETH',
+  'base:USDC': 'ETH',
+  'monero:XMR': 'XMR',
+  'litecoin:LTC': 'LTC',
+  'zcash:ZEC': 'ZEC',
+  'dash:DASH': 'DASH',
+  'dogecoin:DOGE': 'DOGE',
+  'fantom:FTM': 'FTM',
+};
+
+const BRIDGE_ADDRESS_VALIDATORS: Record<string, (address: string) => { valid: boolean; error?: string }> = {
+  ETH: ADDRESS_VALIDATORS.ETH,
+  BTC: ADDRESS_VALIDATORS.BTC,
+  XMR: ADDRESS_VALIDATORS.XMR,
+  LTC: ADDRESS_VALIDATORS.LTC,
+  DASH: ADDRESS_VALIDATORS.DASH,
+  ZEC: ADDRESS_VALIDATORS.ZEC,
+  DOGE: ADDRESS_VALIDATORS.DOGE,
+  SOL: (address: string) => {
+    if (address.length < 32 || address.length > 44) {
+      return { valid: false, error: 'SOL address must be 32-44 characters' };
+    }
+    if (!isBase58(address)) {
+      return { valid: false, error: 'Invalid Base58 characters in SOL address' };
+    }
+    return { valid: true };
+  },
+  MATIC: (address: string) => ADDRESS_VALIDATORS.ETH(address),
+  AVAX: (address: string) => ADDRESS_VALIDATORS.ETH(address),
+  BNB: (address: string) => ADDRESS_VALIDATORS.ETH(address),
+  FTM: (address: string) => ADDRESS_VALIDATORS.ETH(address),
+};
+
+function generateSolAddress(): DepositAddressResult {
+  const keyPair = crypto.generateKeyPairSync('ed25519', {
+    privateKeyEncoding: { type: 'pkcs8', format: 'der' },
+    publicKeyEncoding: { type: 'spki', format: 'der' },
+  });
+  const pubKey = keyPair.publicKey.subarray(-32);
+  const privKey = keyPair.privateKey.subarray(-32);
+  const address = base58Encode(pubKey);
+  return {
+    address,
+    encryptedPrivateKey: encrypt(privKey.toString('hex')),
+  };
+}
+
+const BRIDGE_ADDRESS_GENERATORS: Record<string, () => DepositAddressResult> = {
+  ETH: () => generateEthLikeAddress(),
+  BTC: () => generateBase58Address([0x00]),
+  XMR: () => generateXmrAddress(),
+  LTC: () => generateBase58Address([0x30]),
+  DASH: () => generateBase58Address([0x4C]),
+  ZEC: () => generateBase58Address([0x1C, 0xB8]),
+  DOGE: () => generateBase58Address([0x1E]),
+  SOL: () => generateSolAddress(),
+  MATIC: () => generateEthLikeAddress(),
+  AVAX: () => generateEthLikeAddress(),
+  BNB: () => generateEthLikeAddress(),
+  FTM: () => generateEthLikeAddress(),
+};
+
+export function getBridgeNativeCoin(chainId: string, token: string): string | null {
+  const key = `${chainId}:${token}`;
+  return BRIDGE_CHAIN_TOKEN_MAP[key] || null;
+}
+
+export function validateBridgeAddress(chainId: string, token: string, address: string): { valid: boolean; error?: string } {
+  if (!address || typeof address !== 'string' || address.trim().length === 0) {
+    return { valid: false, error: 'Address is required' };
+  }
+  const trimmed = address.trim();
+  if (trimmed.length > 256) {
+    return { valid: false, error: 'Address is too long' };
+  }
+  const nativeCoin = getBridgeNativeCoin(chainId, token);
+  if (!nativeCoin) {
+    return { valid: false, error: `Unsupported chain/token pair: ${chainId}/${token}` };
+  }
+  const validator = BRIDGE_ADDRESS_VALIDATORS[nativeCoin];
+  if (!validator) {
+    return { valid: false, error: `No validator for chain: ${chainId}` };
+  }
+  return validator(trimmed);
+}
+
+export function generateBridgeDepositAddress(chainId: string, token: string): DepositAddressResult {
+  const nativeCoin = getBridgeNativeCoin(chainId, token);
+  if (!nativeCoin) {
+    throw new Error(`Unsupported chain/token pair: ${chainId}/${token}`);
+  }
+  const generator = BRIDGE_ADDRESS_GENERATORS[nativeCoin];
+  if (!generator) {
+    throw new Error(`No address generator for chain: ${chainId}`);
+  }
+  return generator();
+}

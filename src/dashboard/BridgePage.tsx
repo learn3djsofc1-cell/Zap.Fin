@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { ArrowLeftRight, ArrowRight, Plus, Globe, AlertCircle } from 'lucide-react';
-import { api, type BridgeTransfer, type Chain } from '../lib/api';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { ArrowLeftRight, ArrowRight, Plus, Globe, AlertCircle, CheckCircle, ArrowDownUp } from 'lucide-react';
+import { api, type BridgeTransfer, type Chain, type AddressValidation } from '../lib/api';
 import { useToast } from '../lib/toast';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import BridgeDepositModal from '../components/BridgeDepositModal';
 import { motion } from 'framer-motion';
 
 function timeAgo(date: string): string {
@@ -25,6 +26,14 @@ const statusColors: Record<string, string> = {
   failed: 'bg-red-500/10 text-red-400',
 };
 
+const statusDots: Record<string, string> = {
+  initiated: 'bg-yellow-400',
+  confirming: 'bg-blue-400 animate-pulse',
+  bridging: 'bg-[#0AF5D6] animate-pulse',
+  complete: 'bg-green-400',
+  failed: 'bg-red-400',
+};
+
 function BridgeStatusTracker({ status }: { status: string }) {
   const currentIdx = statusSteps.indexOf(status);
   if (status === 'failed') {
@@ -42,7 +51,7 @@ function BridgeStatusTracker({ status }: { status: string }) {
         <div key={step} className="flex items-center">
           <div className={`w-2 h-2 rounded-full transition-all ${
             i <= currentIdx
-              ? i === currentIdx && status !== 'complete' ? 'bg-[#0AF5D6] animate-pulse' : 'bg-green-400'
+              ? i === currentIdx && status !== 'complete' ? 'bg-green-400 animate-pulse' : 'bg-green-400'
               : 'bg-white/[0.08]'
           }`} />
           {i < statusSteps.length - 1 && (
@@ -69,6 +78,14 @@ export default function BridgePage() {
   const [token, setToken] = useState('');
   const [amount, setAmount] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
+
+  const [addressValid, setAddressValid] = useState<boolean | null>(null);
+  const [addressError, setAddressError] = useState('');
+  const [addressValidating, setAddressValidating] = useState(false);
+  const validateTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  const [depositModal, setDepositModal] = useState(false);
+  const [pendingTransfer, setPendingTransfer] = useState<BridgeTransfer | null>(null);
 
   const sourceChainData = chains.find((c) => c.id === sourceChain);
   const destChainData = chains.find((c) => c.id === destChain);
@@ -98,6 +115,12 @@ export default function BridgePage() {
     }
   }, [sourceChain, chains, token]);
 
+  useEffect(() => {
+    setAddressValid(null);
+    setAddressError('');
+    setRecipientAddress('');
+  }, [destChain]);
+
   function loadTransfers() {
     setLoading(true);
     api.bridge.list({ status: filter })
@@ -106,10 +129,39 @@ export default function BridgePage() {
       .finally(() => setLoading(false));
   }
 
+  const validateAddress = useCallback((chainId: string, tok: string, address: string) => {
+    if (validateTimeout.current) clearTimeout(validateTimeout.current);
+    if (!address.trim()) {
+      setAddressValid(null);
+      setAddressError('');
+      return;
+    }
+    setAddressValidating(true);
+    validateTimeout.current = setTimeout(async () => {
+      try {
+        const result = await api.bridge.validateAddress(chainId, tok, address.trim());
+        setAddressValid(result.valid);
+        setAddressError(result.error || '');
+      } catch {
+        setAddressValid(null);
+        setAddressError('');
+      } finally {
+        setAddressValidating(false);
+      }
+    }, 500);
+  }, []);
+
+  useEffect(() => {
+    if (destChain && token) {
+      validateAddress(destChain, token, recipientAddress);
+    }
+  }, [destChain, token, recipientAddress, validateAddress]);
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) { toast('error', 'Enter a valid amount'); return; }
     if (!recipientAddress.trim()) { toast('error', 'Enter a recipient address'); return; }
+    if (addressValid === false) { toast('error', addressError || 'Invalid recipient address'); return; }
     if (sourceChain === destChain) { toast('error', 'Source and destination must be different'); return; }
 
     setCreating(true);
@@ -125,7 +177,10 @@ export default function BridgePage() {
       setShowCreate(false);
       setAmount('');
       setRecipientAddress('');
-      toast('success', 'Bridge transfer initiated');
+      setAddressValid(null);
+      setAddressError('');
+      setPendingTransfer(data.transfer);
+      setDepositModal(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to initiate bridge';
       toast('error', message);
@@ -138,6 +193,9 @@ export default function BridgePage() {
     const temp = sourceChain;
     setSourceChain(destChain);
     setDestChain(temp);
+    setRecipientAddress('');
+    setAddressValid(null);
+    setAddressError('');
   }
 
   return (
@@ -146,7 +204,7 @@ export default function BridgePage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-start justify-between mb-8"
+        className="flex items-start justify-between mb-6 sm:mb-8"
       >
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -158,7 +216,7 @@ export default function BridgePage() {
               </span>
             </div>
           </div>
-          <p className="text-gray-500 text-sm">Anonymous cross-chain asset transfers</p>
+          <p className="text-gray-500 text-xs sm:text-sm">Anonymous cross-chain asset transfers</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
@@ -197,7 +255,7 @@ export default function BridgePage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] overflow-hidden"
       >
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-white/[0.04]">
+        <div className="flex items-center gap-2 px-4 sm:px-6 py-4 border-b border-white/[0.04]">
           <ArrowLeftRight size={16} className="text-green-400" />
           <span className="text-white text-sm font-bold">Bridge History</span>
           {!loading && <span className="text-gray-600 text-xs ml-auto">{transfers.length} transfers</span>}
@@ -206,13 +264,13 @@ export default function BridgePage() {
         {loading ? (
           <div className="divide-y divide-white/[0.03]">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="px-6 py-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-white/[0.04] animate-pulse" />
-                <div className="flex-1">
-                  <div className="w-40 h-3.5 bg-white/[0.04] rounded animate-pulse mb-2" />
-                  <div className="w-24 h-3 bg-white/[0.04] rounded animate-pulse" />
+              <div key={i} className="px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4">
+                <div className="w-9 h-9 rounded-xl bg-white/[0.04] animate-pulse shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="w-24 sm:w-40 h-3.5 bg-white/[0.04] rounded animate-pulse mb-2" />
+                  <div className="w-36 sm:w-24 h-3 bg-white/[0.04] rounded animate-pulse" />
                 </div>
-                <div className="w-20 h-6 bg-white/[0.04] rounded animate-pulse" />
+                <div className="w-14 sm:w-20 h-6 bg-white/[0.04] rounded animate-pulse shrink-0" />
               </div>
             ))}
           </div>
@@ -230,12 +288,21 @@ export default function BridgePage() {
         ) : (
           <div className="divide-y divide-white/[0.03]">
             {transfers.map((transfer) => (
-              <div key={transfer.id} className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
+              <div
+                key={transfer.id}
+                className="px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4 hover:bg-white/[0.02] transition-colors cursor-pointer"
+                onClick={() => {
+                  if (transfer.status === 'initiated' && transfer.depositAddress) {
+                    setPendingTransfer(transfer);
+                    setDepositModal(true);
+                  }
+                }}
+              >
                 <div className="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
                   <ArrowLeftRight size={16} className="text-green-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                     <span className="text-white text-sm font-semibold">{parseFloat(transfer.amount).toLocaleString()} {transfer.token}</span>
                   </div>
                   <div className="flex items-center gap-1 text-gray-500 text-xs">
@@ -248,7 +315,8 @@ export default function BridgePage() {
                   <BridgeStatusTracker status={transfer.status} />
                 </div>
                 <div className="text-right shrink-0">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider sm:hidden ${statusColors[transfer.status] || ''}`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${statusColors[transfer.status] || ''}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${statusDots[transfer.status] || 'bg-gray-400'}`} />
                     {transfer.status}
                   </span>
                   <span className="text-gray-600 text-[10px] block mt-1">{timeAgo(transfer.createdAt)}</span>
@@ -260,52 +328,89 @@ export default function BridgePage() {
       </motion.div>
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="New Bridge Transfer" maxWidth="max-w-xl">
-        <form onSubmit={handleCreate} className="space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">From Chain</label>
-              <select
-                value={sourceChain}
-                onChange={(e) => setSourceChain(e.target.value)}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-all appearance-none"
-              >
-                {chains.map((c) => (
-                  <option key={c.id} value={c.id} disabled={c.id === destChain}>{c.name}</option>
-                ))}
-              </select>
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">From Chain</label>
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+              {chains.map((c) => (
+                <button
+                  key={`src-${c.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSourceChain(c.id);
+                    if (c.id === destChain) {
+                      const other = chains.find(x => x.id !== c.id);
+                      if (other) setDestChain(other.id);
+                    }
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                    sourceChain === c.id
+                      ? 'bg-green-500/15 text-green-400 border border-green-500/30'
+                      : c.id === destChain
+                      ? 'bg-white/[0.01] text-gray-700 border border-white/[0.03] cursor-not-allowed opacity-40'
+                      : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
+                  }`}
+                  disabled={c.id === destChain}
+                >
+                  <Globe size={11} className={sourceChain === c.id ? 'text-green-400' : 'text-gray-600'} />
+                  <span className="whitespace-nowrap">{c.name}</span>
+                </button>
+              ))}
             </div>
+          </div>
+
+          <div className="flex items-center justify-center -my-1">
             <button
               type="button"
               onClick={swapChains}
-              className="mt-6 w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-gray-400 hover:text-[#0AF5D6] hover:border-[#0AF5D6]/30 transition-all shrink-0"
+              className="w-9 h-9 rounded-full bg-[#111111] border border-white/[0.08] hover:border-green-500/30 flex items-center justify-center transition-all hover:bg-green-500/5 group"
+              title="Swap chains"
             >
-              <ArrowLeftRight size={16} />
+              <ArrowDownUp size={15} className="text-gray-500 group-hover:text-green-400 transition-colors" />
             </button>
-            <div className="flex-1">
-              <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">To Chain</label>
-              <select
-                value={destChain}
-                onChange={(e) => setDestChain(e.target.value)}
-                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#0AF5D6]/40 transition-all appearance-none"
-              >
-                {chains.map((c) => (
-                  <option key={c.id} value={c.id} disabled={c.id === sourceChain}>{c.name}</option>
-                ))}
-              </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">To Chain</label>
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+              {chains.map((c) => (
+                <button
+                  key={`dst-${c.id}`}
+                  type="button"
+                  onClick={() => {
+                    setDestChain(c.id);
+                    if (c.id === sourceChain) {
+                      const other = chains.find(x => x.id !== c.id);
+                      if (other) setSourceChain(other.id);
+                    }
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                    destChain === c.id
+                      ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
+                      : c.id === sourceChain
+                      ? 'bg-white/[0.01] text-gray-700 border border-white/[0.03] cursor-not-allowed opacity-40'
+                      : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
+                  }`}
+                  disabled={c.id === sourceChain}
+                >
+                  <Globe size={11} className={destChain === c.id ? 'text-[#0AF5D6]' : 'text-gray-600'} />
+                  <span className="whitespace-nowrap">{c.name}</span>
+                </button>
+              ))}
             </div>
           </div>
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Token</label>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
               {sourceChainData?.tokens.map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setToken(t)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`shrink-0 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
                     token === t
-                      ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
+                      ? 'bg-green-500/15 text-green-400 border border-green-500/30'
                       : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
                   }`}
                 >
@@ -317,25 +422,72 @@ export default function BridgePage() {
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Amount</label>
-            <input
-              type="number"
-              step="any"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                step="any"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-3 sm:px-4 py-3 pr-16 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-green-500/40 focus:ring-1 focus:ring-green-500/20 transition-all"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <span className="text-green-400 text-xs font-bold">{token}</span>
+              </div>
+            </div>
           </div>
 
           <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Recipient Address on {destChainData?.name || 'destination chain'}</label>
-            <input
-              type="text"
-              value={recipientAddress}
-              onChange={(e) => setRecipientAddress(e.target.value)}
-              placeholder="Enter destination wallet address"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all font-mono text-xs"
-            />
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              Recipient Address
+              <span className="text-gray-600 normal-case ml-1">({destChainData?.name || 'destination'})</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={recipientAddress}
+                onChange={(e) => setRecipientAddress(e.target.value)}
+                placeholder={`Enter ${destChainData?.name || 'destination'} wallet address`}
+                className={`w-full bg-[#111111] rounded-xl px-3 sm:px-4 py-3 pr-10 text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-[11px] sm:text-xs border ${
+                  addressValid === true
+                    ? 'border-green-500/40 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20'
+                    : addressValid === false
+                    ? 'border-red-500/40 focus:border-red-500/60 focus:ring-1 focus:ring-red-500/20'
+                    : 'border-white/[0.06] focus:border-green-500/40 focus:ring-1 focus:ring-green-500/20'
+                }`}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {addressValidating && (
+                  <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                )}
+                {!addressValidating && addressValid === true && (
+                  <CheckCircle size={16} className="text-green-400" />
+                )}
+                {!addressValidating && addressValid === false && (
+                  <AlertCircle size={16} className="text-red-400" />
+                )}
+              </div>
+            </div>
+            {addressValid === false && addressError && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-[11px] mt-1.5 flex items-center gap-1"
+              >
+                <AlertCircle size={10} />
+                {addressError}
+              </motion.p>
+            )}
+            {addressValid === true && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-green-400 text-[11px] mt-1.5 flex items-center gap-1"
+              >
+                <CheckCircle size={10} />
+                Valid {destChainData?.name || 'destination'} address
+              </motion.p>
+            )}
           </div>
 
           <div className="bg-green-500/5 border border-green-500/15 rounded-xl p-3 flex items-start gap-2">
@@ -345,8 +497,8 @@ export default function BridgePage() {
 
           <button
             type="submit"
-            disabled={creating}
-            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
+            disabled={creating || addressValid === false || sourceChain === destChain || !amount}
+            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
           >
             {creating ? (
               <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -356,6 +508,19 @@ export default function BridgePage() {
           </button>
         </form>
       </Modal>
+
+      {pendingTransfer && (
+        <BridgeDepositModal
+          open={depositModal}
+          onClose={() => setDepositModal(false)}
+          depositAddress={pendingTransfer.depositAddress || ''}
+          amount={pendingTransfer.amount}
+          token={pendingTransfer.token}
+          sourceChain={pendingTransfer.sourceChain}
+          destChain={pendingTransfer.destChain}
+          recipientAddress={pendingTransfer.recipientAddress}
+        />
+      )}
     </div>
   );
 }

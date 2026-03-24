@@ -220,6 +220,38 @@ export async function initializeDatabase(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(conversation_id, created_at)
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bridge_transfers (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        source_chain VARCHAR(50) NOT NULL,
+        dest_chain VARCHAR(50) NOT NULL,
+        token VARCHAR(20) NOT NULL,
+        amount NUMERIC(30, 18) NOT NULL,
+        recipient_address VARCHAR(255) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'initiated',
+        deposit_address VARCHAR(255),
+        deposit_private_key_enc TEXT,
+        source_tx_hash VARCHAR(255),
+        dest_tx_hash VARCHAR(255),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        completed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bridge_transfers_user_id ON bridge_transfers(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bridge_transfers_status ON bridge_transfers(status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bridge_transfers_created_at ON bridge_transfers(created_at)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_bridge_transfers_user_status ON bridge_transfers(user_id, status)
+    `);
+
     await client.query('COMMIT');
     console.log('Database schema initialized successfully');
   } catch (err) {

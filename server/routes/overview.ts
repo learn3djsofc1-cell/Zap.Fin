@@ -9,12 +9,14 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
 
-    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult] = await Promise.all([
+    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult, bridgeCountResult, activeBridgeResult] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM mix_operations WHERE user_id = $1', [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND status = 'complete'", [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
       pool.query('SELECT COUNT(*) FROM messages WHERE user_id = $1', [userId]),
       pool.query("SELECT COUNT(*) FROM messages WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
+      pool.query('SELECT COUNT(*) FROM bridge_transfers WHERE user_id = $1', [userId]),
+      pool.query("SELECT COUNT(*) FROM bridge_transfers WHERE user_id = $1 AND status IN ('initiated', 'confirming', 'bridging')", [userId]),
     ]);
 
     const totalMixes = parseInt(mixCountResult.rows[0].count);
@@ -22,6 +24,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
     const recentMixes = parseInt(recentMixResult.rows[0].count);
     const messagesEncrypted = parseInt(messageCountResult.rows[0].count);
     const recentMessages = parseInt(recentMessageResult.rows[0].count);
+    const totalBridges = parseInt(bridgeCountResult.rows[0].count);
+    const activeBridges = parseInt(activeBridgeResult.rows[0].count);
 
     let privacyScore = 0;
     const mixBase = Math.min(totalMixes * 5, 30);
@@ -29,13 +33,14 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
     const mixRecency = Math.min(recentMixes * 3, 20);
     const msgBase = Math.min(messagesEncrypted * 2, 15);
     const msgRecency = Math.min(recentMessages * 1, 15);
-    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency, 100);
+    const bridgeBase = Math.min(totalBridges * 3, 10);
+    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency + bridgeBase, 100);
 
     res.json({
       stats: {
         privacyScore,
         totalMixes,
-        activeBridges: 0,
+        activeBridges,
         messagesEncrypted,
         vpnUptime: '0h',
       },
@@ -57,7 +62,7 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId;
 
-    const [mixResult, msgResult] = await Promise.all([
+    const [mixResult, msgResult, bridgeResult] = await Promise.all([
       pool.query(
         `SELECT id, send_coin, receive_coin, send_amount, receive_amount, status, created_at, recipient_address, privacy_level
          FROM mix_operations
@@ -72,6 +77,14 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
          JOIN conversations c ON c.id = m.conversation_id
          WHERE m.user_id = $1
          ORDER BY m.created_at DESC
+         LIMIT 15`,
+        [userId]
+      ),
+      pool.query(
+        `SELECT id, source_chain, dest_chain, token, amount, status, created_at, recipient_address
+         FROM bridge_transfers
+         WHERE user_id = $1
+         ORDER BY created_at DESC
          LIMIT 15`,
         [userId]
       ),
@@ -95,7 +108,16 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
       status: 'complete' as const,
     }));
 
-    const activity = [...mixActivity, ...msgActivity]
+    const bridgeActivity = bridgeResult.rows.map((row) => ({
+      id: row.id,
+      type: 'bridge' as const,
+      title: `Bridge ${formatNum(row.amount)} ${row.token}`,
+      description: `${row.source_chain} → ${row.dest_chain} to ${row.recipient_address.slice(0, 8)}...${row.recipient_address.slice(-6)}`,
+      timestamp: row.created_at?.toISOString?.() || row.created_at,
+      status: row.status,
+    }));
+
+    const activity = [...mixActivity, ...msgActivity, ...bridgeActivity]
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 20);
 
