@@ -388,10 +388,10 @@ export default function MixerPage() {
       </motion.div>
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="New Privacy Swap" maxWidth="max-w-xl">
-        <form onSubmit={handleCreate} className="space-y-5">
+        <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">You Send</label>
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
               {SUPPORTED_COINS.map((c) => (
                 <button
                   key={`send-${c}`}
@@ -403,7 +403,7 @@ export default function MixerPage() {
                       if (other) setReceiveCoin(other);
                     }
                   }}
-                  className={`flex flex-col items-center gap-0.5 px-1.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                     sendCoin === c
                       ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                       : c === receiveCoin
@@ -412,10 +412,8 @@ export default function MixerPage() {
                   }`}
                   disabled={c === receiveCoin}
                 >
-                  <div className="flex items-center gap-1 sm:gap-1.5">
-                    <CurrencyBadge currency={c} size="sm" showLabel={false} />
-                    <span className="text-[10px] sm:text-xs">{c}</span>
-                  </div>
+                  <CurrencyBadge currency={c} size="sm" showLabel={false} />
+                  <span>{c}</span>
                 </button>
               ))}
             </div>
@@ -441,20 +439,20 @@ export default function MixerPage() {
             )}
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center -my-1">
             <button
               type="button"
               onClick={handleSwapCoins}
-              className="w-10 h-10 rounded-full bg-[#111111] border border-white/[0.08] hover:border-[#0AF5D6]/30 flex items-center justify-center transition-all hover:bg-[#0AF5D6]/5 group"
+              className="w-9 h-9 rounded-full bg-[#111111] border border-white/[0.08] hover:border-[#0AF5D6]/30 flex items-center justify-center transition-all hover:bg-[#0AF5D6]/5 group"
               title="Swap coins"
             >
-              <ArrowDownUp size={16} className="text-gray-500 group-hover:text-[#0AF5D6] transition-colors" />
+              <ArrowDownUp size={15} className="text-gray-500 group-hover:text-[#0AF5D6] transition-colors" />
             </button>
           </div>
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">You Receive</label>
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
               {SUPPORTED_COINS.map((c) => (
                 <button
                   key={`recv-${c}`}
@@ -466,7 +464,7 @@ export default function MixerPage() {
                       if (other) setSendCoin(other);
                     }
                   }}
-                  className={`flex flex-col items-center gap-0.5 px-1.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                     receiveCoin === c
                       ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
                       : c === sendCoin
@@ -475,10 +473,8 @@ export default function MixerPage() {
                   }`}
                   disabled={c === sendCoin}
                 >
-                  <div className="flex items-center gap-1 sm:gap-1.5">
-                    <CurrencyBadge currency={c} size="sm" showLabel={false} />
-                    <span className="text-[10px] sm:text-xs">{c}</span>
-                  </div>
+                  <CurrencyBadge currency={c} size="sm" showLabel={false} />
+                  <span>{c}</span>
                 </button>
               ))}
             </div>
@@ -488,7 +484,7 @@ export default function MixerPage() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="bg-[#111111] border border-white/[0.06] rounded-xl p-4"
+              className="bg-[#111111] border border-white/[0.06] rounded-xl p-3 sm:p-4"
             >
               {ratesLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -503,15 +499,15 @@ export default function MixerPage() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-1">
                     <span className="text-gray-400 text-xs">Estimated Receive</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[#0AF5D6] text-lg font-bold">{parseFloat(receiveAmount).toLocaleString()}</span>
+                      <span className="text-[#0AF5D6] text-base sm:text-lg font-bold">{parseFloat(receiveAmount).toLocaleString()}</span>
                       <CurrencyBadge currency={receiveCoin} size="sm" />
                     </div>
                   </div>
                   {receiveAmount && rates && (
-                    <p className="text-gray-500 text-[11px] text-right mb-2">{getUsdValue(receiveCoin, receiveAmount)}</p>
+                    <p className="text-gray-500 text-[11px] text-right mb-1">{getUsdValue(receiveCoin, receiveAmount)}</p>
                   )}
                   <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
                     <div className="flex items-center gap-1 text-gray-500">
@@ -528,15 +524,15 @@ export default function MixerPage() {
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
               Recipient Address
-              <span className="text-gray-600 normal-case ml-1">— your {receiveCoin} wallet</span>
+              <span className="text-gray-600 normal-case ml-1">({receiveCoin})</span>
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                placeholder={`Enter ${receiveCoin} destination wallet address`}
-                className={`w-full bg-[#111111] rounded-xl px-4 py-3 pr-10 text-sm text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-[11px] sm:text-xs border ${
+                placeholder={`Enter ${receiveCoin} wallet address`}
+                className={`w-full bg-[#111111] rounded-xl px-3 sm:px-4 py-3 pr-10 text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-[11px] sm:text-xs border ${
                   addressValid === true
                     ? 'border-green-500/40 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20'
                     : addressValid === false
@@ -580,30 +576,30 @@ export default function MixerPage() {
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Privacy Level</label>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {PRIVACY_LEVELS.map((level) => (
                 <button
                   key={level.value}
                   type="button"
                   onClick={() => setPrivacyLevel(level.value)}
-                  className={`w-full flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 rounded-xl border transition-all text-left ${
+                  className={`w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-all text-left ${
                     privacyLevel === level.value
                       ? 'border-[#0AF5D6]/30 bg-[#0AF5D6]/5'
                       : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
                   }`}
                 >
-                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                     privacyLevel === level.value ? 'bg-[#0AF5D6]/15 text-[#0AF5D6]' : 'bg-white/[0.04] text-gray-500'
                   }`}>
-                    <level.icon size={16} />
+                    <level.icon size={15} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className={`text-sm font-bold block ${privacyLevel === level.value ? 'text-[#0AF5D6]' : 'text-white'}`}>{level.label}</span>
-                    <span className="text-gray-500 text-[11px] sm:text-xs block">{level.desc}</span>
+                    <span className="text-gray-500 text-[10px] sm:text-xs block leading-tight">{level.desc}</span>
                   </div>
                   <div className="flex items-center gap-1 text-gray-500 shrink-0">
-                    <Clock size={12} />
-                    <span className="text-[11px] sm:text-xs">{level.time}</span>
+                    <Clock size={11} />
+                    <span className="text-[10px] sm:text-xs">{level.time}</span>
                   </div>
                 </button>
               ))}
@@ -612,16 +608,16 @@ export default function MixerPage() {
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
-              Delay (Optional)
-              <span className="text-gray-600 normal-case ml-1">— adds time between mix steps</span>
+              Delay
+              <span className="text-gray-600 normal-case ml-1">(optional)</span>
             </label>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-1.5 sm:gap-2">
               {[0, 15, 30, 60, 120].map((d) => (
                 <button
                   key={d}
                   type="button"
                   onClick={() => setDelay(d)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all text-center ${
                     delay === d
                       ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                       : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
@@ -636,7 +632,7 @@ export default function MixerPage() {
           <button
             type="submit"
             disabled={creating || addressValid === false || sendCoin === receiveCoin || !sendAmount}
-            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
+            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
           >
             {creating ? (
               <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
