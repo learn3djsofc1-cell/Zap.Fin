@@ -196,7 +196,8 @@ export interface Chain {
   name: string;
   icon: string;
   tokens: string[];
-  logo?: string;
+  logo?: string | null;
+  tokenLogos?: Record<string, string | null>;
 }
 
 export interface NotificationPreference {

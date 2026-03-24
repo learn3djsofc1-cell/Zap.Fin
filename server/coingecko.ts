@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 const COINGECKO_IDS: Record<string, string> = {
   BTC: 'bitcoin',
   ETH: 'ethereum',
@@ -8,6 +11,151 @@ const COINGECKO_IDS: Record<string, string> = {
   BCH: 'bitcoin-cash',
   DOGE: 'dogecoin',
 };
+
+const CHAIN_COINGECKO_IDS: Record<string, string> = {
+  ethereum: 'ethereum',
+  bitcoin: 'bitcoin',
+  solana: 'solana',
+  polygon: 'matic-network',
+  avalanche: 'avalanche-2',
+  bsc: 'binancecoin',
+  arbitrum: 'arbitrum',
+  optimism: 'optimism',
+  base: 'ethereum',
+  monero: 'monero',
+  litecoin: 'litecoin',
+  zcash: 'zcash',
+  dash: 'dash',
+  dogecoin: 'dogecoin',
+  fantom: 'fantom',
+};
+
+const TOKEN_COINGECKO_IDS: Record<string, string> = {
+  BTC: 'bitcoin',
+  ETH: 'ethereum',
+  SOL: 'solana',
+  USDC: 'usd-coin',
+  USDT: 'tether',
+  XMR: 'monero',
+  LTC: 'litecoin',
+  DASH: 'dash',
+  ZEC: 'zcash',
+  BCH: 'bitcoin-cash',
+  DOGE: 'dogecoin',
+  MATIC: 'matic-network',
+  AVAX: 'avalanche-2',
+  BNB: 'binancecoin',
+  FTM: 'fantom',
+  ARB: 'arbitrum',
+  OP: 'optimism',
+};
+
+const LOGO_CACHE_DIR = path.join(process.cwd(), 'public');
+const logoMemoryCache: Record<string, string> = {};
+
+function getLogoFilename(geckoId: string): string {
+  return `crypto-${geckoId}.png`;
+}
+
+function getLocalLogoPath(geckoId: string): string {
+  return path.join(LOGO_CACHE_DIR, getLogoFilename(geckoId));
+}
+
+function isLogoCached(geckoId: string): boolean {
+  if (logoMemoryCache[geckoId]) return true;
+  const filePath = getLocalLogoPath(geckoId);
+  if (fs.existsSync(filePath)) {
+    logoMemoryCache[geckoId] = `/${getLogoFilename(geckoId)}`;
+    return true;
+  }
+  return false;
+}
+
+async function fetchAndCacheLogo(geckoId: string): Promise<string | null> {
+  if (isLogoCached(geckoId)) {
+    return logoMemoryCache[geckoId];
+  }
+
+  const apiKey = process.env.COINGECKO_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const infoUrl = `https://api.coingecko.com/api/v3/coins/${geckoId}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false&x_cg_demo_api_key=${apiKey}`;
+    const resp = await fetch(infoUrl, { headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return null;
+
+    const data = await resp.json();
+    const imageUrl = data?.image?.small || data?.image?.thumb;
+    if (!imageUrl) return null;
+
+    const imgResp = await fetch(imageUrl);
+    if (!imgResp.ok) return null;
+
+    const buffer = Buffer.from(await imgResp.arrayBuffer());
+    const filePath = getLocalLogoPath(geckoId);
+    fs.writeFileSync(filePath, buffer);
+
+    const publicPath = `/${getLogoFilename(geckoId)}`;
+    logoMemoryCache[geckoId] = publicPath;
+    console.log(`Cached logo for ${geckoId} at ${filePath}`);
+    return publicPath;
+  } catch (err) {
+    console.error(`Failed to fetch logo for ${geckoId}:`, err);
+    return null;
+  }
+}
+
+export async function getChainLogoUrl(chainId: string): Promise<string | null> {
+  const geckoId = CHAIN_COINGECKO_IDS[chainId];
+  if (!geckoId) return null;
+
+  if (isLogoCached(geckoId)) {
+    return logoMemoryCache[geckoId];
+  }
+
+  return fetchAndCacheLogo(geckoId);
+}
+
+export async function getTokenLogoUrl(token: string): Promise<string | null> {
+  const geckoId = TOKEN_COINGECKO_IDS[token.toUpperCase()];
+  if (!geckoId) return null;
+
+  if (isLogoCached(geckoId)) {
+    return logoMemoryCache[geckoId];
+  }
+
+  return fetchAndCacheLogo(geckoId);
+}
+
+export function initLogoCache(): void {
+  if (!fs.existsSync(LOGO_CACHE_DIR)) {
+    fs.mkdirSync(LOGO_CACHE_DIR, { recursive: true });
+  }
+
+  const allGeckoIds = new Set([
+    ...Object.values(CHAIN_COINGECKO_IDS),
+    ...Object.values(TOKEN_COINGECKO_IDS),
+  ]);
+
+  for (const geckoId of allGeckoIds) {
+    isLogoCached(geckoId);
+  }
+
+  const uncachedIds = [...allGeckoIds].filter(id => !logoMemoryCache[id]);
+  if (uncachedIds.length > 0) {
+    console.log(`Logo cache: ${allGeckoIds.size - uncachedIds.length} cached, ${uncachedIds.length} missing — will fetch on demand`);
+    (async () => {
+      for (const geckoId of uncachedIds) {
+        await fetchAndCacheLogo(geckoId);
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    })().catch(err => console.error('Background logo fetch error:', err));
+  } else {
+    console.log(`Logo cache: all ${allGeckoIds.size} logos cached locally`);
+  }
+}
+
+export { CHAIN_COINGECKO_IDS, TOKEN_COINGECKO_IDS };
 
 const SUPPORTED_SYMBOLS = Object.keys(COINGECKO_IDS);
 

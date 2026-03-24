@@ -462,14 +462,14 @@ function TechnologySection() {
 
 function SupportedAssetsSection() {
   const assets = [
-    { symbol: 'BTC', name: 'Bitcoin', logo: '/crypto-btc.png' },
-    { symbol: 'ETH', name: 'Ethereum', logo: '/crypto-eth.png' },
-    { symbol: 'XMR', name: 'Monero', logo: '/crypto-xmr.png' },
-    { symbol: 'LTC', name: 'Litecoin', logo: '/crypto-ltc.png' },
+    { symbol: 'BTC', name: 'Bitcoin', logo: '/crypto-bitcoin.png' },
+    { symbol: 'ETH', name: 'Ethereum', logo: '/crypto-ethereum.png' },
+    { symbol: 'XMR', name: 'Monero', logo: '/crypto-monero.png' },
+    { symbol: 'LTC', name: 'Litecoin', logo: '/crypto-litecoin.png' },
     { symbol: 'DASH', name: 'Dash', logo: '/crypto-dash.png' },
-    { symbol: 'ZEC', name: 'Zcash', logo: '/crypto-zec.png' },
-    { symbol: 'BCH', name: 'Bitcoin Cash', logo: '/crypto-bch.png' },
-    { symbol: 'DOGE', name: 'Dogecoin', logo: '/crypto-doge.png' },
+    { symbol: 'ZEC', name: 'Zcash', logo: '/crypto-zcash.png' },
+    { symbol: 'BCH', name: 'Bitcoin Cash', logo: '/crypto-bitcoin-cash.png' },
+    { symbol: 'DOGE', name: 'Dogecoin', logo: '/crypto-dogecoin.png' },
   ];
 
   return (

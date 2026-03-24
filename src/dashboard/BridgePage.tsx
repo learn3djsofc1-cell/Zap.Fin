@@ -4,7 +4,7 @@ import { api, type BridgeTransfer, type Chain } from '../lib/api';
 import { useToast } from '../lib/toast';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
-import CurrencyBadge, { getChainLogo, getTokenLogo } from '../components/CurrencyBadge';
+import CurrencyBadge from '../components/CurrencyBadge';
 import BridgeDepositModal from '../components/BridgeDepositModal';
 import { motion } from 'framer-motion';
 
@@ -35,16 +35,14 @@ const statusDots: Record<string, string> = {
   failed: 'bg-red-400',
 };
 
-function ChainLogo({ chainId, logo, size = 14, className = '' }: { chainId: string; logo?: string; size?: number; className?: string }) {
-  const resolvedLogo = logo || getChainLogo(chainId);
-  if (resolvedLogo) {
-    return <img src={resolvedLogo} alt={chainId} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
+function ChainLogo({ chainId, logo, size = 14, className = '' }: { chainId: string; logo?: string | null; size?: number; className?: string }) {
+  if (logo) {
+    return <img src={logo} alt={chainId} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
   }
   return <Globe size={size} className={className} />;
 }
 
-function TokenLogo({ token, size = 14, className = '' }: { token: string; size?: number; className?: string }) {
-  const logo = getTokenLogo(token);
+function TokenLogo({ token, logo, size = 14, className = '' }: { token: string; logo?: string | null; size?: number; className?: string }) {
   if (logo) {
     return <img src={logo} alt={token} style={{ width: size, height: size }} className={`object-contain ${className}`} />;
   }
@@ -113,6 +111,13 @@ export default function BridgePage() {
 
   const sourceChainData = chains.find((c) => c.id === sourceChain);
   const destChainData = chains.find((c) => c.id === destChain);
+
+  const getChainById = useCallback((id: string) => chains.find(c => c.id === id), [chains]);
+  const resolveChainLogo = useCallback((chainId: string) => getChainById(chainId)?.logo || null, [getChainById]);
+  const resolveTokenLogo = useCallback((chainId: string, tok: string) => {
+    const chain = getChainById(chainId);
+    return chain?.tokenLogos?.[tok] || null;
+  }, [getChainById]);
 
   const availableTokens = useMemo(() => {
     if (!sourceChainData) return [];
@@ -328,17 +333,17 @@ export default function BridgePage() {
                 }}
               >
                 <div className="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
-                  <TokenLogo token={transfer.token} size={18} />
+                  <TokenLogo token={transfer.token} logo={resolveTokenLogo(transfer.sourceChain, transfer.token)} size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                     <span className="text-white text-sm font-semibold">{parseFloat(transfer.amount).toLocaleString()} {transfer.token}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                    <ChainLogo chainId={transfer.sourceChain} size={12} />
+                    <ChainLogo chainId={transfer.sourceChain} logo={resolveChainLogo(transfer.sourceChain)} size={12} />
                     <span className="capitalize">{transfer.sourceChain}</span>
                     <ArrowRight size={10} />
-                    <ChainLogo chainId={transfer.destChain} size={12} />
+                    <ChainLogo chainId={transfer.destChain} logo={resolveChainLogo(transfer.destChain)} size={12} />
                     <span className="capitalize">{transfer.destChain}</span>
                   </div>
                 </div>
@@ -374,7 +379,7 @@ export default function BridgePage() {
                       if (other) setDestChain(other.id);
                     }
                   }}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-w-0 ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-w-max ${
                     sourceChain === c.id
                       ? 'bg-green-500/15 text-green-400 border border-green-500/30'
                       : c.id === destChain
@@ -415,7 +420,7 @@ export default function BridgePage() {
                       if (other) setSourceChain(other.id);
                     }
                   }}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-w-0 ${
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap min-w-max ${
                     destChain === c.id
                       ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                       : c.id === sourceChain

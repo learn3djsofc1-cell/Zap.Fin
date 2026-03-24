@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { initializeDatabase } from './schema.js';
+import { initLogoCache } from './coingecko.js';
 import { authRouter } from './auth.js';
 import { overviewRouter } from './routes/overview.js';
 import { mixerRouter } from './routes/mixer.js';
@@ -49,6 +50,7 @@ const PORT = parseInt(process.env.PORT || '3001', 10);
 async function start() {
   try {
     await initializeDatabase();
+    initLogoCache();
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`API server running on port ${PORT}`);
     });
