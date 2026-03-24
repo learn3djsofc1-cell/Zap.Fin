@@ -258,7 +258,7 @@ export default function OverviewPage() {
             description="Start using GhostLane products and your activity will appear here."
           />
         ) : (
-          <div className="divide-y divide-white/[0.03]">
+          <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">
             {activity.map((item) => {
               const Icon = activityTypeIcon[item.type] || Shield;
               const colorClass = activityTypeColor[item.type] || 'text-gray-400 bg-gray-500/10';

@@ -283,8 +283,8 @@ export default function VpnPage() {
 
   const selectedServerData = servers.find((s) => s.id === selectedServer);
 
-  const visibleServerCount = serversExpanded ? filteredCountries.length : Math.min(filteredCountries.length, 6);
-  const visibleCountries = filteredCountries.slice(0, visibleServerCount);
+  const allServers = filteredCountries.flatMap(([, s]) => s);
+  const visibleServers = serversExpanded ? allServers : allServers.slice(0, 5);
 
   const activeDapps = dapps.filter(d => d.status === 'active');
 
@@ -522,48 +522,46 @@ export default function VpnPage() {
         ) : (
           <>
             <div className="divide-y divide-white/[0.03]">
-              {visibleCountries.map(([_country, countryServers]) => (
-                countryServers.map((server) => (
-                  <button
-                    key={server.id}
-                    onClick={() => !session?.connected && setSelectedServer(server.id)}
-                    disabled={session?.connected}
-                    className={`w-full px-5 py-3 flex items-center gap-3 text-left transition-colors ${
-                      session?.connected ? 'cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'
-                    } ${selectedServer === server.id ? 'bg-[#0AF5D6]/5' : ''}`}
-                  >
-                    <span className="text-base">{server.flag}</span>
-                    <div className={`w-2 h-2 rounded-full shrink-0 ${selectedServer === server.id ? 'bg-[#0AF5D6]' : 'bg-white/[0.08]'}`} />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-white text-xs sm:text-sm font-medium">{server.city}, {server.country}</span>
-                    </div>
-                    <div className="hidden sm:flex items-center gap-4">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                          <div className={`h-full rounded-full ${loadColor(server.load)}`} style={{ width: `${server.load}%` }} />
-                        </div>
-                        <span className="text-gray-500 text-[10px] w-8">{server.load}%</span>
+              {visibleServers.map((server) => (
+                <button
+                  key={server.id}
+                  onClick={() => !session?.connected && setSelectedServer(server.id)}
+                  disabled={session?.connected}
+                  className={`w-full px-5 py-3 flex items-center gap-3 text-left transition-colors ${
+                    session?.connected ? 'cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'
+                  } ${selectedServer === server.id ? 'bg-[#0AF5D6]/5' : ''}`}
+                >
+                  <span className="text-base">{server.flag}</span>
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${selectedServer === server.id ? 'bg-[#0AF5D6]' : 'bg-white/[0.08]'}`} />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-white text-xs sm:text-sm font-medium">{server.city}, {server.country}</span>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-6 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                        <div className={`h-full rounded-full ${loadColor(server.load)}`} style={{ width: `${server.load}%` }} />
                       </div>
-                      <span className={`text-xs font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
+                      <span className="text-gray-500 text-[10px] w-8">{server.load}%</span>
                     </div>
-                    <span className={`sm:hidden text-[10px] font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
-                    {session?.connected && session.serverId === server.id && (
-                      <div className="flex items-center gap-1 bg-[#0AF5D6]/10 rounded px-1.5 py-0.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6] animate-pulse" />
-                        <span className="text-[#0AF5D6] text-[9px] font-bold">ACTIVE</span>
-                      </div>
-                    )}
-                  </button>
-                ))
+                    <span className={`text-xs font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
+                  </div>
+                  <span className={`sm:hidden text-[10px] font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
+                  {session?.connected && session.serverId === server.id && (
+                    <div className="flex items-center gap-1 bg-[#0AF5D6]/10 rounded px-1.5 py-0.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6] animate-pulse" />
+                      <span className="text-[#0AF5D6] text-[9px] font-bold">ACTIVE</span>
+                    </div>
+                  )}
+                </button>
               ))}
             </div>
-            {filteredCountries.length > 6 && (
+            {allServers.length > 5 && (
               <button
                 onClick={() => setServersExpanded(!serversExpanded)}
                 className="w-full py-2.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-gray-400 text-xs font-medium transition-colors border-t border-white/[0.04]"
               >
                 {serversExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                {serversExpanded ? 'Show less' : `Show all ${filteredCountries.reduce((a, [, s]) => a + s.length, 0)} servers`}
+                {serversExpanded ? 'Show less' : `Show all ${allServers.length} servers`}
               </button>
             )}
           </>
