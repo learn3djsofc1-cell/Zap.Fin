@@ -164,7 +164,7 @@ router.post('/validate-address', async (req: AuthRequest, res: Response): Promis
       res.status(400).json({ error: 'chain, token, and address must be non-empty strings' });
       return;
     }
-    const result = validateBridgeAddress(chain, token, address);
+    const result = validateBridgeAddress(chain, token.toUpperCase(), address);
     res.json(result);
   } catch (err) {
     console.error('Bridge address validation error:', err);
