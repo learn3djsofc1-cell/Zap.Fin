@@ -119,11 +119,11 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/mixer/rates` Live exchange rates from CoinGecko (60s cache)
 - `GET /api/mixer/pools` Pool sizes
 - `GET /api/mixer/:id` Get mix details
-- `GET /api/messenger/conversations` List conversations
-- `POST /api/messenger/conversations` Create conversation
-- `GET /api/messenger/conversations/:id/messages` Get messages
-- `POST /api/messenger/conversations/:id/messages` Send message
-- `GET /api/messenger/contacts` List contacts
+- `GET /api/messenger/conversations` List conversations (DB-backed, per user)
+- `POST /api/messenger/conversations` Create conversation (Solana address validation, no contact name)
+- `GET /api/messenger/conversations/:id/messages` Get messages (DB-backed, ownership verified)
+- `POST /api/messenger/conversations/:id/messages` Send message (DB-backed, updates conversation last_message)
+- `GET /api/messenger/contacts` List contacts (derived from conversations)
 - `GET /api/bridge` List bridge transfers
 - `POST /api/bridge` Create bridge transfer
 - `GET /api/bridge/chains` List supported chains
@@ -183,6 +183,8 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 
 - `users` - User accounts (email, password_hash, name)
 - `mix_operations` - Cross-asset swap operations (send_coin, receive_coin, send_amount, receive_amount, exchange_rate, fee_percent, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
+- `conversations` - Messenger conversations per user (contact_address as Solana address, last_message, last_message_at, UNIQUE per user+address)
+- `messages` - Messenger messages (conversation_id FK, user_id FK, content, sender, self_destruct_seconds)
 - `agents` - Agent configurations and balances
 - `transactions` - General transaction records
 - `policies` - Security policy configurations

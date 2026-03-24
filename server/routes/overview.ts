@@ -9,30 +9,34 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
 
-    const [mixCountResult, completedMixResult, recentMixResult] = await Promise.all([
+    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM mix_operations WHERE user_id = $1', [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND status = 'complete'", [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
+      pool.query('SELECT COUNT(*) FROM messages WHERE user_id = $1', [userId]),
+      pool.query("SELECT COUNT(*) FROM messages WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
     ]);
 
     const totalMixes = parseInt(mixCountResult.rows[0].count);
     const completedMixes = parseInt(completedMixResult.rows[0].count);
     const recentMixes = parseInt(recentMixResult.rows[0].count);
+    const messagesEncrypted = parseInt(messageCountResult.rows[0].count);
+    const recentMessages = parseInt(recentMessageResult.rows[0].count);
 
     let privacyScore = 0;
-    if (totalMixes > 0) {
-      const baseScore = Math.min(totalMixes * 5, 40);
-      const completionBonus = totalMixes > 0 ? Math.round((completedMixes / totalMixes) * 30) : 0;
-      const recencyBonus = Math.min(recentMixes * 3, 30);
-      privacyScore = Math.min(baseScore + completionBonus + recencyBonus, 100);
-    }
+    const mixBase = Math.min(totalMixes * 5, 30);
+    const mixCompletion = totalMixes > 0 ? Math.round((completedMixes / totalMixes) * 20) : 0;
+    const mixRecency = Math.min(recentMixes * 3, 20);
+    const msgBase = Math.min(messagesEncrypted * 2, 15);
+    const msgRecency = Math.min(recentMessages * 1, 15);
+    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency, 100);
 
     res.json({
       stats: {
         privacyScore,
         totalMixes,
         activeBridges: 0,
-        messagesEncrypted: 0,
+        messagesEncrypted,
         vpnUptime: '0h',
       },
     });
@@ -53,16 +57,27 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId;
 
-    const result = await pool.query(
-      `SELECT id, send_coin, receive_coin, send_amount, receive_amount, status, created_at, recipient_address, privacy_level
-       FROM mix_operations
-       WHERE user_id = $1
-       ORDER BY created_at DESC
-       LIMIT 20`,
-      [userId]
-    );
+    const [mixResult, msgResult] = await Promise.all([
+      pool.query(
+        `SELECT id, send_coin, receive_coin, send_amount, receive_amount, status, created_at, recipient_address, privacy_level
+         FROM mix_operations
+         WHERE user_id = $1
+         ORDER BY created_at DESC
+         LIMIT 15`,
+        [userId]
+      ),
+      pool.query(
+        `SELECT m.id, m.content, m.created_at, c.contact_address
+         FROM messages m
+         JOIN conversations c ON c.id = m.conversation_id
+         WHERE m.user_id = $1
+         ORDER BY m.created_at DESC
+         LIMIT 15`,
+        [userId]
+      ),
+    ]);
 
-    const activity = result.rows.map((row) => ({
+    const mixActivity = mixResult.rows.map((row) => ({
       id: row.id,
       type: 'mix' as const,
       title: `${formatNum(row.send_amount)} ${row.send_coin} → ${formatNum(row.receive_amount)} ${row.receive_coin}`,
@@ -70,6 +85,19 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
       timestamp: row.created_at?.toISOString?.() || row.created_at,
       status: row.status,
     }));
+
+    const msgActivity = msgResult.rows.map((row) => ({
+      id: row.id,
+      type: 'message' as const,
+      title: `Message to ${row.contact_address.slice(0, 6)}...${row.contact_address.slice(-4)}`,
+      description: row.content.length > 50 ? row.content.slice(0, 50) + '...' : row.content,
+      timestamp: row.created_at?.toISOString?.() || row.created_at,
+      status: 'complete' as const,
+    }));
+
+    const activity = [...mixActivity, ...msgActivity]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 20);
 
     res.json({ activity });
   } catch (err) {

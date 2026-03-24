@@ -1,12 +1,38 @@
 import { Response, Router } from 'express';
 import { authMiddleware, AuthRequest } from '../auth.js';
+import pool from '../db.js';
 
 const router = Router();
 router.use(authMiddleware);
 
+const SOLANA_BASE58 = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
+
+function isValidSolanaAddress(address: string): boolean {
+  if (!address || address.length < 32 || address.length > 44) return false;
+  return SOLANA_BASE58.test(address);
+}
+
 router.get('/conversations', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    res.json({ conversations: [] });
+    const userId = req.userId;
+    const result = await pool.query(
+      `SELECT id, contact_address, last_message, last_message_at, created_at
+       FROM conversations
+       WHERE user_id = $1
+       ORDER BY last_message_at DESC`,
+      [userId]
+    );
+
+    const conversations = result.rows.map((row) => ({
+      id: row.id,
+      contactAddress: row.contact_address,
+      lastMessage: row.last_message,
+      lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
+      unreadCount: 0,
+      isEncrypted: true,
+    }));
+
+    res.json({ conversations });
   } catch (err) {
     console.error('Messenger conversations error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -15,21 +41,58 @@ router.get('/conversations', async (req: AuthRequest, res: Response): Promise<vo
 
 router.post('/conversations', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { contactAddress, contactName } = req.body;
-    if (!contactAddress || !contactName) {
-      res.status(400).json({ error: 'Contact address and name required' });
+    const userId = req.userId;
+    const { contactAddress } = req.body;
+
+    if (!contactAddress) {
+      res.status(400).json({ error: 'Solana address is required' });
       return;
     }
-    const conversation = {
-      id: crypto.randomUUID(),
-      contactName,
-      contactAddress,
-      lastMessage: '',
-      lastMessageAt: new Date().toISOString(),
-      unreadCount: 0,
-      isEncrypted: true,
-    };
-    res.json({ conversation });
+
+    const trimmed = contactAddress.trim();
+    if (!isValidSolanaAddress(trimmed)) {
+      res.status(400).json({ error: 'Invalid Solana address. Must be 32-44 base58 characters (no 0, O, I, l).' });
+      return;
+    }
+
+    const existing = await pool.query(
+      'SELECT id, contact_address, last_message, last_message_at, created_at FROM conversations WHERE user_id = $1 AND contact_address = $2',
+      [userId, trimmed]
+    );
+
+    if (existing.rows.length > 0) {
+      const row = existing.rows[0];
+      res.json({
+        conversation: {
+          id: row.id,
+          contactAddress: row.contact_address,
+          lastMessage: row.last_message,
+          lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
+          unreadCount: 0,
+          isEncrypted: true,
+        },
+      });
+      return;
+    }
+
+    const result = await pool.query(
+      `INSERT INTO conversations (user_id, contact_address)
+       VALUES ($1, $2)
+       RETURNING id, contact_address, last_message, last_message_at, created_at`,
+      [userId, trimmed]
+    );
+
+    const row = result.rows[0];
+    res.json({
+      conversation: {
+        id: row.id,
+        contactAddress: row.contact_address,
+        lastMessage: row.last_message,
+        lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
+        unreadCount: 0,
+        isEncrypted: true,
+      },
+    });
   } catch (err) {
     console.error('Messenger create conversation error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -38,7 +101,37 @@ router.post('/conversations', async (req: AuthRequest, res: Response): Promise<v
 
 router.get('/conversations/:id/messages', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    res.json({ messages: [] });
+    const userId = req.userId;
+    const conversationId = req.params.id;
+
+    const convCheck = await pool.query(
+      'SELECT id FROM conversations WHERE id = $1 AND user_id = $2',
+      [conversationId, userId]
+    );
+    if (convCheck.rows.length === 0) {
+      res.status(404).json({ error: 'Conversation not found' });
+      return;
+    }
+
+    const result = await pool.query(
+      `SELECT id, conversation_id, content, sender, self_destruct_seconds, created_at
+       FROM messages
+       WHERE conversation_id = $1
+       ORDER BY created_at ASC`,
+      [conversationId]
+    );
+
+    const messages = result.rows.map((row) => ({
+      id: row.id,
+      conversationId: row.conversation_id,
+      content: row.content,
+      sender: row.sender,
+      timestamp: row.created_at?.toISOString?.() || row.created_at,
+      isEncrypted: true,
+      selfDestructSeconds: row.self_destruct_seconds || undefined,
+    }));
+
+    res.json({ messages });
   } catch (err) {
     console.error('Messenger messages error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -47,21 +140,50 @@ router.get('/conversations/:id/messages', async (req: AuthRequest, res: Response
 
 router.post('/conversations/:id/messages', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    const userId = req.userId;
+    const conversationId = req.params.id;
     const { content, selfDestructSeconds } = req.body;
-    if (!content) {
+
+    if (!content || !content.trim()) {
       res.status(400).json({ error: 'Message content required' });
       return;
     }
-    const message = {
-      id: crypto.randomUUID(),
-      conversationId: req.params.id,
-      content,
-      sender: 'me',
-      timestamp: new Date().toISOString(),
-      isEncrypted: true,
-      selfDestructSeconds: selfDestructSeconds || undefined,
-    };
-    res.json({ message });
+
+    const convCheck = await pool.query(
+      'SELECT id FROM conversations WHERE id = $1 AND user_id = $2',
+      [conversationId, userId]
+    );
+    if (convCheck.rows.length === 0) {
+      res.status(404).json({ error: 'Conversation not found' });
+      return;
+    }
+
+    const trimmedContent = content.trim();
+
+    const result = await pool.query(
+      `INSERT INTO messages (conversation_id, user_id, content, sender, self_destruct_seconds)
+       VALUES ($1, $2, $3, 'me', $4)
+       RETURNING id, conversation_id, content, sender, self_destruct_seconds, created_at`,
+      [conversationId, userId, trimmedContent, selfDestructSeconds || null]
+    );
+
+    await pool.query(
+      `UPDATE conversations SET last_message = $1, last_message_at = NOW() WHERE id = $2`,
+      [trimmedContent.length > 100 ? trimmedContent.slice(0, 100) + '...' : trimmedContent, conversationId]
+    );
+
+    const row = result.rows[0];
+    res.json({
+      message: {
+        id: row.id,
+        conversationId: row.conversation_id,
+        content: row.content,
+        sender: row.sender,
+        timestamp: row.created_at?.toISOString?.() || row.created_at,
+        isEncrypted: true,
+        selfDestructSeconds: row.self_destruct_seconds || undefined,
+      },
+    });
   } catch (err) {
     console.error('Messenger send error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -70,7 +192,16 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
 
 router.get('/contacts', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    res.json({ contacts: [] });
+    const userId = req.userId;
+    const result = await pool.query(
+      `SELECT DISTINCT contact_address FROM conversations WHERE user_id = $1 ORDER BY contact_address`,
+      [userId]
+    );
+    const contacts = result.rows.map((row) => ({
+      id: row.contact_address,
+      address: row.contact_address,
+    }));
+    res.json({ contacts });
   } catch (err) {
     console.error('Messenger contacts error:', err);
     res.status(500).json({ error: 'Internal server error' });

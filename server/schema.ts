@@ -179,6 +179,47 @@ export async function initializeDatabase(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_mix_operations_user_status ON mix_operations(user_id, status)
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS conversations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        contact_address VARCHAR(255) NOT NULL,
+        last_message TEXT NOT NULL DEFAULT '',
+        last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, contact_address)
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_conversations_last_msg ON conversations(user_id, last_message_at DESC)
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        sender VARCHAR(10) NOT NULL DEFAULT 'me',
+        self_destruct_seconds INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_user_id ON messages(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(conversation_id, created_at)
+    `);
+
     await client.query('COMMIT');
     console.log('Database schema initialized successfully');
   } catch (err) {

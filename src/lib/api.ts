@@ -81,7 +81,6 @@ export interface MixOperation {
 
 export interface Conversation {
   id: string;
-  contactName: string;
   contactAddress: string;
   lastMessage: string;
   lastMessageAt: string;
@@ -239,9 +238,9 @@ export const api = {
       request<{ messages: Message[] }>(`/messenger/conversations/${conversationId}/messages`),
     send: (conversationId: string, body: { content: string; selfDestructSeconds?: number }) =>
       request<{ message: Message }>(`/messenger/conversations/${conversationId}/messages`, { method: 'POST', body: JSON.stringify(body) }),
-    createConversation: (body: { contactAddress: string; contactName: string }) =>
+    createConversation: (body: { contactAddress: string }) =>
       request<{ conversation: Conversation }>('/messenger/conversations', { method: 'POST', body: JSON.stringify(body) }),
-    contacts: () => request<{ contacts: { id: string; name: string; address: string }[] }>('/messenger/contacts'),
+    contacts: () => request<{ contacts: { id: string; address: string }[] }>('/messenger/contacts'),
   },
   bridge: {
     create: (body: { sourceChain: string; destChain: string; token: string; amount: string; recipientAddress: string }) =>

@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import { MessageSquare, Send, Lock, Timer, Plus, Search, User, Shield } from 'lucide-react';
+import { MessageSquare, Send, Lock, Timer, Plus, Search, Shield, AlertCircle } from 'lucide-react';
 import { api, type Conversation, type Message } from '../lib/api';
 import { useToast } from '../lib/toast';
-import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,6 +13,18 @@ function timeAgo(date: string): string {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function truncateAddress(addr: string): string {
+  if (!addr || addr.length <= 12) return addr;
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+const SOLANA_BASE58 = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
+
+function isValidSolanaAddress(address: string): boolean {
+  if (!address || address.length < 32 || address.length > 44) return false;
+  return SOLANA_BASE58.test(address);
 }
 
 const SELF_DESTRUCT_OPTIONS = [
@@ -36,8 +47,8 @@ export default function MessengerPage() {
   const [selfDestruct, setSelfDestruct] = useState(0);
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newContactName, setNewContactName] = useState('');
   const [newContactAddress, setNewContactAddress] = useState('');
+  const [addressTouched, setAddressTouched] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +87,13 @@ export default function MessengerPage() {
       });
       setMessages((prev) => [...prev, data.message]);
       setMessageText('');
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === activeConversation.id
+            ? { ...c, lastMessage: messageText.trim().slice(0, 100), lastMessageAt: new Date().toISOString() }
+            : c
+        ).sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime())
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to send message';
       toast('error', message);
@@ -84,22 +102,32 @@ export default function MessengerPage() {
     }
   }
 
+  const addressValid = newContactAddress.trim().length > 0 && isValidSolanaAddress(newContactAddress.trim());
+  const showAddressError = addressTouched && newContactAddress.trim().length > 0 && !addressValid;
+
   async function handleNewChat(e: React.FormEvent) {
     e.preventDefault();
-    if (!newContactName.trim() || !newContactAddress.trim()) {
-      toast('error', 'Name and address are required');
+    if (!newContactAddress.trim()) {
+      toast('error', 'Solana address is required');
+      return;
+    }
+    if (!addressValid) {
+      toast('error', 'Invalid Solana address');
       return;
     }
     try {
       const data = await api.messenger.createConversation({
-        contactName: newContactName.trim(),
         contactAddress: newContactAddress.trim(),
       });
-      setConversations((prev) => [data.conversation, ...prev]);
+      setConversations((prev) => {
+        const exists = prev.find((c) => c.id === data.conversation.id);
+        if (exists) return prev;
+        return [data.conversation, ...prev];
+      });
       openConversation(data.conversation);
       setShowNewChat(false);
-      setNewContactName('');
       setNewContactAddress('');
+      setAddressTouched(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create conversation';
       toast('error', message);
@@ -107,7 +135,7 @@ export default function MessengerPage() {
   }
 
   const filteredConversations = conversations.filter((c) =>
-    c.contactName.toLowerCase().includes(searchQuery.toLowerCase())
+    c.contactAddress.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -153,7 +181,7 @@ export default function MessengerPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search conversations..."
+                  placeholder="Search by address..."
                   className="w-full bg-[#111111] border border-white/[0.06] rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-all"
                 />
               </div>
@@ -183,12 +211,12 @@ export default function MessengerPage() {
                       activeConversation?.id === conv.id ? 'bg-white/[0.03]' : ''
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/15 flex items-center justify-center shrink-0">
-                      <span className="text-blue-400 text-xs font-bold">{conv.contactName[0]?.toUpperCase()}</span>
+                    <div className="w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center shrink-0">
+                      <span className="text-purple-400 text-[10px] font-bold font-mono">{conv.contactAddress.slice(0, 2)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-white text-sm font-semibold truncate">{conv.contactName}</span>
+                        <span className="text-white text-xs font-semibold truncate font-mono">{truncateAddress(conv.contactAddress)}</span>
                         <span className="text-gray-600 text-[10px] shrink-0 ml-2">{timeAgo(conv.lastMessageAt)}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -227,11 +255,11 @@ export default function MessengerPage() {
                   >
                     ←
                   </button>
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/15 flex items-center justify-center">
-                    <span className="text-blue-400 text-[10px] font-bold">{activeConversation.contactName[0]?.toUpperCase()}</span>
+                  <div className="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center">
+                    <span className="text-purple-400 text-[10px] font-bold font-mono">{activeConversation.contactAddress.slice(0, 2)}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-white text-sm font-semibold block truncate">{activeConversation.contactName}</span>
+                    <span className="text-white text-xs font-semibold block truncate font-mono">{truncateAddress(activeConversation.contactAddress)}</span>
                     <div className="flex items-center gap-1">
                       <Lock size={8} className="text-[#0AF5D6]" />
                       <span className="text-[#0AF5D6] text-[10px] font-semibold">Encrypted</span>
@@ -324,27 +352,38 @@ export default function MessengerPage() {
         </div>
       </motion.div>
 
-      <Modal open={showNewChat} onClose={() => setShowNewChat(false)} title="New Encrypted Chat">
+      <Modal open={showNewChat} onClose={() => { setShowNewChat(false); setNewContactAddress(''); setAddressTouched(false); }} title="New Encrypted Chat">
         <form onSubmit={handleNewChat} className="space-y-5">
           <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Contact Name</label>
-            <input
-              type="text"
-              value={newContactName}
-              onChange={(e) => setNewContactName(e.target.value)}
-              placeholder="Enter contact name"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Contact Address</label>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Solana Address</label>
             <input
               type="text"
               value={newContactAddress}
-              onChange={(e) => setNewContactAddress(e.target.value)}
-              placeholder="Enter wallet or GhostLane address"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all font-mono text-xs"
+              onChange={(e) => { setNewContactAddress(e.target.value); setAddressTouched(true); }}
+              onBlur={() => setAddressTouched(true)}
+              placeholder="Enter Solana wallet address"
+              className={`w-full bg-[#111111] border rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-xs ${
+                showAddressError
+                  ? 'border-red-500/50 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20'
+                  : addressValid
+                    ? 'border-[#0AF5D6]/30 focus:border-[#0AF5D6]/50 focus:ring-1 focus:ring-[#0AF5D6]/20'
+                    : 'border-white/[0.06] focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20'
+              }`}
             />
+            {showAddressError && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <AlertCircle size={12} className="text-red-400 shrink-0" />
+                <span className="text-red-400 text-[11px]">Invalid Solana address. Must be 32-44 base58 characters.</span>
+              </div>
+            )}
+            {addressValid && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <div className="w-3 h-3 rounded-full bg-[#0AF5D6]/20 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6]" />
+                </div>
+                <span className="text-[#0AF5D6] text-[11px]">Valid Solana address</span>
+              </div>
+            )}
           </div>
           <div className="bg-blue-500/5 border border-blue-500/15 rounded-xl p-3 flex items-start gap-2">
             <Lock size={14} className="text-blue-400 shrink-0 mt-0.5" />
@@ -352,7 +391,8 @@ export default function MessengerPage() {
           </div>
           <button
             type="submit"
-            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
+            disabled={!addressValid}
+            className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-40 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
           >
             <MessageSquare size={16} /> Start Encrypted Chat
           </button>
