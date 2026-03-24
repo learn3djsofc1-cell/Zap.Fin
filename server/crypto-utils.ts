@@ -226,8 +226,11 @@ function base58Encode(buffer: Buffer): string {
 
 function generateBase58Address(versionByte: number): DepositAddressResult {
   const privKey = crypto.randomBytes(32);
-  const pubKeyHash = crypto.createHash('sha256').update(privKey).digest();
-  const ripemd = crypto.createHash('ripemd160').update(pubKeyHash).digest();
+  const signingKey = new ethers.SigningKey('0x' + privKey.toString('hex'));
+  const compressedPubKey = Buffer.from(signingKey.compressedPublicKey.slice(2), 'hex');
+
+  const sha256Hash = crypto.createHash('sha256').update(compressedPubKey).digest();
+  const ripemd = crypto.createHash('ripemd160').update(sha256Hash).digest();
 
   const versionedPayload = Buffer.concat([Buffer.from([versionByte]), ripemd]);
   const checksum = crypto.createHash('sha256').update(
@@ -243,19 +246,25 @@ function generateBase58Address(versionByte: number): DepositAddressResult {
 }
 
 function generateXmrAddress(): DepositAddressResult {
-  const spendKey = crypto.randomBytes(32);
-  const viewKey = crypto.randomBytes(32);
-  const combined = Buffer.concat([Buffer.from([0x12]), spendKey, viewKey]);
-  const checkHash = crypto.createHash('sha256').update(combined).digest().subarray(0, 4);
-  const fullAddr = Buffer.concat([combined, checkHash]);
-  const encoded = base58Encode(fullAddr);
-  const address = '4' + encoded.slice(0, 94);
+  const spendKeyPair = crypto.generateKeyPairSync('ed25519');
+  const viewKeyPair = crypto.generateKeyPairSync('ed25519');
+
+  const spendPub = spendKeyPair.publicKey.export({ type: 'spki', format: 'der' }).subarray(-32);
+  const viewPub = viewKeyPair.publicKey.export({ type: 'spki', format: 'der' }).subarray(-32);
+  const spendPriv = spendKeyPair.privateKey.export({ type: 'pkcs8', format: 'der' }).subarray(-32);
+  const viewPriv = viewKeyPair.privateKey.export({ type: 'pkcs8', format: 'der' }).subarray(-32);
+
+  const networkByte = Buffer.from([0x12]);
+  const payload = Buffer.concat([networkByte, spendPub, viewPub]);
+  const checkHash = crypto.createHash('sha256').update(payload).digest().subarray(0, 4);
+  const fullAddr = Buffer.concat([payload, checkHash]);
+  const address = base58Encode(fullAddr);
 
   return {
     address,
     encryptedPrivateKey: encrypt(JSON.stringify({
-      spendKey: spendKey.toString('hex'),
-      viewKey: viewKey.toString('hex'),
+      spendKey: spendPriv.toString('hex'),
+      viewKey: viewPriv.toString('hex'),
     })),
   };
 }
