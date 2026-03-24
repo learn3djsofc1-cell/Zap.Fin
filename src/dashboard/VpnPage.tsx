@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Wifi, WifiOff, Shield, Globe, Zap, Power, Search, MapPin, Signal, Lock, Fingerprint, Radio, Clock, ExternalLink, History, X, ChevronDown, ChevronUp, StopCircle, Activity } from 'lucide-react';
+import { Wifi, WifiOff, Shield, Globe, Zap, Power, Search, MapPin, Signal, Lock, Fingerprint, Radio, Clock, ExternalLink, History, X, StopCircle, Activity } from 'lucide-react';
 import { api, type VpnServer, type VpnSession, type VpnSearchResult, type VpnDappSession } from '../lib/api';
 import { useToast } from '../lib/toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -83,7 +83,6 @@ export default function VpnPage() {
   const [dappsLoading, setDappsLoading] = useState(false);
   const [dappDurations, setDappDurations] = useState<Record<string, string>>({});
 
-  const [serversExpanded, setServersExpanded] = useState(false);
   const [endingSession, setEndingSession] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -284,7 +283,6 @@ export default function VpnPage() {
   const selectedServerData = servers.find((s) => s.id === selectedServer);
 
   const allServers = filteredCountries.flatMap(([, s]) => s);
-  const visibleServers = serversExpanded ? allServers : allServers.slice(0, 5);
 
   const activeDapps = dapps.filter(d => d.status === 'active');
 
@@ -520,51 +518,40 @@ export default function VpnPage() {
             ))}
           </div>
         ) : (
-          <>
-            <div className="divide-y divide-white/[0.03]">
-              {visibleServers.map((server) => (
-                <button
-                  key={server.id}
-                  onClick={() => !session?.connected && setSelectedServer(server.id)}
-                  disabled={session?.connected}
-                  className={`w-full px-5 py-3 flex items-center gap-3 text-left transition-colors ${
-                    session?.connected ? 'cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'
-                  } ${selectedServer === server.id ? 'bg-[#0AF5D6]/5' : ''}`}
-                >
-                  <span className="text-base">{server.flag}</span>
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${selectedServer === server.id ? 'bg-[#0AF5D6]' : 'bg-white/[0.08]'}`} />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs sm:text-sm font-medium">{server.city}, {server.country}</span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                        <div className={`h-full rounded-full ${loadColor(server.load)}`} style={{ width: `${server.load}%` }} />
-                      </div>
-                      <span className="text-gray-500 text-[10px] w-8">{server.load}%</span>
-                    </div>
-                    <span className={`text-xs font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
-                  </div>
-                  <span className={`sm:hidden text-[10px] font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
-                  {session?.connected && session.serverId === server.id && (
-                    <div className="flex items-center gap-1 bg-[#0AF5D6]/10 rounded px-1.5 py-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6] animate-pulse" />
-                      <span className="text-[#0AF5D6] text-[9px] font-bold">ACTIVE</span>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            {allServers.length > 5 && (
+          <div className="divide-y divide-white/[0.03] max-h-[240px] overflow-y-auto">
+            {allServers.map((server) => (
               <button
-                onClick={() => setServersExpanded(!serversExpanded)}
-                className="w-full py-2.5 flex items-center justify-center gap-1.5 text-gray-500 hover:text-gray-400 text-xs font-medium transition-colors border-t border-white/[0.04]"
+                key={server.id}
+                onClick={() => !session?.connected && setSelectedServer(server.id)}
+                disabled={session?.connected}
+                className={`w-full px-5 py-3 flex items-center gap-3 text-left transition-colors ${
+                  session?.connected ? 'cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'
+                } ${selectedServer === server.id ? 'bg-[#0AF5D6]/5' : ''}`}
               >
-                {serversExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                {serversExpanded ? 'Show less' : `Show all ${allServers.length} servers`}
+                <span className="text-base">{server.flag}</span>
+                <div className={`w-2 h-2 rounded-full shrink-0 ${selectedServer === server.id ? 'bg-[#0AF5D6]' : 'bg-white/[0.08]'}`} />
+                <div className="flex-1 min-w-0">
+                  <span className="text-white text-xs sm:text-sm font-medium">{server.city}, {server.country}</span>
+                </div>
+                <div className="hidden sm:flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div className={`h-full rounded-full ${loadColor(server.load)}`} style={{ width: `${server.load}%` }} />
+                    </div>
+                    <span className="text-gray-500 text-[10px] w-8">{server.load}%</span>
+                  </div>
+                  <span className={`text-xs font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
+                </div>
+                <span className={`sm:hidden text-[10px] font-mono ${latencyColor(server.latencyMs)}`}>{server.latencyMs}ms</span>
+                {session?.connected && session.serverId === server.id && (
+                  <div className="flex items-center gap-1 bg-[#0AF5D6]/10 rounded px-1.5 py-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6] animate-pulse" />
+                    <span className="text-[#0AF5D6] text-[9px] font-bold">ACTIVE</span>
+                  </div>
+                )}
               </button>
-            )}
-          </>
+            ))}
+          </div>
         )}
       </motion.div>
 
@@ -682,7 +669,7 @@ export default function VpnPage() {
                       <X size={14} />
                     </button>
                   </div>
-                  <div className="divide-y divide-white/[0.03] max-h-[500px] overflow-y-auto">
+                  <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">
                     {searchResults.map((result, i) => (
                       <div key={i} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
                         <button
@@ -751,7 +738,7 @@ export default function VpnPage() {
                 <p className="text-gray-600 text-xs">Search and open dApps through the VPN to track them here</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/[0.03] max-h-[500px] overflow-y-auto">
+              <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">
                 {dapps.map((dapp) => (
                   <div key={dapp.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
                     <div className="flex items-center justify-between mb-1">
@@ -806,7 +793,7 @@ export default function VpnPage() {
                 <p className="text-gray-600 text-xs">Connect to a VPN server to start your first session</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/[0.03] max-h-[500px] overflow-y-auto">
+              <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">
                 {history.map((s) => (
                   <div key={s.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
                     <div className="flex items-center justify-between mb-1.5">

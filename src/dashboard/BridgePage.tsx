@@ -320,7 +320,7 @@ export default function BridgePage() {
             }
           />
         ) : (
-          <div className="divide-y divide-white/[0.03]">
+          <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">
             {transfers.map((transfer) => (
               <div
                 key={transfer.id}

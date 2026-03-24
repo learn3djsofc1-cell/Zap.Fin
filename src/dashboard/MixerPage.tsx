@@ -340,7 +340,7 @@ export default function MixerPage() {
             }
           />
         ) : (
-          <div className="divide-y divide-white/[0.03]">
+          <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">
             {mixes.map((mix) => (
               <div
                 key={mix.id}
