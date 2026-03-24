@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -21,8 +22,8 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] overflow-y-auto overscroll-contain" onClick={onClose}>
       <div className="fixed inset-0 bg-black/80 backdrop-blur-md" />
       <div className="relative min-h-full flex items-start sm:items-center justify-center px-3 py-3 sm:py-6 sm:px-6">
         <div
@@ -38,6 +39,7 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
           <div className="px-4 sm:px-6 py-4 sm:py-5">{children}</div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

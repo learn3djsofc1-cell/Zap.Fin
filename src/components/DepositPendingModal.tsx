@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, Clock, ArrowRightLeft } from 'lucide-react';
 import CurrencyBadge from './CurrencyBadge';
@@ -62,17 +63,17 @@ export default function DepositPendingModal({ open, onClose, depositAddress, sen
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] overflow-y-auto"
+          className="fixed inset-0 z-[9999] overflow-y-auto overscroll-contain"
           onClick={onClose}
         >
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-lg" />
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-lg" />
           <div className="min-h-full flex items-start sm:items-center justify-center px-3 py-4 sm:p-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -191,6 +192,7 @@ export default function DepositPendingModal({ open, onClose, depositAddress, sen
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
