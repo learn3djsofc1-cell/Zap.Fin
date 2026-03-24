@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Shuffle, Clock, Shield, Zap, Plus, Lock, Users, Database } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Shuffle, Clock, Shield, Zap, Plus, Lock, Database, CheckCircle, AlertCircle } from 'lucide-react';
 import { api, type MixOperation, type MixPool } from '../lib/api';
 import { useToast } from '../lib/toast';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import CurrencyBadge from '../components/CurrencyBadge';
+import DepositPendingModal from '../components/DepositPendingModal';
 import { motion } from 'framer-motion';
 
 const PRIVACY_LEVELS = [
@@ -59,6 +60,14 @@ export default function MixerPage() {
   const [privacyLevel, setPrivacyLevel] = useState<'standard' | 'enhanced' | 'maximum'>('enhanced');
   const [delay, setDelay] = useState(0);
 
+  const [addressValid, setAddressValid] = useState<boolean | null>(null);
+  const [addressError, setAddressError] = useState('');
+  const [addressValidating, setAddressValidating] = useState(false);
+  const validateTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  const [depositModal, setDepositModal] = useState(false);
+  const [pendingMix, setPendingMix] = useState<MixOperation | null>(null);
+
   useEffect(() => {
     loadMixes();
   }, [filter]);
@@ -82,10 +91,42 @@ export default function MixerPage() {
       .finally(() => setLoading(false));
   }
 
+  const validateAddress = useCallback((coinType: string, address: string) => {
+    if (validateTimeout.current) clearTimeout(validateTimeout.current);
+    if (!address.trim()) {
+      setAddressValid(null);
+      setAddressError('');
+      return;
+    }
+    setAddressValidating(true);
+    validateTimeout.current = setTimeout(async () => {
+      try {
+        const result = await api.mixer.validateAddress(coinType, address.trim());
+        setAddressValid(result.valid);
+        setAddressError(result.error || '');
+      } catch {
+        setAddressValid(null);
+        setAddressError('');
+      } finally {
+        setAddressValidating(false);
+      }
+    }, 500);
+  }, []);
+
+  useEffect(() => {
+    validateAddress(coin, recipient);
+  }, [coin, recipient, validateAddress]);
+
+  useEffect(() => {
+    setAddressValid(null);
+    setAddressError('');
+  }, [coin]);
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) { toast('error', 'Enter a valid amount'); return; }
     if (!recipient.trim()) { toast('error', 'Enter a recipient address'); return; }
+    if (addressValid === false) { toast('error', addressError || 'Invalid recipient address'); return; }
 
     setCreating(true);
     try {
@@ -100,7 +141,10 @@ export default function MixerPage() {
       setShowCreate(false);
       setAmount('');
       setRecipient('');
-      toast('success', 'Mix operation initiated');
+      setAddressValid(null);
+      setAddressError('');
+      setPendingMix(data.mix);
+      setDepositModal(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create mix';
       toast('error', message);
@@ -166,14 +210,10 @@ export default function MixerPage() {
                 <CurrencyBadge currency={pool.coin} size="sm" showLabel={false} />
                 <span className="text-white text-sm font-bold">{pool.coin}</span>
               </div>
-              <div className="flex items-center gap-1 mb-1">
+              <div className="flex items-center gap-1">
                 <Database size={10} className="text-purple-400" />
                 <span className="text-white text-sm font-semibold">{formatPoolSize(pool.size)}</span>
                 <span className="text-gray-500 text-[10px]">pool size</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users size={10} className="text-gray-500" />
-                <span className="text-gray-400 text-xs">{pool.participants} participants</span>
               </div>
             </div>
           ))
@@ -207,7 +247,7 @@ export default function MixerPage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="bg-[#0A0A0A] rounded-2xl border border-white/[0.04] overflow-hidden"
       >
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-white/[0.04]">
+        <div className="flex items-center gap-2 px-4 sm:px-6 py-4 border-b border-white/[0.04]">
           <Shuffle size={16} className="text-purple-400" />
           <span className="text-white text-sm font-bold">Mixing History</span>
           {!loading && <span className="text-gray-600 text-xs ml-auto">{mixes.length} operations</span>}
@@ -216,13 +256,13 @@ export default function MixerPage() {
         {loading ? (
           <div className="divide-y divide-white/[0.03]">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="px-6 py-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-white/[0.04] animate-pulse" />
-                <div className="flex-1">
-                  <div className="w-32 h-3.5 bg-white/[0.04] rounded animate-pulse mb-2" />
-                  <div className="w-48 h-3 bg-white/[0.04] rounded animate-pulse" />
+              <div key={i} className="px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4">
+                <div className="w-9 h-9 rounded-xl bg-white/[0.04] animate-pulse shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="w-24 sm:w-32 h-3.5 bg-white/[0.04] rounded animate-pulse mb-2" />
+                  <div className="w-36 sm:w-48 h-3 bg-white/[0.04] rounded animate-pulse" />
                 </div>
-                <div className="w-16 h-6 bg-white/[0.04] rounded animate-pulse" />
+                <div className="w-14 sm:w-16 h-6 bg-white/[0.04] rounded animate-pulse shrink-0" />
               </div>
             ))}
           </div>
@@ -240,7 +280,16 @@ export default function MixerPage() {
         ) : (
           <div className="divide-y divide-white/[0.03]">
             {mixes.map((mix) => (
-              <div key={mix.id} className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
+              <div
+                key={mix.id}
+                className="px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4 hover:bg-white/[0.02] transition-colors cursor-pointer"
+                onClick={() => {
+                  if (mix.status === 'pending' && mix.depositAddress) {
+                    setPendingMix(mix);
+                    setDepositModal(true);
+                  }
+                }}
+              >
                 <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
                   <Shuffle size={16} className="text-purple-400" />
                 </div>
@@ -281,18 +330,18 @@ export default function MixerPage() {
                     key={c}
                     type="button"
                     onClick={() => setCoin(c)}
-                    className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`flex flex-col items-center gap-1 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all ${
                       coin === c
                         ? 'bg-[#0AF5D6]/15 text-[#0AF5D6] border border-[#0AF5D6]/30'
                         : 'bg-white/[0.03] text-gray-500 border border-white/[0.06] hover:border-white/[0.12]'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 sm:gap-1.5">
                       <CurrencyBadge currency={c} size="sm" showLabel={false} />
-                      {c}
+                      <span className="text-[10px] sm:text-xs">{c}</span>
                     </div>
                     {pool && (
-                      <span className="text-[9px] text-gray-600 font-normal">
+                      <span className="text-[8px] sm:text-[9px] text-gray-600 font-normal">
                         {formatPoolSize(pool.size)} pool
                       </span>
                     )}
@@ -316,13 +365,52 @@ export default function MixerPage() {
 
           <div>
             <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Recipient Address</label>
-            <input
-              type="text"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="Enter destination wallet address"
-              className="w-full bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20 transition-all font-mono text-xs"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder={`Enter ${coin} destination wallet address`}
+                className={`w-full bg-[#111111] rounded-xl px-4 py-3 pr-10 text-sm text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-[11px] sm:text-xs border ${
+                  addressValid === true
+                    ? 'border-green-500/40 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20'
+                    : addressValid === false
+                    ? 'border-red-500/40 focus:border-red-500/60 focus:ring-1 focus:ring-red-500/20'
+                    : 'border-white/[0.06] focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20'
+                }`}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {addressValidating && (
+                  <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                )}
+                {!addressValidating && addressValid === true && (
+                  <CheckCircle size={16} className="text-green-400" />
+                )}
+                {!addressValidating && addressValid === false && (
+                  <AlertCircle size={16} className="text-red-400" />
+                )}
+              </div>
+            </div>
+            {addressValid === false && addressError && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-[11px] mt-1.5 flex items-center gap-1"
+              >
+                <AlertCircle size={10} />
+                {addressError}
+              </motion.p>
+            )}
+            {addressValid === true && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-green-400 text-[11px] mt-1.5 flex items-center gap-1"
+              >
+                <CheckCircle size={10} />
+                Valid {coin} address
+              </motion.p>
+            )}
           </div>
 
           <div>
@@ -333,24 +421,24 @@ export default function MixerPage() {
                   key={level.value}
                   type="button"
                   onClick={() => setPrivacyLevel(level.value)}
-                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left ${
+                  className={`w-full flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 rounded-xl border transition-all text-left ${
                     privacyLevel === level.value
                       ? 'border-[#0AF5D6]/30 bg-[#0AF5D6]/5'
                       : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 ${
                     privacyLevel === level.value ? 'bg-[#0AF5D6]/15 text-[#0AF5D6]' : 'bg-white/[0.04] text-gray-500'
                   }`}>
                     <level.icon size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className={`text-sm font-bold block ${privacyLevel === level.value ? 'text-[#0AF5D6]' : 'text-white'}`}>{level.label}</span>
-                    <span className="text-gray-500 text-xs block">{level.desc}</span>
+                    <span className="text-gray-500 text-[11px] sm:text-xs block">{level.desc}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-500">
+                  <div className="flex items-center gap-1 text-gray-500 shrink-0">
                     <Clock size={12} />
-                    <span className="text-xs">{level.time}</span>
+                    <span className="text-[11px] sm:text-xs">{level.time}</span>
                   </div>
                 </button>
               ))}
@@ -362,7 +450,7 @@ export default function MixerPage() {
               Delay (Optional)
               <span className="text-gray-600 normal-case ml-1">— adds time between mix steps</span>
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {[0, 15, 30, 60, 120].map((d) => (
                 <button
                   key={d}
@@ -382,7 +470,7 @@ export default function MixerPage() {
 
           <button
             type="submit"
-            disabled={creating}
+            disabled={creating || addressValid === false}
             className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-50 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
           >
             {creating ? (
@@ -393,6 +481,17 @@ export default function MixerPage() {
           </button>
         </form>
       </Modal>
+
+      {pendingMix && (
+        <DepositPendingModal
+          open={depositModal}
+          onClose={() => setDepositModal(false)}
+          depositAddress={pendingMix.depositAddress || ''}
+          amount={pendingMix.amount}
+          coin={pendingMix.coin}
+          privacyLevel={pendingMix.privacyLevel}
+        />
+      )}
     </div>
   );
 }

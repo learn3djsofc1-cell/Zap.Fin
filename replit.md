@@ -55,6 +55,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   │   ├── ConfirmDialog.tsx # Delete confirmation dialog
 │   │   ├── Skeleton.tsx    # Loading skeleton components
 │   │   ├── CurrencyBadge.tsx # Currency display with logos (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE, SOL, USDC, USDT)
+│   │   ├── DepositPendingModal.tsx # Animated deposit pending modal with SVG orbital spinner (Framer Motion)
 │   │   ├── ErrorBoundary.tsx # Error boundary component
 │   │   └── EmptyState.tsx  # Empty state placeholder
 │   ├── docs/
@@ -73,12 +74,13 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 ├── server/
 │   ├── index.ts            # Express server entry: initializes DB, mounts all API routes
 │   ├── db.ts               # PostgreSQL connection pool (pg)
-│   ├── schema.ts           # Database schema initialization (users table)
+│   ├── schema.ts           # Database schema initialization (users, mix_operations tables)
 │   ├── auth.ts             # Auth routes (/api/auth/*) + JWT middleware
+│   ├── crypto-utils.ts     # Address validation & deposit address generation (ethers.js, crypto)
 │   ├── validate.ts         # ID validation helpers
 │   ├── routes/
-│   │   ├── overview.ts     # GET /api/overview/stats, GET /api/overview/activity
-│   │   ├── mixer.ts        # CRUD /api/mixer (create mix, list, get, pools)
+│   │   ├── overview.ts     # GET /api/overview/stats (real DB), GET /api/overview/activity (real DB)
+│   │   ├── mixer.ts        # CRUD /api/mixer (DB-backed), validate-address, pools, deposit address gen
 │   │   ├── messenger.ts    # /api/messenger (conversations, messages, contacts)
 │   │   ├── bridge.ts       # /api/bridge (create transfer, list, chains)
 │   │   ├── vpn.ts          # /api/vpn (servers, session, connect, disconnect, kill-switch)
@@ -111,7 +113,8 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/overview/stats` Dashboard stats (privacy score, totals)
 - `GET /api/overview/activity` Recent activity feed
 - `GET /api/mixer` List mix operations
-- `POST /api/mixer` Create mix operation (coin, amount, recipient, privacy level)
+- `POST /api/mixer` Create mix operation (coin, amount, recipient, privacy level) — generates deposit address, persists to DB
+- `POST /api/mixer/validate-address` Validate recipient address by coin type
 - `GET /api/mixer/pools` Pool sizes
 - `GET /api/mixer/:id` Get mix details
 - `GET /api/messenger/conversations` List conversations
@@ -171,3 +174,14 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `DATABASE_URL` - PostgreSQL connection string (auto-set by Replit)
 - `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - Individual DB connection params
 - `JWT_SECRET` - Secret key for JWT signing (defaults to a dev fallback if not set)
+- `DEPOSIT_KEY_SECRET` - AES-256 encryption key for deposit private keys (defaults to a dev fallback if not set)
+
+## Database Tables
+
+- `users` - User accounts (email, password_hash, name)
+- `mix_operations` - Cryptocurrency mix operations (coin, amount, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
+- `agents` - Agent configurations and balances
+- `transactions` - General transaction records
+- `policies` - Security policy configurations
+- `api_keys` - User API keys
+- `integrations` - Third-party integrations

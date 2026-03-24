@@ -66,7 +66,9 @@ export interface MixOperation {
   amount: string;
   recipientAddress: string;
   privacyLevel: string;
+  delayMinutes: number;
   status: 'pending' | 'mixing' | 'complete' | 'failed';
+  depositAddress?: string;
   createdAt: string;
   completedAt?: string;
   txHash?: string;
@@ -171,7 +173,11 @@ export interface UserSession {
 export interface MixPool {
   coin: string;
   size: number;
-  participants: number;
+}
+
+export interface AddressValidation {
+  valid: boolean;
+  error?: string;
 }
 
 export interface Chain {
@@ -213,6 +219,8 @@ export const api = {
     },
     get: (id: string) => request<{ mix: MixOperation }>(`/mixer/${id}`),
     pools: () => request<{ pools: MixPool[] }>('/mixer/pools'),
+    validateAddress: (coin: string, address: string) =>
+      request<AddressValidation>('/mixer/validate-address', { method: 'POST', body: JSON.stringify({ coin, address }) }),
   },
   messenger: {
     conversations: () => request<{ conversations: Conversation[] }>('/messenger/conversations'),

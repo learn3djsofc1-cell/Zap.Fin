@@ -5,6 +5,8 @@ export async function initializeDatabase(): Promise<void> {
   try {
     await client.query('BEGIN');
 
+    await client.query(`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -116,6 +118,37 @@ export async function initializeDatabase(): Promise<void> {
 
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_integrations_user_id ON integrations(user_id)
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS mix_operations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        coin VARCHAR(10) NOT NULL,
+        amount NUMERIC(30, 18) NOT NULL,
+        recipient_address VARCHAR(255) NOT NULL,
+        privacy_level VARCHAR(20) NOT NULL DEFAULT 'standard',
+        delay_minutes INTEGER NOT NULL DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        deposit_address VARCHAR(255),
+        deposit_private_key_enc TEXT,
+        tx_hash VARCHAR(255),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        completed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_mix_operations_user_id ON mix_operations(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_mix_operations_status ON mix_operations(status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_mix_operations_created_at ON mix_operations(created_at)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_mix_operations_user_status ON mix_operations(user_id, status)
     `);
 
     await client.query('COMMIT');
