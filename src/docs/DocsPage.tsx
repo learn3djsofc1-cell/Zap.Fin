@@ -509,7 +509,7 @@ export default function DocsPage() {
 
       <footer className="border-t border-white/[0.04] py-6">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-[11px] text-gray-600">
-          <span>&copy; 2025 GhostLane. All rights reserved.</span>
+          <span>&copy; 2026 GhostLane. All rights reserved.</span>
           <Link to="/" className="text-gray-500 hover:text-white transition-colors text-xs">Back to Home</Link>
         </div>
       </footer>

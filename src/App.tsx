@@ -723,7 +723,9 @@ function FooterSection() {
             <span className="text-gray-500 text-[10px] font-bold uppercase tracking-widest block mb-4">Support</span>
             <div className="flex flex-col gap-2.5">
               {supportLinks.map((l) => (
-                <a key={l.label} href={l.href} className="text-gray-500 hover:text-white text-xs font-medium transition-colors">{l.label}</a>
+                l.href.startsWith('/') ?
+                  <Link key={l.label} to={l.href} className="text-gray-500 hover:text-white text-xs font-medium transition-colors">{l.label}</Link> :
+                  <a key={l.label} href={l.href} className="text-gray-500 hover:text-white text-xs font-medium transition-colors">{l.label}</a>
               ))}
             </div>
           </div>
@@ -741,7 +743,7 @@ function FooterSection() {
         </div>
 
         <div className="border-t border-white/[0.04] pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <span className="text-gray-600 text-[11px]">&copy; 2024 GhostLane. All rights reserved. Your privacy is our priority.</span>
+          <span className="text-gray-600 text-[11px]">&copy; 2026 GhostLane. All rights reserved. Your privacy is our priority.</span>
         </div>
       </div>
     </footer>
