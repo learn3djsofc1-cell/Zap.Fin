@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Eye, EyeOff, Code2, Lock, Layers, Terminal, ChevronRight, ChevronDown, Shuffle, MessageSquare, ArrowLeftRight, Wifi } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Eye, EyeOff, Code2, Lock, Layers, Terminal, ChevronRight, ChevronDown, Shuffle, MessageSquare, ArrowLeftRight, Wifi, Copy } from 'lucide-react';
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -81,6 +81,39 @@ function Navbar() {
   );
 }
 
+const CA_ADDRESS = 'BYKKztG8ckqAHDi3UvXP5JegiAnqXqwAyWXbatzApump';
+
+function CaAddress() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(CA_ADDRESS).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.35 }}
+      className="flex justify-center mb-10"
+    >
+      <button
+        onClick={handleCopy}
+        className="group flex items-center gap-2 sm:gap-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-[#0AF5D6]/20 rounded-xl px-3 py-2.5 sm:px-5 sm:py-3 transition-all duration-300 max-w-full cursor-pointer"
+      >
+        <span className="text-[#0AF5D6] text-[10px] sm:text-xs font-bold uppercase tracking-widest shrink-0">CA</span>
+        <span className="text-gray-400 group-hover:text-gray-200 text-[11px] sm:text-sm font-mono truncate transition-colors">{CA_ADDRESS}</span>
+        <span className={`shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg transition-all duration-300 ${copied ? 'bg-[#0AF5D6]/15 text-[#0AF5D6]' : 'bg-white/5 text-gray-500 group-hover:text-[#0AF5D6] group-hover:bg-[#0AF5D6]/10'}`}>
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+        </span>
+      </button>
+    </motion.div>
+  );
+}
+
 function HeroSection() {
   const { user } = useAuth();
   const containerRef = useRef(null);
@@ -111,7 +144,7 @@ function HeroSection() {
             Advanced cryptocurrency mixing, encrypted messaging, privacy bridge, and secure VPN - all powered by zero-knowledge technology. Send and receive on-chain with complete privacy while protecting your digital assets with military-grade encryption.
           </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-16">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
             <Link to={user ? '/app' : '/login'} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20">
               Launch App <ArrowRight size={16} />
             </Link>
@@ -119,6 +152,8 @@ function HeroSection() {
               Documentation <ArrowRight size={15} />
             </Link>
           </motion.div>
+
+          <CaAddress />
 
           <motion.div style={{ y: floatY }} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
             {[
