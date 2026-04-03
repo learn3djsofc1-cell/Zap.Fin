@@ -67,10 +67,14 @@ export function connect(): void {
         for (const handler of listeners) {
           try {
             handler(data);
-          } catch {}
+          } catch (handlerErr) {
+            console.error('[WS] Event handler error:', handlerErr);
+          }
         }
       }
-    } catch {}
+    } catch (parseErr) {
+      console.error('[WS] Message parse error:', parseErr);
+    }
   };
 
   ws.onclose = () => {

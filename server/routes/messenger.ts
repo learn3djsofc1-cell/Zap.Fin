@@ -1,7 +1,7 @@
 import { Response, Router } from 'express';
 import { authMiddleware, AuthRequest } from '../auth.js';
 import pool from '../db.js';
-import { sendToUser, type WsEvent } from '../websocket.js';
+import { sendToUser } from '../websocket.js';
 
 const router = Router();
 router.use(authMiddleware);
