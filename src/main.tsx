@@ -9,6 +9,7 @@ import MixerPage from './dashboard/MixerPage.tsx';
 import MessengerPage from './dashboard/MessengerPage.tsx';
 import BridgePage from './dashboard/BridgePage.tsx';
 import VpnPage from './dashboard/VpnPage.tsx';
+import PrivacyShieldPage from './dashboard/PrivacyShieldPage.tsx';
 import SettingsPage from './dashboard/SettingsPage.tsx';
 import LoginPage from './auth/LoginPage.tsx';
 import SignupPage from './auth/SignupPage.tsx';
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="mixer" element={<ErrorBoundary><MixerPage /></ErrorBoundary>} />
                 <Route path="messenger" element={<ErrorBoundary><MessengerPage /></ErrorBoundary>} />
                 <Route path="bridge" element={<ErrorBoundary><BridgePage /></ErrorBoundary>} />
+                <Route path="privacy" element={<ErrorBoundary><PrivacyShieldPage /></ErrorBoundary>} />
                 <Route path="vpn" element={<ErrorBoundary><VpnPage /></ErrorBoundary>} />
                 <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
               </Route>

@@ -346,6 +346,40 @@ export async function initializeDatabase(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_vpn_dapp_sessions_status ON vpn_dapp_sessions(user_id, status)
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS railgun_operations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        operation_type VARCHAR(20) NOT NULL,
+        network VARCHAR(50) NOT NULL,
+        token VARCHAR(20) NOT NULL,
+        amount NUMERIC(30, 18) NOT NULL,
+        source_address VARCHAR(255),
+        recipient_address VARCHAR(255),
+        railgun_contract VARCHAR(255) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        zk_proof_hash VARCHAR(255),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        completed_at TIMESTAMP WITH TIME ZONE
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_railgun_operations_user_id ON railgun_operations(user_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_railgun_operations_status ON railgun_operations(status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_railgun_operations_user_status ON railgun_operations(user_id, status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_railgun_operations_type ON railgun_operations(user_id, operation_type)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_railgun_operations_created_at ON railgun_operations(created_at)
+    `);
+
     await client.query('COMMIT');
     console.log('Database schema initialized successfully');
   } catch (err) {

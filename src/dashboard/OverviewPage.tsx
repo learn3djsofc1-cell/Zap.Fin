@@ -50,6 +50,16 @@ const productCards = [
     hoverBorder: 'hover:border-green-500/30',
   },
   {
+    icon: Shield,
+    title: 'Privacy Shield',
+    description: 'ZK-SNARK shielded transfers via Railgun',
+    to: '/app/privacy',
+    color: 'text-[#0AF5D6]',
+    bg: 'bg-[#0AF5D6]/10',
+    border: 'border-[#0AF5D6]/15',
+    hoverBorder: 'hover:border-[#0AF5D6]/30',
+  },
+  {
     icon: Wifi,
     title: 'VPN',
     description: 'Military-grade VPN with Tor integration',
@@ -106,6 +116,7 @@ const activityTypeIcon: Record<string, typeof Shuffle> = {
   mix: Shuffle,
   bridge: ArrowLeftRight,
   message: MessageSquare,
+  railgun: Shield,
   vpn: Wifi,
 };
 
@@ -113,6 +124,7 @@ const activityTypeColor: Record<string, string> = {
   mix: 'text-purple-400 bg-purple-500/10',
   bridge: 'text-green-400 bg-green-500/10',
   message: 'text-blue-400 bg-blue-500/10',
+  railgun: 'text-[#0AF5D6] bg-[#0AF5D6]/10',
   vpn: 'text-orange-400 bg-orange-500/10',
 };
 
@@ -205,7 +217,7 @@ export default function OverviewPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.25 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8"
       >
         {productCards.map((card, i) => (
           <Link

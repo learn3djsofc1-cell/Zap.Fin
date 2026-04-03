@@ -9,6 +9,7 @@ const navItems = [
   { to: '/app/mixer', icon: Shuffle, label: 'Mixer', end: false, group: 'Products' },
   { to: '/app/messenger', icon: MessageSquare, label: 'Messenger', end: false, group: 'Products' },
   { to: '/app/bridge', icon: ArrowLeftRight, label: 'Bridge', end: false, group: 'Products' },
+  { to: '/app/privacy', icon: Shield, label: 'Privacy Shield', end: false, group: 'Products' },
   { to: '/app/vpn', icon: Wifi, label: 'VPN', end: false, group: 'Products' },
   { to: '/app/settings', icon: Settings, label: 'Settings', end: false, group: 'Account' },
 ];

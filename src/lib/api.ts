@@ -179,11 +179,50 @@ export interface OverviewStats {
 
 export interface ActivityItem {
   id: string;
-  type: 'mix' | 'bridge' | 'message' | 'vpn';
+  type: 'mix' | 'bridge' | 'message' | 'railgun' | 'vpn';
   title: string;
   description: string;
   timestamp: string;
   status: string;
+}
+
+export interface RailgunNetwork {
+  id: string;
+  name: string;
+  chainId: number;
+  relayAdapt: string;
+  tokens: string[];
+}
+
+export interface RailgunOperation {
+  id: string;
+  operationType: 'shield' | 'transfer' | 'unshield';
+  network: string;
+  token: string;
+  amount: string;
+  sourceAddress?: string;
+  recipientAddress?: string;
+  railgunContract: string;
+  status: 'pending' | 'proving' | 'confirmed' | 'complete' | 'failed';
+  zkProofHash?: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface RailgunBalance {
+  network: string;
+  token: string;
+  shieldedBalance: string;
+}
+
+export interface RailgunStats {
+  totalOperations: number;
+  totalShielded: number;
+  totalPrivateTransfers: number;
+  totalUnshielded: number;
+  totalShieldedVolume: string;
+  networksUsed: number;
+  privacyScore: number;
 }
 
 export interface AuthUser {
@@ -337,6 +376,26 @@ export const api = {
       const qs = query.toString();
       return request<{ dapps: VpnDappSession[] }>(`/vpn/dapps${qs ? `?${qs}` : ''}`);
     },
+  },
+  railgun: {
+    networks: () => request<{ networks: RailgunNetwork[] }>('/railgun/networks'),
+    shield: (body: Record<string, string>) =>
+      request<{ operation: RailgunOperation }>('/railgun/shield', { method: 'POST', body: JSON.stringify(body) }),
+    transfer: (body: Record<string, string>) =>
+      request<{ operation: RailgunOperation }>('/railgun/transfer', { method: 'POST', body: JSON.stringify(body) }),
+    unshield: (body: Record<string, string>) =>
+      request<{ operation: RailgunOperation }>('/railgun/unshield', { method: 'POST', body: JSON.stringify(body) }),
+    operations: (params?: { type?: string; status?: string; limit?: number; offset?: number }) => {
+      const query = new URLSearchParams();
+      if (params?.type) query.set('type', params.type);
+      if (params?.status) query.set('status', params.status);
+      if (params?.limit) query.set('limit', String(params.limit));
+      if (params?.offset) query.set('offset', String(params.offset));
+      const qs = query.toString();
+      return request<{ operations: RailgunOperation[]; total: number }>(`/railgun/operations${qs ? `?${qs}` : ''}`);
+    },
+    balances: () => request<{ balances: RailgunBalance[] }>('/railgun/balances'),
+    stats: () => request<{ stats: RailgunStats }>('/railgun/stats'),
   },
   settings: {
     profile: () => request<{ profile: UserProfile }>('/settings/profile'),

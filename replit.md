@@ -31,8 +31,9 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 1. **Mixer** — Advanced cryptocurrency mixing with ZK proofs. Break transaction links with massive anonymity sets. Supports BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE.
 2. **Encrypted Messenger** — E2E encrypted messaging with username-based contacts, real-time WebSocket delivery, disappearing messages, and zero metadata collection.
 3. **Privacy Bridge** — Cross-chain asset transfers across 15+ chains with complete anonymity.
-4. **VPN** — Military-grade VPN with no-logs policy, kill switch, 24 global servers, SerpAPI-powered private search, session history with DB persistence.
-5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Ethereum (developer SDK).
+4. **Privacy Shield** — Railgun Protocol ZK-SNARK private transfers on EVM chains (Ethereum, Arbitrum, Polygon, BSC). Three operations: Shield (public→private), Transfer (private→private), Unshield (private→public). Real Railgun Relay Adapt contract addresses displayed. Shielded balance tracking, privacy score, operation history with ZK proof hashes.
+5. **VPN** — Military-grade VPN with no-logs policy, kill switch, 24 global servers, SerpAPI-powered private search, session history with DB persistence.
+6. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Ethereum (developer SDK).
 
 ## Project Structure
 
@@ -67,6 +68,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │       ├── MixerPage.tsx        # /app/mixer - New mix form, coin selector, privacy levels, history
 │       ├── MessengerPage.tsx    # /app/messenger - Conversation list, chat view, self-destruct, new chat
 │       ├── BridgePage.tsx       # /app/bridge - Cross-chain form, chain swap, status tracker, history
+│       ├── PrivacyShieldPage.tsx # /app/privacy - Railgun ZK-SNARK shield/transfer/unshield, balances, history
 │       ├── VpnPage.tsx          # /app/vpn - Connection toggle, 24 global servers, real-time stats (duration, fingerprint, IP cloak, relayer), bandwidth, kill switch, SerpAPI private search, dApp session tracking with duration/status, session history with end-session control
 │       └── SettingsPage.tsx     # /app/settings - Profile, security (password, 2FA, sessions), notifications
 ├── public/
@@ -86,6 +88,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   │   ├── mixer.ts        # Cross-asset swap CRUD /api/mixer (DB-backed), rates, validate-address, pools
 │   │   ├── messenger.ts    # /api/messenger (conversations, messages, contacts)
 │   │   ├── bridge.ts       # /api/bridge (create transfer, list, chains)
+│   │   ├── railgun.ts      # /api/railgun (shield, transfer, unshield, operations, balances, stats, networks)
 │   │   ├── vpn.ts          # /api/vpn (servers, session, connect, disconnect, kill-switch)
 │   │   └── settings.ts     # /api/settings (profile, password, 2fa, sessions)
 │   └── tsconfig.json       # Server TS config
@@ -104,6 +107,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `/app/mixer` Cryptocurrency mixer (protected)
 - `/app/messenger` Encrypted messenger (protected)
 - `/app/bridge` Privacy bridge (protected)
+- `/app/privacy` Privacy Shield - Railgun ZK-SNARK operations (protected)
 - `/app/vpn` VPN management (protected)
 - `/app/settings` Account settings (protected)
 
@@ -131,6 +135,13 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/bridge` List bridge transfers
 - `POST /api/bridge` Create bridge transfer
 - `GET /api/bridge/chains` List supported chains
+- `GET /api/railgun/networks` List Railgun-supported networks (Ethereum, Arbitrum, Polygon, BSC) with contract addresses
+- `POST /api/railgun/shield` Shield tokens (public→private) — requires EVM source address
+- `POST /api/railgun/transfer` Private transfer (private→private) — requires 0zk recipient address
+- `POST /api/railgun/unshield` Unshield tokens (private→public) — requires EVM recipient address
+- `GET /api/railgun/operations` List operations (filterable by type and status, paginated)
+- `GET /api/railgun/balances` Computed shielded balances per network/token
+- `GET /api/railgun/stats` Aggregated stats (total ops, privacy score, networks used)
 - `GET /api/vpn/servers` List 24 global VPN servers (flag, latency, load, protocol)
 - `GET /api/vpn/session` Get active VPN session (DB-backed with IP, fingerprint, relay)
 - `POST /api/vpn/connect` Connect to VPN server (creates DB session)
@@ -203,6 +214,7 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `vpn_sessions` - VPN session records (server_id, server_name, server_country, server_city, assigned_ip, fingerprint_hash, relay_node, bytes_up, bytes_down, kill_switch, status, connected_at, disconnected_at)
 - `vpn_searches` - VPN search history (session_id FK, query, results_count, url_opened)
 - `vpn_dapp_sessions` - dApp session tracking (vpn_session_id FK, url, title, status, opened_at, closed_at)
+- `railgun_operations` - Railgun privacy operations (operation_type shield/transfer/unshield, network, token, amount, source_address, recipient_address, railgun_contract, status, zk_proof_hash)
 - `agents` - Agent configurations and balances
 - `transactions` - General transaction records
 - `policies` - Security policy configurations
