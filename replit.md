@@ -29,7 +29,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 ## GhostLane Products
 
 1. **Mixer** — Advanced cryptocurrency mixing with ZK proofs. Break transaction links with massive anonymity sets. Supports BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE.
-2. **Encrypted Messenger** — E2E encrypted messaging with username-based contacts, disappearing messages, and zero metadata collection.
+2. **Encrypted Messenger** — E2E encrypted messaging with username-based contacts, real-time WebSocket delivery, disappearing messages, and zero metadata collection.
 3. **Privacy Bridge** — Cross-chain asset transfers across 15+ chains with complete anonymity.
 4. **VPN** — Military-grade VPN with no-logs policy, kill switch, 24 global servers, SerpAPI-powered private search, session history with DB persistence.
 5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Ethereum (developer SDK).
@@ -48,6 +48,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   │   └── SignupPage.tsx  # /signup - Registration form
 │   ├── lib/
 │   │   ├── api.ts          # Centralized API client with typed interfaces for all products (mixer, messenger, bridge, vpn, settings, overview)
+│   │   ├── websocket.ts    # WebSocket client: auto-reconnect with exponential backoff, event subscription
 │   │   ├── AuthContext.tsx  # Auth context/provider + ProtectedRoute component
 │   │   └── toast.tsx       # Toast notification system (success/error/warning/info)
 │   ├── components/
@@ -72,7 +73,8 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   ├── ghostlane-logo.png  # GhostLane brand logo
 │   └── ...                 # Favicons and crypto logos
 ├── server/
-│   ├── index.ts            # Express server entry: initializes DB, mounts all API routes
+│   ├── index.ts            # Express server entry: http.createServer, initializes DB, mounts API routes + WebSocket
+│   ├── websocket.ts        # WebSocket server: JWT auth on upgrade, userId→connection map, heartbeat, sendToUser broadcast
 │   ├── db.ts               # PostgreSQL connection pool (pg)
 │   ├── schema.ts           # Database schema initialization (users, mix_operations tables)
 │   ├── auth.ts             # Auth routes (/api/auth/*) + JWT middleware
@@ -123,7 +125,8 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `POST /api/messenger/conversations` Create conversation (by contactUserId, validates target user exists and is not self)
 - `GET /api/messenger/users/search?q=` Search registered users by username (ILIKE, excludes self, limit 10)
 - `GET /api/messenger/conversations/:id/messages` Get messages (DB-backed, ownership verified)
-- `POST /api/messenger/conversations/:id/messages` Send message (DB-backed, updates conversation last_message)
+- `POST /api/messenger/conversations/:id/messages` Send message (DB-backed, updates conversation last_message, broadcasts to recipient via WebSocket)
+- `WS /ws?token=JWT` WebSocket endpoint — JWT-authenticated upgrade, real-time events: new_message, conversation_update, new_conversation. Heartbeat ping/pong at 30s intervals.
 - `GET /api/messenger/contacts` List contacts (derived from conversations)
 - `GET /api/bridge` List bridge transfers
 - `POST /api/bridge` Create bridge transfer

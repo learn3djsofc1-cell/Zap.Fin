@@ -1,6 +1,7 @@
 import { Response, Router } from 'express';
 import { authMiddleware, AuthRequest } from '../auth.js';
 import pool from '../db.js';
+import { sendToUser, type WsEvent } from '../websocket.js';
 
 const router = Router();
 router.use(authMiddleware);
@@ -95,9 +96,33 @@ router.post('/conversations', async (req: AuthRequest, res: Response): Promise<v
     );
 
     const row = result.rows[0];
-    res.json({
-      conversation: mapConversationRow({ ...row, contact_name: contactName }),
-    });
+    const conversation = mapConversationRow({ ...row, contact_name: contactName });
+    res.json({ conversation });
+
+    try {
+      let recipientConv = await pool.query(
+        'SELECT id FROM conversations WHERE user_id = $1 AND contact_user_id = $2',
+        [contactUserId, userId]
+      );
+      if (recipientConv.rows.length === 0) {
+        const senderNameResult = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
+        const senderDisplayName = senderNameResult.rows[0]?.name || 'Unknown';
+
+        recipientConv = await pool.query(
+          `INSERT INTO conversations (user_id, contact_user_id)
+           VALUES ($1, $2) RETURNING id, contact_user_id, last_message, last_message_at, created_at`,
+          [contactUserId, userId]
+        );
+
+        const recipientRow = recipientConv.rows[0];
+        sendToUser(contactUserId, {
+          type: 'new_conversation',
+          payload: mapConversationRow({ ...recipientRow, contact_name: senderDisplayName }),
+        });
+      }
+    } catch (broadcastErr) {
+      console.error('WebSocket broadcast error (non-fatal):', broadcastErr);
+    }
   } catch (err) {
     console.error('Messenger create conversation error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -172,23 +197,105 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
       [conversationId, userId, trimmedContent, selfDestructSeconds || null]
     );
 
+    const lastMsgPreview = trimmedContent.length > 100 ? trimmedContent.slice(0, 100) + '...' : trimmedContent;
+
     await pool.query(
       `UPDATE conversations SET last_message = $1, last_message_at = NOW() WHERE id = $2`,
-      [trimmedContent.length > 100 ? trimmedContent.slice(0, 100) + '...' : trimmedContent, conversationId]
+      [lastMsgPreview, conversationId]
     );
 
     const row = result.rows[0];
-    res.json({
-      message: {
-        id: row.id,
-        conversationId: row.conversation_id,
-        content: row.content,
-        sender: row.sender,
-        timestamp: row.created_at?.toISOString?.() || row.created_at,
-        isEncrypted: true,
-        selfDestructSeconds: row.self_destruct_seconds || undefined,
-      },
-    });
+    const messagePayload = {
+      id: row.id,
+      conversationId: row.conversation_id,
+      content: row.content,
+      sender: row.sender,
+      timestamp: row.created_at?.toISOString?.() || row.created_at,
+      isEncrypted: true,
+      selfDestructSeconds: row.self_destruct_seconds || undefined,
+    };
+
+    res.json({ message: messagePayload });
+
+    try {
+      const senderConv = await pool.query(
+        'SELECT contact_user_id FROM conversations WHERE id = $1',
+        [conversationId]
+      );
+      const recipientId = senderConv.rows[0]?.contact_user_id;
+
+      if (recipientId) {
+        const senderName = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
+        const senderDisplayName = senderName.rows[0]?.name || 'Unknown';
+
+        let recipientConv = await pool.query(
+          'SELECT id FROM conversations WHERE user_id = $1 AND contact_user_id = $2',
+          [recipientId, userId]
+        );
+
+        if (recipientConv.rows.length === 0) {
+          recipientConv = await pool.query(
+            `INSERT INTO conversations (user_id, contact_user_id) VALUES ($1, $2)
+             RETURNING id`,
+            [recipientId, userId]
+          );
+
+          sendToUser(recipientId, {
+            type: 'new_conversation',
+            payload: {
+              id: recipientConv.rows[0].id,
+              contactUserId: userId,
+              contactName: senderDisplayName,
+              lastMessage: lastMsgPreview,
+              lastMessageAt: row.created_at?.toISOString?.() || row.created_at,
+              unreadCount: 1,
+              isEncrypted: true,
+            },
+          });
+        }
+
+        const recipientConvId = recipientConv.rows[0].id;
+
+        await pool.query(
+          `INSERT INTO messages (conversation_id, user_id, content, sender, self_destruct_seconds)
+           VALUES ($1, $2, $3, 'them', $4)`,
+          [recipientConvId, userId, trimmedContent, selfDestructSeconds || null]
+        );
+
+        await pool.query(
+          `UPDATE conversations SET last_message = $1, last_message_at = NOW() WHERE id = $2`,
+          [lastMsgPreview, recipientConvId]
+        );
+
+        sendToUser(recipientId, {
+          type: 'new_message',
+          payload: {
+            id: row.id,
+            conversationId: recipientConvId,
+            content: trimmedContent,
+            sender: 'them',
+            timestamp: row.created_at?.toISOString?.() || row.created_at,
+            isEncrypted: true,
+            selfDestructSeconds: row.self_destruct_seconds || undefined,
+          },
+        });
+
+        sendToUser(recipientId, {
+          type: 'conversation_update',
+          payload: {
+            id: recipientConvId,
+            contactUserId: userId,
+            contactName: senderDisplayName,
+            lastMessage: lastMsgPreview,
+            lastMessageAt: row.created_at?.toISOString?.() || row.created_at,
+            unreadCount: 0,
+            isEncrypted: true,
+          },
+        });
+      }
+    } catch (broadcastErr) {
+      console.error('WebSocket broadcast error (non-fatal):', broadcastErr);
+    }
   } catch (err) {
     console.error('Messenger send error:', err);
     res.status(500).json({ error: 'Internal server error' });

@@ -1,8 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
+import { createServer } from 'http';
 import path from 'path';
 import fs from 'fs';
 import { initializeDatabase } from './schema.js';
 import { initLogoCache } from './coingecko.js';
+import { setupWebSocket } from './websocket.js';
 import { authRouter } from './auth.js';
 import { overviewRouter } from './routes/overview.js';
 import { mixerRouter } from './routes/mixer.js';
@@ -13,6 +15,7 @@ import { settingsRouter } from './routes/settings.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
+const server = createServer(app);
 
 if (isProduction) {
   app.set('trust proxy', 1);
@@ -51,7 +54,8 @@ async function start() {
   try {
     await initializeDatabase();
     initLogoCache();
-    app.listen(PORT, '0.0.0.0', () => {
+    setupWebSocket(server);
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`API server running on port ${PORT}`);
     });
   } catch (err) {

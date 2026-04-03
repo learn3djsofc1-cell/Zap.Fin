@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { MessageSquare, Send, Lock, Timer, Plus, Search, Shield, Users } from 'lucide-react';
 import { api, type Conversation, type Message } from '../lib/api';
+import { connect as wsConnect, disconnect as wsDisconnect, subscribe as wsSubscribe, type WsEvent } from '../lib/websocket';
 import { useToast } from '../lib/toast';
 import Modal from '../components/Modal';
 import { motion } from 'framer-motion';
@@ -57,11 +58,72 @@ export default function MessengerPage() {
     };
   }, []);
 
+  const activeConversationRef = useRef<Conversation | null>(null);
+  activeConversationRef.current = activeConversation;
+
   useEffect(() => {
     api.messenger.conversations()
       .then((data) => setConversations(data.conversations))
       .catch(() => toast('error', 'Failed to load conversations'))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    wsConnect();
+
+    const unsubscribe = wsSubscribe((event: WsEvent) => {
+      const p = event.payload as Record<string, unknown>;
+
+      if (event.type === 'new_message') {
+        const currentConv = activeConversationRef.current;
+        if (currentConv && p.conversationId === currentConv.id) {
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === p.id)) return prev;
+            return [...prev, {
+              id: p.id as string,
+              conversationId: p.conversationId as string,
+              content: p.content as string,
+              sender: p.sender as 'me' | 'them',
+              timestamp: p.timestamp as string,
+              isEncrypted: true,
+              selfDestructSeconds: p.selfDestructSeconds as number | undefined,
+            }];
+          });
+        }
+      }
+
+      if (event.type === 'conversation_update') {
+        setConversations((prev) => {
+          const updated = prev.map((c) =>
+            c.id === p.id
+              ? { ...c, lastMessage: p.lastMessage as string, lastMessageAt: p.lastMessageAt as string }
+              : c
+          );
+          return updated.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+        });
+      }
+
+      if (event.type === 'new_conversation') {
+        const newConv: Conversation = {
+          id: p.id as string,
+          contactUserId: p.contactUserId as number,
+          contactName: p.contactName as string,
+          lastMessage: (p.lastMessage as string) || '',
+          lastMessageAt: p.lastMessageAt as string,
+          unreadCount: (p.unreadCount as number) || 0,
+          isEncrypted: true,
+        };
+        setConversations((prev) => {
+          if (prev.some((c) => c.id === newConv.id)) return prev;
+          return [newConv, ...prev];
+        });
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      wsDisconnect();
+    };
   }, []);
 
   useEffect(() => {
