@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
-import { MessageSquare, Send, Lock, Timer, Plus, Search, Shield, AlertCircle } from 'lucide-react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { MessageSquare, Send, Lock, Timer, Plus, Search, Shield, Users } from 'lucide-react';
 import { api, type Conversation, type Message } from '../lib/api';
 import { useToast } from '../lib/toast';
 import Modal from '../components/Modal';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 function timeAgo(date: string): string {
   const now = Date.now();
@@ -15,15 +15,11 @@ function timeAgo(date: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function truncateAddress(addr: string): string {
-  if (!addr || addr.length <= 12) return addr;
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-}
-
-const ETH_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
-
-function isValidEthereumAddress(address: string): boolean {
-  return ETH_ADDRESS_RE.test(address);
+function getInitials(name: string): string {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 }
 
 const SELF_DESTRUCT_OPTIONS = [
@@ -46,10 +42,14 @@ export default function MessengerPage() {
   const [selfDestruct, setSelfDestruct] = useState(0);
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newContactAddress, setNewContactAddress] = useState('');
-  const [addressTouched, setAddressTouched] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userSearchResults, setUserSearchResults] = useState<{ id: number; name: string }[]>([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: number; name: string } | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     api.messenger.conversations()
@@ -63,6 +63,33 @@ export default function MessengerPage() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  const handleUserSearch = useCallback((query: string) => {
+    setUserSearchQuery(query);
+    setSelectedUser(null);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (!query.trim() || query.trim().length < 2) {
+      setUserSearchResults([]);
+      setUserSearchLoading(false);
+      return;
+    }
+
+    setUserSearchLoading(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const data = await api.messenger.searchUsers(query.trim());
+        setUserSearchResults(data.users);
+      } catch {
+        setUserSearchResults([]);
+      } finally {
+        setUserSearchLoading(false);
+      }
+    }, 300);
+  }, []);
 
   function openConversation(conv: Conversation) {
     setActiveConversation(conv);
@@ -101,22 +128,15 @@ export default function MessengerPage() {
     }
   }
 
-  const addressValid = newContactAddress.trim().length > 0 && isValidEthereumAddress(newContactAddress.trim());
-  const showAddressError = addressTouched && newContactAddress.trim().length > 0 && !addressValid;
-
   async function handleNewChat(e: React.FormEvent) {
     e.preventDefault();
-    if (!newContactAddress.trim()) {
-      toast('error', 'Ethereum address is required');
-      return;
-    }
-    if (!addressValid) {
-      toast('error', 'Invalid Ethereum address');
+    if (!selectedUser) {
+      toast('error', 'Please select a user to chat with');
       return;
     }
     try {
       const data = await api.messenger.createConversation({
-        contactAddress: newContactAddress.trim(),
+        contactUserId: selectedUser.id,
       });
       setConversations((prev) => {
         const exists = prev.find((c) => c.id === data.conversation.id);
@@ -125,8 +145,9 @@ export default function MessengerPage() {
       });
       openConversation(data.conversation);
       setShowNewChat(false);
-      setNewContactAddress('');
-      setAddressTouched(false);
+      setUserSearchQuery('');
+      setUserSearchResults([]);
+      setSelectedUser(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create conversation';
       toast('error', message);
@@ -134,7 +155,7 @@ export default function MessengerPage() {
   }
 
   const filteredConversations = conversations.filter((c) =>
-    c.contactAddress.toLowerCase().includes(searchQuery.toLowerCase())
+    c.contactName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -179,7 +200,7 @@ export default function MessengerPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by address..."
+                  placeholder="Search by username..."
                   className="w-full bg-[#111111] border border-white/[0.06] rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-all"
                 />
               </div>
@@ -210,11 +231,11 @@ export default function MessengerPage() {
                     }`}
                   >
                     <div className="w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center shrink-0">
-                      <span className="text-purple-400 text-[10px] font-bold font-mono">{conv.contactAddress.slice(0, 2)}</span>
+                      <span className="text-purple-400 text-[10px] font-bold">{getInitials(conv.contactName)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-white text-xs font-semibold truncate font-mono">{truncateAddress(conv.contactAddress)}</span>
+                        <span className="text-white text-xs font-semibold truncate">{conv.contactName}</span>
                         <span className="text-gray-600 text-[10px] shrink-0 ml-2">{timeAgo(conv.lastMessageAt)}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -255,10 +276,10 @@ export default function MessengerPage() {
                       ←
                     </button>
                     <div className="w-7 h-7 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center shrink-0">
-                      <span className="text-purple-400 text-[9px] font-bold font-mono">{activeConversation.contactAddress.slice(0, 2)}</span>
+                      <span className="text-purple-400 text-[9px] font-bold">{getInitials(activeConversation.contactName)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-white text-xs font-semibold block truncate font-mono">{truncateAddress(activeConversation.contactAddress)}</span>
+                      <span className="text-white text-xs font-semibold block truncate">{activeConversation.contactName}</span>
                       <div className="flex items-center gap-1">
                         <Lock size={8} className="text-[#0AF5D6]" />
                         <span className="text-[#0AF5D6] text-[10px] font-semibold">Encrypted</span>
@@ -367,46 +388,80 @@ export default function MessengerPage() {
         </div>
       </motion.div>
 
-      <Modal open={showNewChat} onClose={() => { setShowNewChat(false); setNewContactAddress(''); setAddressTouched(false); }} title="New Encrypted Chat">
+      <Modal open={showNewChat} onClose={() => { setShowNewChat(false); setUserSearchQuery(''); setUserSearchResults([]); setSelectedUser(null); }} title="New Encrypted Chat">
         <form onSubmit={handleNewChat} className="space-y-5">
           <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Ethereum Address</label>
-            <input
-              type="text"
-              value={newContactAddress}
-              onChange={(e) => { setNewContactAddress(e.target.value); setAddressTouched(true); }}
-              onBlur={() => setAddressTouched(true)}
-              placeholder="Enter Ethereum wallet address (0x...)"
-              className={`w-full bg-[#111111] border rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-xs ${
-                showAddressError
-                  ? 'border-red-500/50 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20'
-                  : addressValid
-                    ? 'border-[#0AF5D6]/30 focus:border-[#0AF5D6]/50 focus:ring-1 focus:ring-[#0AF5D6]/20'
-                    : 'border-white/[0.06] focus:border-[#0AF5D6]/40 focus:ring-1 focus:ring-[#0AF5D6]/20'
-              }`}
-            />
-            {showAddressError && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <AlertCircle size={12} className="text-red-400 shrink-0" />
-                <span className="text-red-400 text-[11px]">Invalid Ethereum address. Must start with 0x followed by 40 hex characters.</span>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Find User</label>
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
+              <input
+                type="text"
+                value={userSearchQuery}
+                onChange={(e) => handleUserSearch(e.target.value)}
+                placeholder="Search by username..."
+                className="w-full bg-[#111111] border border-white/[0.06] rounded-xl pl-9 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0AF5D6]/40 transition-all"
+                autoFocus
+              />
+            </div>
+
+            {selectedUser && (
+              <div className="mt-3 flex items-center gap-3 bg-[#0AF5D6]/5 border border-[#0AF5D6]/20 rounded-xl px-4 py-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500/15 border border-purple-500/20 flex items-center justify-center shrink-0">
+                  <span className="text-purple-400 text-[10px] font-bold">{getInitials(selectedUser.name)}</span>
+                </div>
+                <span className="text-white text-sm font-semibold flex-1">{selectedUser.name}</span>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedUser(null); setUserSearchQuery(''); }}
+                  className="text-gray-500 hover:text-white text-xs transition-colors"
+                >
+                  Change
+                </button>
               </div>
             )}
-            {addressValid && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <div className="w-3 h-3 rounded-full bg-[#0AF5D6]/20 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6]" />
-                </div>
-                <span className="text-[#0AF5D6] text-[11px]">Valid Ethereum address</span>
+
+            {!selectedUser && userSearchQuery.trim().length >= 2 && (
+              <div className="mt-2 bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                {userSearchLoading ? (
+                  <div className="px-4 py-3 flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-[#0AF5D6] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-gray-500 text-xs">Searching...</span>
+                  </div>
+                ) : userSearchResults.length === 0 ? (
+                  <div className="px-4 py-3 flex items-center gap-2">
+                    <Users size={14} className="text-gray-600" />
+                    <span className="text-gray-500 text-xs">No users found</span>
+                  </div>
+                ) : (
+                  userSearchResults.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setUserSearchQuery(user.name);
+                        setUserSearchResults([]);
+                      }}
+                      className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-white/[0.04] transition-colors text-left border-b border-white/[0.03] last:border-b-0"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/15 flex items-center justify-center shrink-0">
+                        <span className="text-purple-400 text-[10px] font-bold">{getInitials(user.name)}</span>
+                      </div>
+                      <span className="text-white text-sm font-medium">{user.name}</span>
+                    </button>
+                  ))
+                )}
               </div>
             )}
           </div>
+
           <div className="bg-blue-500/5 border border-blue-500/15 rounded-xl p-3 flex items-start gap-2">
             <Lock size={14} className="text-blue-400 shrink-0 mt-0.5" />
             <p className="text-gray-400 text-xs leading-relaxed">All messages are end-to-end encrypted using 256-bit encryption. GhostLane cannot read your messages.</p>
           </div>
           <button
             type="submit"
-            disabled={!addressValid}
+            disabled={!selectedUser}
             className="w-full bg-[#0AF5D6] hover:bg-[#08D4B8] disabled:opacity-40 disabled:cursor-not-allowed text-black py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20"
           >
             <MessageSquare size={16} /> Start Encrypted Chat

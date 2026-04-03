@@ -29,7 +29,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 ## GhostLane Products
 
 1. **Mixer** — Advanced cryptocurrency mixing with ZK proofs. Break transaction links with massive anonymity sets. Supports BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE.
-2. **Encrypted Messenger** — E2E encrypted messaging with disappearing messages and zero metadata collection.
+2. **Encrypted Messenger** — E2E encrypted messaging with username-based contacts, disappearing messages, and zero metadata collection.
 3. **Privacy Bridge** — Cross-chain asset transfers across 15+ chains with complete anonymity.
 4. **VPN** — Military-grade VPN with no-logs policy, kill switch, 24 global servers, SerpAPI-powered private search, session history with DB persistence.
 5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Ethereum (developer SDK).
@@ -120,7 +120,8 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/mixer/pools` Pool sizes
 - `GET /api/mixer/:id` Get mix details
 - `GET /api/messenger/conversations` List conversations (DB-backed, per user)
-- `POST /api/messenger/conversations` Create conversation (Ethereum address validation, no contact name)
+- `POST /api/messenger/conversations` Create conversation (by contactUserId, validates target user exists and is not self)
+- `GET /api/messenger/users/search?q=` Search registered users by username (ILIKE, excludes self, limit 10)
 - `GET /api/messenger/conversations/:id/messages` Get messages (DB-backed, ownership verified)
 - `POST /api/messenger/conversations/:id/messages` Send message (DB-backed, updates conversation last_message)
 - `GET /api/messenger/contacts` List contacts (derived from conversations)
@@ -193,7 +194,7 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 
 - `users` - User accounts (email, password_hash, name)
 - `mix_operations` - Cross-asset swap operations (send_coin, receive_coin, send_amount, receive_amount, exchange_rate, fee_percent, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
-- `conversations` - Messenger conversations per user (contact_address as Ethereum address, last_message, last_message_at, UNIQUE per user+address)
+- `conversations` - Messenger conversations per user (contact_user_id FK to users, last_message, last_message_at, UNIQUE per user+contact_user_id)
 - `messages` - Messenger messages (conversation_id FK, user_id FK, content, sender, self_destruct_seconds)
 - `bridge_transfers` - Cross-chain bridge transfers (source_chain, dest_chain, token, amount, recipient_address, status, deposit_address)
 - `vpn_sessions` - VPN session records (server_id, server_name, server_country, server_city, assigned_ip, fingerprint_hash, relay_node, bytes_up, bytes_down, kill_switch, status, connected_at, disconnected_at)

@@ -132,7 +132,7 @@ export default function DocsPage() {
               <H3>Key Capabilities</H3>
               <UL>
                 <LI>Cross-asset mixing across 8 cryptocurrencies (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE) with live CoinGecko exchange rates</LI>
-                <LI>End-to-end encrypted messaging with configurable self-destruct timers and Ethereum address-based identity</LI>
+                <LI>End-to-end encrypted messaging with configurable self-destruct timers and username-based identity</LI>
                 <LI>Cross-chain bridge transfers across 15+ blockchains with deposit tracking and status lifecycle</LI>
                 <LI>VPN service spanning 24 servers across 6 global regions with kill switch, bandwidth monitoring, and dApp session tracking</LI>
                 <LI>Ux402 Protocol for untraceable cross-chain transactions using multi-hop privacy pool routing</LI>
@@ -209,7 +209,7 @@ export default function DocsPage() {
             <Section id="messenger" title="Encrypted Messenger">
               <H3>End-to-End Encryption Architecture</H3>
               <P>
-                The GhostLane Messenger provides fully encrypted communication between users identified by Ethereum wallet addresses. All message content is encrypted client-side using AES-256-GCM before transmission. The server stores only ciphertext — plaintext content never exists on GhostLane infrastructure. Conversations are initiated by specifying the recipient's Ethereum address; no phone numbers, emails, or usernames are required.
+                The GhostLane Messenger provides fully encrypted communication between registered users identified by username. All message content is encrypted client-side using AES-256-GCM before transmission. The server stores only ciphertext — plaintext content never exists on GhostLane infrastructure. Conversations are initiated by searching for a recipient's username; no wallet addresses, phone numbers, or emails are required.
               </P>
               <H3>Self-Destructing Messages</H3>
               <P>
@@ -229,7 +229,7 @@ export default function DocsPage() {
               <P>
                 GhostLane does not collect, store, or process any messaging metadata. There are no read receipts, typing indicators, or online status signals. The server cannot determine who is communicating with whom, how frequently messages are exchanged, or the size of message payloads. All metadata fields are encrypted alongside content.
               </P>
-              <CodeBlock code={`// Create a new conversation with an Ethereum address\nconst conversation = await client.messenger.create({\n  contactAddress: '0xABC...DEF',\n});\n\n// Send a self-destructing message\nconst msg = await client.messenger.send({\n  conversationId: conversation.id,\n  content: 'Transfer confirmed. Funds cleared.',\n  selfDestructSeconds: 300, // 5 minutes\n});\n\nconsole.log(msg.encrypted);  // true\nconsole.log(msg.expiresAt);  // '2025-03-24T12:10:00Z'`} />
+              <CodeBlock code={`// Search for a user by username\nconst results = await client.messenger.searchUsers('alice');\n\n// Create a new conversation with a user\nconst conversation = await client.messenger.create({\n  contactUserId: results[0].id,\n});\n\n// Send a self-destructing message\nconst msg = await client.messenger.send({\n  conversationId: conversation.id,\n  content: 'Transfer confirmed. Funds cleared.',\n  selfDestructSeconds: 300, // 5 minutes\n});\n\nconsole.log(msg.encrypted);  // true\nconsole.log(msg.expiresAt);  // '2025-03-24T12:10:00Z'`} />
             </Section>
 
             {/* ── Privacy Bridge ── */}
@@ -438,7 +438,8 @@ export default function DocsPage() {
                 headers={['Method', 'Endpoint', 'Description']}
                 rows={[
                   ['GET', '/api/messenger/conversations', 'List all conversations for the authenticated user'],
-                  ['POST', '/api/messenger/conversations', 'Create a new conversation by Ethereum address'],
+                  ['POST', '/api/messenger/conversations', 'Create a new conversation by user ID'],
+                  ['GET', '/api/messenger/users/search?q=', 'Search registered users by username'],
                   ['GET', '/api/messenger/conversations/:id/messages', 'Retrieve messages in a conversation'],
                   ['POST', '/api/messenger/conversations/:id/messages', 'Send an encrypted message (supports selfDestructSeconds)'],
                   ['GET', '/api/messenger/contacts', 'List contacts derived from conversation history'],

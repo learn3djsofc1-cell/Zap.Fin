@@ -5,32 +5,32 @@ import pool from '../db.js';
 const router = Router();
 router.use(authMiddleware);
 
-const ETH_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
-
-function isValidEthereumAddress(address: string): boolean {
-  return ETH_ADDRESS_RE.test(address);
+function mapConversationRow(row: any) {
+  return {
+    id: row.id,
+    contactUserId: row.contact_user_id,
+    contactName: row.contact_name || 'Unknown',
+    lastMessage: row.last_message,
+    lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
+    unreadCount: 0,
+    isEncrypted: true,
+  };
 }
 
 router.get('/conversations', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
     const result = await pool.query(
-      `SELECT id, contact_address, last_message, last_message_at, created_at
-       FROM conversations
-       WHERE user_id = $1
-       ORDER BY last_message_at DESC`,
+      `SELECT c.id, c.contact_user_id, u.name AS contact_name,
+              c.last_message, c.last_message_at, c.created_at
+       FROM conversations c
+       LEFT JOIN users u ON u.id = c.contact_user_id
+       WHERE c.user_id = $1
+       ORDER BY c.last_message_at DESC`,
       [userId]
     );
 
-    const conversations = result.rows.map((row) => ({
-      id: row.id,
-      contactAddress: row.contact_address,
-      lastMessage: row.last_message,
-      lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
-      unreadCount: 0,
-      isEncrypted: true,
-    }));
-
+    const conversations = result.rows.map(mapConversationRow);
     res.json({ conversations });
   } catch (err) {
     console.error('Messenger conversations error:', err);
@@ -41,56 +41,53 @@ router.get('/conversations', async (req: AuthRequest, res: Response): Promise<vo
 router.post('/conversations', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
-    const { contactAddress } = req.body;
+    const { contactUserId } = req.body;
 
-    if (!contactAddress) {
-      res.status(400).json({ error: 'Ethereum address is required' });
+    if (!contactUserId || typeof contactUserId !== 'number') {
+      res.status(400).json({ error: 'Valid contact user ID is required' });
       return;
     }
 
-    const trimmed = contactAddress.trim();
-    if (!isValidEthereumAddress(trimmed)) {
-      res.status(400).json({ error: 'Invalid Ethereum address. Must start with 0x followed by 40 hex characters.' });
+    if (contactUserId === userId) {
+      res.status(400).json({ error: 'You cannot start a conversation with yourself' });
       return;
     }
+
+    const userCheck = await pool.query(
+      'SELECT id, name FROM users WHERE id = $1',
+      [contactUserId]
+    );
+    if (userCheck.rows.length === 0) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    const contactName = userCheck.rows[0].name;
 
     const existing = await pool.query(
-      'SELECT id, contact_address, last_message, last_message_at, created_at FROM conversations WHERE user_id = $1 AND contact_address = $2',
-      [userId, trimmed]
+      `SELECT c.id, c.contact_user_id, c.last_message, c.last_message_at, c.created_at
+       FROM conversations c
+       WHERE c.user_id = $1 AND c.contact_user_id = $2`,
+      [userId, contactUserId]
     );
 
     if (existing.rows.length > 0) {
       const row = existing.rows[0];
       res.json({
-        conversation: {
-          id: row.id,
-          contactAddress: row.contact_address,
-          lastMessage: row.last_message,
-          lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
-          unreadCount: 0,
-          isEncrypted: true,
-        },
+        conversation: mapConversationRow({ ...row, contact_name: contactName }),
       });
       return;
     }
 
     const result = await pool.query(
-      `INSERT INTO conversations (user_id, contact_address)
+      `INSERT INTO conversations (user_id, contact_user_id)
        VALUES ($1, $2)
-       RETURNING id, contact_address, last_message, last_message_at, created_at`,
-      [userId, trimmed]
+       RETURNING id, contact_user_id, last_message, last_message_at, created_at`,
+      [userId, contactUserId]
     );
 
     const row = result.rows[0];
     res.json({
-      conversation: {
-        id: row.id,
-        contactAddress: row.contact_address,
-        lastMessage: row.last_message,
-        lastMessageAt: row.last_message_at?.toISOString?.() || row.last_message_at,
-        unreadCount: 0,
-        isEncrypted: true,
-      },
+      conversation: mapConversationRow({ ...row, contact_name: contactName }),
     });
   } catch (err) {
     console.error('Messenger create conversation error:', err);
@@ -193,16 +190,56 @@ router.get('/contacts', async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId;
     const result = await pool.query(
-      `SELECT DISTINCT contact_address FROM conversations WHERE user_id = $1 ORDER BY contact_address`,
+      `SELECT DISTINCT c.contact_user_id, u.name
+       FROM conversations c
+       JOIN users u ON u.id = c.contact_user_id
+       WHERE c.user_id = $1 AND c.contact_user_id IS NOT NULL
+       ORDER BY u.name`,
       [userId]
     );
     const contacts = result.rows.map((row) => ({
-      id: row.contact_address,
-      address: row.contact_address,
+      id: row.contact_user_id,
+      name: row.name,
     }));
     res.json({ contacts });
   } catch (err) {
     console.error('Messenger contacts error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/users/search', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const q = req.query.q;
+
+    if (!q || typeof q !== 'string' || q.trim().length === 0) {
+      res.json({ users: [] });
+      return;
+    }
+
+    const searchTerm = q.trim();
+    if (searchTerm.length > 100) {
+      res.status(400).json({ error: 'Search query too long' });
+      return;
+    }
+
+    const result = await pool.query(
+      `SELECT id, name FROM users
+       WHERE id != $1 AND name ILIKE $2
+       ORDER BY name ASC
+       LIMIT 10`,
+      [userId, `%${searchTerm}%`]
+    );
+
+    const users = result.rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+    }));
+
+    res.json({ users });
+  } catch (err) {
+    console.error('Messenger user search error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

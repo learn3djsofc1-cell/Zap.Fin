@@ -100,9 +100,10 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
         [userId]
       ),
       pool.query(
-        `SELECT m.id, m.content, m.created_at, c.contact_address
+        `SELECT m.id, m.content, m.created_at, COALESCE(u.name, c.contact_address, 'Unknown') AS contact_name
          FROM messages m
          JOIN conversations c ON c.id = m.conversation_id
+         LEFT JOIN users u ON u.id = c.contact_user_id
          WHERE m.user_id = $1
          ORDER BY m.created_at DESC
          LIMIT 15`,
@@ -138,7 +139,7 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
     const msgActivity = msgResult.rows.map((row) => ({
       id: row.id,
       type: 'message' as const,
-      title: `Message to ${row.contact_address.slice(0, 6)}...${row.contact_address.slice(-4)}`,
+      title: `Message to ${row.contact_name}`,
       description: row.content.length > 50 ? row.content.slice(0, 50) + '...' : row.content,
       timestamp: row.created_at?.toISOString?.() || row.created_at,
       status: 'complete' as const,

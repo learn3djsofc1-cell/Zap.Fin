@@ -183,7 +183,8 @@ export async function initializeDatabase(): Promise<void> {
       CREATE TABLE IF NOT EXISTS conversations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        contact_address VARCHAR(255) NOT NULL,
+        contact_address VARCHAR(255),
+        contact_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         last_message TEXT NOT NULL DEFAULT '',
         last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -192,10 +193,21 @@ export async function initializeDatabase(): Promise<void> {
     `);
 
     await client.query(`
+      ALTER TABLE conversations ADD COLUMN IF NOT EXISTS contact_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE
+    `);
+
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id)
     `);
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_conversations_last_msg ON conversations(user_id, last_message_at DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_conversations_contact_user_id ON conversations(contact_user_id)
+    `);
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_conversations_user_contact_user
+      ON conversations(user_id, contact_user_id) WHERE contact_user_id IS NOT NULL
     `);
 
     await client.query(`
