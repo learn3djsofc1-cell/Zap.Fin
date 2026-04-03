@@ -5,7 +5,16 @@ import pool from '../db.js';
 const router = Router();
 router.use(authMiddleware);
 
-function mapConversationRow(row: any) {
+interface ConversationRow {
+  id: string;
+  contact_user_id: number | null;
+  contact_name: string | null;
+  last_message: string;
+  last_message_at: Date | string;
+  created_at: Date | string;
+}
+
+function mapConversationRow(row: ConversationRow) {
   return {
     id: row.id,
     contactUserId: row.contact_user_id,
