@@ -5,6 +5,7 @@ import {
   setArtifactStore,
   ArtifactStore,
   loadProvider,
+  getFallbackProviderForNetwork,
 } from '@railgun-community/wallet';
 import {
   NetworkName,
@@ -188,20 +189,94 @@ async function recoverPendingOperations(): Promise<void> {
       console.log(`[Railgun] Recovered ${staleResult.rowCount} stale operations → failed`);
     }
 
-    const confirmedResult = await pool.query(
-      `SELECT id, tx_hash FROM railgun_operations WHERE status = 'confirmed'`
+    const confirmedResult = await pool.query<{ id: string; tx_hash: string; network: string }>(
+      `SELECT id, tx_hash, network FROM railgun_operations WHERE status = 'confirmed' AND tx_hash IS NOT NULL`
     );
     if (confirmedResult.rows.length > 0) {
-      console.log(`[Railgun] Found ${confirmedResult.rows.length} confirmed-but-incomplete operations — marking complete`);
+      console.log(`[Railgun] Verifying ${confirmedResult.rows.length} confirmed operations on-chain...`);
       for (const row of confirmedResult.rows) {
-        await pool.query(
-          `UPDATE railgun_operations SET status = 'complete', completed_at = NOW() WHERE id = $1`,
-          [row.id]
-        );
+        await verifyOperationOnChain(row.id, row.tx_hash, row.network);
       }
     }
   } catch (err) {
     console.error('[Railgun] Operation recovery error:', err);
+  }
+}
+
+async function verifyOperationOnChain(opId: string, txHash: string, networkId: string): Promise<void> {
+  try {
+    const net = SUPPORTED_NETWORKS.find(n => n.id === networkId);
+    if (!net) {
+      console.warn(`[Railgun] Unknown network ${networkId} for op ${opId}, leaving confirmed`);
+      return;
+    }
+
+    const provider = getFallbackProviderForNetwork(net.networkName);
+    if (!provider) {
+      console.warn(`[Railgun] No provider for ${net.name}, cannot verify op ${opId}`);
+      return;
+    }
+
+    const receipt = await provider.getTransactionReceipt(txHash);
+    if (!receipt) {
+      console.log(`[Railgun] Op ${opId}: tx ${txHash} not found on-chain yet, leaving confirmed`);
+      return;
+    }
+
+    if (receipt.status === 1) {
+      await pool.query(
+        `UPDATE railgun_operations SET status = 'complete', completed_at = NOW() WHERE id = $1`,
+        [opId]
+      );
+      console.log(`[Railgun] Op ${opId}: verified complete on-chain`);
+    } else {
+      await pool.query(
+        `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
+        [opId]
+      );
+      console.log(`[Railgun] Op ${opId}: tx reverted on-chain`);
+    }
+  } catch (err) {
+    console.error(`[Railgun] On-chain verification failed for op ${opId}:`, err);
+  }
+}
+
+let statusWorkerInterval: ReturnType<typeof setInterval> | null = null;
+
+export function startStatusWorker(): void {
+  if (statusWorkerInterval) return;
+
+  statusWorkerInterval = setInterval(async () => {
+    if (!engineInitialized) return;
+
+    try {
+      const confirmedOps = await pool.query<{ id: string; tx_hash: string; network: string }>(
+        `SELECT id, tx_hash, network FROM railgun_operations
+         WHERE status = 'confirmed' AND tx_hash IS NOT NULL
+         AND created_at > NOW() - INTERVAL '24 hours'`
+      );
+
+      for (const row of confirmedOps.rows) {
+        await verifyOperationOnChain(row.id, row.tx_hash, row.network);
+      }
+
+      await pool.query(
+        `UPDATE railgun_operations SET status = 'failed'
+         WHERE status IN ('pending', 'proving')
+         AND created_at < NOW() - INTERVAL '15 minutes'`
+      );
+    } catch (err) {
+      console.error('[Railgun] Status worker error:', err);
+    }
+  }, 60000);
+
+  console.log('[Railgun] Status worker started (60s interval)');
+}
+
+export function stopStatusWorker(): void {
+  if (statusWorkerInterval) {
+    clearInterval(statusWorkerInterval);
+    statusWorkerInterval = null;
   }
 }
 

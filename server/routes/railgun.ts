@@ -322,12 +322,16 @@ async function processShieldAsync(
       transaction = shieldResult.transaction;
     }
 
+    const proofHash = crypto.createHash('sha256')
+      .update(typeof transaction.data === 'string' ? transaction.data : `${operationId}:proved`)
+      .digest('hex');
+
     const txResponse = await connectedWallet.sendTransaction(transaction);
     const txHash = txResponse.hash;
 
     await pool.query(
       `UPDATE railgun_operations SET status = 'confirmed', tx_hash = $2, zk_proof_hash = $3 WHERE id = $1`,
-      [operationId, txHash, crypto.createHash('sha256').update(`${operationId}:${txHash}`).digest('hex').substring(0, 16)]
+      [operationId, txHash, proofHash]
     );
 
     const receipt = await txResponse.wait();
@@ -511,12 +515,16 @@ async function processTransferAsync(
       },
     );
 
+    const proofHash = crypto.createHash('sha256')
+      .update(typeof transaction.data === 'string' ? transaction.data : `${operationId}:proved`)
+      .digest('hex');
+
     const txResponse = await connectedWallet.sendTransaction(transaction);
     const txHash = txResponse.hash;
 
     await pool.query(
       `UPDATE railgun_operations SET status = 'confirmed', tx_hash = $2, zk_proof_hash = $3 WHERE id = $1`,
-      [operationId, txHash, crypto.createHash('sha256').update(`${operationId}:${txHash}`).digest('hex').substring(0, 16)]
+      [operationId, txHash, proofHash]
     );
 
     const receipt = await txResponse.wait();
@@ -695,12 +703,16 @@ async function processUnshieldAsync(
       },
     );
 
+    const proofHash = crypto.createHash('sha256')
+      .update(typeof transaction.data === 'string' ? transaction.data : `${operationId}:proved`)
+      .digest('hex');
+
     const txResponse = await connectedWallet.sendTransaction(transaction);
     const txHash = txResponse.hash;
 
     await pool.query(
       `UPDATE railgun_operations SET status = 'confirmed', tx_hash = $2, zk_proof_hash = $3 WHERE id = $1`,
-      [operationId, txHash, crypto.createHash('sha256').update(`${operationId}:${txHash}`).digest('hex').substring(0, 16)]
+      [operationId, txHash, proofHash]
     );
 
     const receipt = await txResponse.wait();
