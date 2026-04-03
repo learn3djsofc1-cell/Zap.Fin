@@ -55,9 +55,6 @@ run = ["node", "./dist/index.cjs"]
 [userenv.shared]
 JWT_SECRET = "ff0225f8f0a158019db7f51311e37cf555b7a9f8f8f9ad3192e674288fa29eeb"
 DEPOSIT_KEY_SECRET = "3c3995767f8a9eb6e717782c73f6f4495c928ff3e9ddc7a16b57002115cf8809"
-COINGECKO_API_KEY = "CG-t4bHGmbr6hqGvnfbMggxXvWB"
-SERPAPI_KEY = "6a1dbeaff00a11fe8a193d926bef1df1d71837a33ee99b07be083188f0acc6ba"
-HELIUS_API_KEY = "d701d36a-adf6-4915-bdbd-a8764077b649"
 
 [userenv.production]
 NODE_ENV = "production"

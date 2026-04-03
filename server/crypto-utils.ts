@@ -363,20 +363,6 @@ const BRIDGE_ADDRESS_VALIDATORS: Record<string, (address: string) => { valid: bo
   FTM: (address: string) => ADDRESS_VALIDATORS.ETH(address),
 };
 
-function generateSolAddress(): DepositAddressResult {
-  const keyPair = crypto.generateKeyPairSync('ed25519', {
-    privateKeyEncoding: { type: 'pkcs8', format: 'der' },
-    publicKeyEncoding: { type: 'spki', format: 'der' },
-  });
-  const pubKey = keyPair.publicKey.subarray(-32);
-  const privKey = keyPair.privateKey.subarray(-32);
-  const address = base58Encode(pubKey);
-  return {
-    address,
-    encryptedPrivateKey: encrypt(privKey.toString('hex')),
-  };
-}
-
 const BRIDGE_ADDRESS_GENERATORS: Record<string, () => DepositAddressResult> = {
   ETH: () => generateEthLikeAddress(),
   BTC: () => generateBase58Address([0x00]),

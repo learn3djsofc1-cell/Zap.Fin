@@ -174,11 +174,19 @@ async function fetchPricesFromApi(): Promise<Record<string, number>> {
     ? `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&x_cg_demo_api_key=${apiKey}`
     : `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     headers: {
       'Accept': 'application/json',
     },
   });
+
+  if (!response.ok && apiKey) {
+    const fallbackUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+    console.warn(`CoinGecko keyed request failed (${response.status}), retrying without key...`);
+    response = await fetch(fallbackUrl, {
+      headers: { 'Accept': 'application/json' },
+    });
+  }
 
   if (!response.ok) {
     const text = await response.text();
