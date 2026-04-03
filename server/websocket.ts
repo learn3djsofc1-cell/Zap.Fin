@@ -19,12 +19,26 @@ export interface WsEvent {
   payload: Record<string, unknown>;
 }
 
-const clients = new Map<number, Set<WebSocket>>();
+interface AuthenticatedWebSocket extends WebSocket {
+  userId: number;
+  isAlive: boolean;
+}
+
+const clients = new Map<number, Set<AuthenticatedWebSocket>>();
 
 const HEARTBEAT_INTERVAL = 30_000;
-const PONG_TIMEOUT = 10_000;
 
 let wss: WebSocketServer | null = null;
+
+function removeClient(ws: AuthenticatedWebSocket): void {
+  const userSockets = clients.get(ws.userId);
+  if (userSockets) {
+    userSockets.delete(ws);
+    if (userSockets.size === 0) {
+      clients.delete(ws.userId);
+    }
+  }
+}
 
 export function setupWebSocket(server: HttpServer): WebSocketServer {
   const JWT_SECRET = getJwtSecret();
@@ -56,9 +70,10 @@ export function setupWebSocket(server: HttpServer): WebSocketServer {
         return;
       }
 
-      wss!.handleUpgrade(req, socket, head, (ws) => {
-        (ws as any).userId = decoded.userId;
-        (ws as any).isAlive = true;
+      wss!.handleUpgrade(req, socket, head, (rawWs) => {
+        const ws = rawWs as AuthenticatedWebSocket;
+        ws.userId = decoded.userId;
+        ws.isAlive = true;
         wss!.emit('connection', ws, req);
       });
     } catch {
@@ -66,26 +81,20 @@ export function setupWebSocket(server: HttpServer): WebSocketServer {
     }
   });
 
-  wss.on('connection', (ws: WebSocket) => {
-    const userId = (ws as any).userId as number;
+  wss.on('connection', (rawWs: WebSocket) => {
+    const ws = rawWs as AuthenticatedWebSocket;
 
-    if (!clients.has(userId)) {
-      clients.set(userId, new Set());
+    if (!clients.has(ws.userId)) {
+      clients.set(ws.userId, new Set());
     }
-    clients.get(userId)!.add(ws);
+    clients.get(ws.userId)!.add(ws);
 
     ws.on('pong', () => {
-      (ws as any).isAlive = true;
+      ws.isAlive = true;
     });
 
     ws.on('close', () => {
-      const userSockets = clients.get(userId);
-      if (userSockets) {
-        userSockets.delete(ws);
-        if (userSockets.size === 0) {
-          clients.delete(userId);
-        }
-      }
+      removeClient(ws);
     });
 
     ws.on('error', () => {
@@ -96,21 +105,16 @@ export function setupWebSocket(server: HttpServer): WebSocketServer {
   const heartbeat = setInterval(() => {
     if (!wss) return;
 
-    wss.clients.forEach((ws) => {
-      if ((ws as any).isAlive === false) {
-        const userId = (ws as any).userId as number;
-        const userSockets = clients.get(userId);
-        if (userSockets) {
-          userSockets.delete(ws);
-          if (userSockets.size === 0) {
-            clients.delete(userId);
-          }
-        }
+    wss.clients.forEach((rawWs) => {
+      const ws = rawWs as AuthenticatedWebSocket;
+
+      if (ws.isAlive === false) {
+        removeClient(ws);
         ws.terminate();
         return;
       }
 
-      (ws as any).isAlive = false;
+      ws.isAlive = false;
       ws.ping();
     });
   }, HEARTBEAT_INTERVAL);

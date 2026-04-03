@@ -256,9 +256,10 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
 
         const recipientConvId = recipientConv.rows[0].id;
 
-        await pool.query(
+        const recipientMsg = await pool.query(
           `INSERT INTO messages (conversation_id, user_id, content, sender, self_destruct_seconds)
-           VALUES ($1, $2, $3, 'them', $4)`,
+           VALUES ($1, $2, $3, 'them', $4)
+           RETURNING id, created_at`,
           [recipientConvId, userId, trimmedContent, selfDestructSeconds || null]
         );
 
@@ -267,10 +268,11 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
           [lastMsgPreview, recipientConvId]
         );
 
+        const recipientMsgRow = recipientMsg.rows[0];
         sendToUser(recipientId, {
           type: 'new_message',
           payload: {
-            id: row.id,
+            id: recipientMsgRow.id,
             conversationId: recipientConvId,
             content: trimmedContent,
             sender: 'them',

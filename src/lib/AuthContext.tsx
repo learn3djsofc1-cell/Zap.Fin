@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { api, setToken, getToken } from './api';
+import { connect as wsConnect, disconnect as wsDisconnect } from './websocket';
 import { Navigate, useLocation } from 'react-router-dom';
 
 interface User {
@@ -31,26 +32,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     api.auth.me()
-      .then((data) => setUser(data.user))
+      .then((data) => {
+        setUser(data.user);
+        wsConnect();
+      })
       .catch(() => {
         setToken(null);
       })
       .finally(() => setLoading(false));
+
+    return () => {
+      wsDisconnect();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     const data = await api.auth.login({ email, password });
     setToken(data.token);
     setUser(data.user);
+    wsConnect();
   };
 
   const register = async (email: string, password: string, name: string) => {
     const data = await api.auth.register({ email, password, name });
     setToken(data.token);
     setUser(data.user);
+    wsConnect();
   };
 
   const logout = () => {
+    wsDisconnect();
     setToken(null);
     setUser(null);
   };

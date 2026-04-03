@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { MessageSquare, Send, Lock, Timer, Plus, Search, Shield, Users } from 'lucide-react';
 import { api, type Conversation, type Message } from '../lib/api';
-import { connect as wsConnect, disconnect as wsDisconnect, subscribe as wsSubscribe, type WsEvent } from '../lib/websocket';
+import { subscribe as wsSubscribe, type WsEvent } from '../lib/websocket';
 import { useToast } from '../lib/toast';
 import Modal from '../components/Modal';
 import { motion } from 'framer-motion';
@@ -69,8 +69,6 @@ export default function MessengerPage() {
   }, []);
 
   useEffect(() => {
-    wsConnect();
-
     const unsubscribe = wsSubscribe((event: WsEvent) => {
       const p = event.payload as Record<string, unknown>;
 
@@ -120,10 +118,7 @@ export default function MessengerPage() {
       }
     });
 
-    return () => {
-      unsubscribe();
-      wsDisconnect();
-    };
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
