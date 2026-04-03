@@ -197,6 +197,10 @@ export async function initializeDatabase(): Promise<void> {
     `);
 
     await client.query(`
+      ALTER TABLE conversations ALTER COLUMN contact_address DROP NOT NULL
+    `);
+
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id)
     `);
     await client.query(`
