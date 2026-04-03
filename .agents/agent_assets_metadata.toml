@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "UpBryx75dXcdozG1h_3Uc"
+uri = "file://public/noctra-flow-diagram.png"
+type = "image"
+title = "Noctra AI Introduction Flow Diagram (1600x900 PNG)"
