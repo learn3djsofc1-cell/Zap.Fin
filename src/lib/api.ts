@@ -1,5 +1,6 @@
 const API_BASE = '/api';
 
+// Migration: read legacy 'ghostlane_token' for users who authenticated before rebrand (remove after 2026-07-01)
 let authToken: string | null = localStorage.getItem('noctra_token') || localStorage.getItem('ghostlane_token');
 
 export function setToken(token: string | null) {
