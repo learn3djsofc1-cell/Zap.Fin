@@ -74,8 +74,8 @@ export default function LoginPage() {
       >
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-            <img src="/ghostlane-logo.png" alt="GhostLane" className="w-10 h-10 rounded-xl object-cover" />
-            <span className="text-2xl font-bold tracking-tight text-white">GhostLane</span>
+            <img src="/noctra-logo.png" alt="Noctra AI" className="w-10 h-10 rounded-xl object-cover" />
+            <span className="text-2xl font-bold tracking-tight text-white">Noctra AI</span>
           </Link>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Welcome back</h1>
           <p className="text-gray-500 text-sm mt-2">Sign in to access your privacy dashboard</p>

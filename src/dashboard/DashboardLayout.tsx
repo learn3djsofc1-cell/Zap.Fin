@@ -55,8 +55,8 @@ export default function DashboardLayout() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0AF5D6]/[0.03] via-transparent to-[#0AF5D6]/[0.02] pointer-events-none" />
         <div className="p-5 border-b border-white/[0.04] relative z-10">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
-            <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
+            <img src="/noctra-logo.png" alt="Noctra AI" className="w-8 h-8 rounded-lg object-cover" />
+            <span className="text-lg font-bold tracking-tight text-white">Noctra AI</span>
           </Link>
         </div>
         <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto relative z-10">
@@ -95,8 +95,8 @@ export default function DashboardLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-40 bg-[#000000]/90 backdrop-blur-xl border-b border-white/[0.04] px-5 sm:px-6 py-4 flex items-center justify-between md:justify-end">
           <div className="flex items-center gap-2.5 md:hidden">
-            <img src="/ghostlane-logo.png" alt="GhostLane" className="w-7 h-7 rounded-lg object-cover" />
-            <span className="text-base font-bold tracking-tight text-white">GhostLane</span>
+            <img src="/noctra-logo.png" alt="Noctra AI" className="w-7 h-7 rounded-lg object-cover" />
+            <span className="text-base font-bold tracking-tight text-white">Noctra AI</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 bg-[#0AF5D6]/8 border border-[#0AF5D6]/15 rounded-lg px-3 py-1.5">
@@ -133,8 +133,8 @@ export default function DashboardLayout() {
               >
                 <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
                   <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-                    <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
-                    <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
+                    <img src="/noctra-logo.png" alt="Noctra AI" className="w-8 h-8 rounded-lg object-cover" />
+                    <span className="text-lg font-bold tracking-tight text-white">Noctra AI</span>
                   </Link>
                   <button className="text-gray-400 hover:text-white p-1" onClick={() => setMobileOpen(false)}>
                     <X size={20} />
@@ -200,13 +200,6 @@ export default function DashboardLayout() {
                 <span>{item.label}</span>
               </NavLink>
             ))}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[10px] font-medium text-gray-500"
-            >
-              <Menu size={20} />
-              <span>More</span>
-            </button>
           </div>
         </nav>
       </div>

@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Eye, EyeOff, Code2, Lock, Layers, Terminal, ChevronRight, ChevronDown, Shuffle, MessageSquare, ArrowLeftRight, Wifi, Copy } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Eye, EyeOff, Code2, Lock, Layers, Terminal, ChevronRight, ChevronDown, Shuffle, MessageSquare, ArrowLeftRight, Wifi } from 'lucide-react';
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -58,8 +58,8 @@ function Navbar() {
     <nav className="sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-2xl border-b border-white/[0.04]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
         <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
-          <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
-          <span className="text-xl font-bold tracking-tight text-white">GhostLane</span>
+          <img src="/noctra-logo.png" alt="Noctra AI" className="w-8 h-8 rounded-lg object-cover" />
+          <span className="text-xl font-bold tracking-tight text-white">Noctra AI</span>
         </Link>
         <div className="hidden md:flex items-center gap-7">
           {links.map((l) => (
@@ -81,38 +81,6 @@ function Navbar() {
   );
 }
 
-const CA_ADDRESS = 'BYKKztG8ckqAHDi3UvXP5JegiAnqXqwAyWXbatzApump';
-
-function CaAddress() {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(CA_ADDRESS).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, []);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.35 }}
-      className="flex justify-center mb-10"
-    >
-      <button
-        onClick={handleCopy}
-        className="group flex items-center gap-2 sm:gap-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-[#0AF5D6]/20 rounded-xl px-3 py-2.5 sm:px-5 sm:py-3 transition-all duration-300 max-w-full cursor-pointer"
-      >
-        <span className="text-[#0AF5D6] text-[10px] sm:text-xs font-bold uppercase tracking-widest shrink-0">CA</span>
-        <span className="text-gray-400 group-hover:text-gray-200 text-[11px] sm:text-sm font-mono truncate transition-colors">{CA_ADDRESS}</span>
-        <span className={`shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg transition-all duration-300 ${copied ? 'bg-[#0AF5D6]/15 text-[#0AF5D6]' : 'bg-white/5 text-gray-500 group-hover:text-[#0AF5D6] group-hover:bg-[#0AF5D6]/10'}`}>
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-        </span>
-      </button>
-    </motion.div>
-  );
-}
 
 function HeroSection() {
   const { user } = useAuth();
@@ -153,14 +121,12 @@ function HeroSection() {
             </Link>
           </motion.div>
 
-          <CaAddress />
-
           <motion.div style={{ y: floatY }} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
             {[
               { label: 'Zero-Knowledge', icon: <Lock size={16} /> },
               { label: 'Encryption', icon: <Shield size={16} /> },
               { label: 'Multi-Chain', icon: <Layers size={16} /> },
-              { label: '4 Products', icon: <Zap size={16} /> },
+              { label: '6 Products', icon: <Zap size={16} /> },
             ].map((item, i) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.08 }} className="flex items-center gap-2 text-gray-500">
                 <span className="text-[#0AF5D6]">{item.icon}</span>
@@ -176,10 +142,11 @@ function HeroSection() {
 
 function ProductsSection() {
   const products = [
-    { icon: <Shuffle size={22} />, stat: '99.9%', statLabel: 'Privacy', title: 'GhostLane Mixer', desc: 'Advanced cryptocurrency mixing with zero-knowledge proofs. Break transaction links with massive anonymity sets.', tags: ['Multi-chain support', 'Zero logs', 'Instant mixing'] },
-    { icon: <MessageSquare size={22} />, stat: '256-bit', statLabel: 'Encryption', title: 'Privacy Encrypted Messenger', desc: 'End-to-end encrypted messaging with disappearing messages and zero metadata collection.', tags: ['Self-destructing messages', 'Anonymous chat', 'No metadata'] },
+    { icon: <Shuffle size={22} />, stat: '99.9%', statLabel: 'Privacy', title: 'Privacy Mixer', desc: 'Advanced cryptocurrency mixing with zero-knowledge proofs. Break transaction links with massive anonymity sets.', tags: ['Multi-chain support', 'Zero logs', 'Instant mixing'] },
+    { icon: <MessageSquare size={22} />, stat: '256-bit', statLabel: 'Encryption', title: 'Encrypted Messenger', desc: 'End-to-end encrypted messaging with disappearing messages and zero metadata collection.', tags: ['Self-destructing messages', 'Anonymous chat', 'No metadata'] },
     { icon: <ArrowLeftRight size={22} />, stat: '15+', statLabel: 'Chains', title: 'Privacy Bridge', desc: 'Cross-chain asset transfers with complete anonymity. Move assets between blockchains without leaving a trace.', tags: ['Cross-chain swaps', 'Privacy preserved', 'Low fees'] },
-    { icon: <Wifi size={22} />, stat: '50+', statLabel: 'Countries', title: 'GhostLane VPN', desc: 'Military-grade VPN with no-logs policy and Tor integration. Browse and transact with full anonymity.', tags: ['No logs policy', 'Tor integration', 'Kill switch'] },
+    { icon: <Shield size={22} />, stat: 'ZK-SNARK', statLabel: 'Proofs', title: 'Privacy Shield', desc: 'ZK-SNARK powered shielded transfers across EVM chains. Shield, transfer, and unshield tokens with full privacy.', tags: ['EVM multi-chain', 'Shielded balances', 'ZK proofs'] },
+    { icon: <Wifi size={22} />, stat: '50+', statLabel: 'Countries', title: 'Privacy VPN', desc: 'Military-grade VPN with no-logs policy and Tor integration. Browse and transact with full anonymity.', tags: ['No logs policy', 'Tor integration', 'Kill switch'] },
   ];
 
   return (
@@ -224,11 +191,11 @@ function Ux402Section() {
 
   const codeSnippets: Record<string, string[]> = {
     typescript: [
-      "import { Ux402Client } from '@ghostlane/ux402-sdk';",
+      "import { Ux402Client } from '@noctra/ux402-sdk';",
       "",
       "const client = new Ux402Client({",
       "  network: 'mainnet',",
-      "  rpcUrl: 'https://api.ghostlane.net/ux402',",
+      "  rpcUrl: 'https://api.usenoctra.xyz/ux402',",
       "});",
       "",
       "// Initiate private cross-chain transfer",
@@ -246,11 +213,11 @@ function Ux402Section() {
       "console.log(status); // 'complete'",
     ],
     python: [
-      "from ghostlane import Ux402Client",
+      "from noctra import Ux402Client",
       "",
       "client = Ux402Client(",
       "    network='mainnet',",
-      "    rpc_url='https://api.ghostlane.net/ux402',",
+      "    rpc_url='https://api.usenoctra.xyz/ux402',",
       ")",
       "",
       "# Initiate private cross-chain transfer",
@@ -268,11 +235,11 @@ function Ux402Section() {
       "print(status)  # 'complete'",
     ],
     rust: [
-      "use ghostlane::Ux402Client;",
+      "use noctra::Ux402Client;",
       "",
       "let client = Ux402Client::new(",
       "    \"mainnet\",",
-      "    \"https://api.ghostlane.net/ux402\",",
+      "    \"https://api.usenoctra.xyz/ux402\",",
       ");",
       "",
       "// Initiate private cross-chain transfer",
@@ -388,7 +355,7 @@ function WhySection() {
       <div className="absolute bottom-0 left-0 w-[600px] h-[400px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
-          <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Why GhostLane</span>
+          <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Why Noctra AI</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
             Advanced privacy technology meets<br className="hidden md:block" /> user-friendly design
           </h2>
@@ -421,7 +388,7 @@ function HowItWorksSection() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#0AF5D6]/6 rounded-full blur-3xl" />
       <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
         <RevealOnScroll className="text-center mb-16">
-          <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">How GhostLane Works</span>
+          <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">How Noctra AI Works</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
             Simple, secure, and completely private
           </h2>
@@ -558,7 +525,7 @@ function ComparisonSection() {
         <RevealOnScroll className="text-center mb-16">
           <span className="text-[#0AF5D6] text-xs font-bold uppercase tracking-widest block mb-3">Comparison</span>
           <h2 className="text-[30px] sm:text-[42px] md:text-[50px] font-extrabold leading-[1.08] tracking-tight text-white mb-4">
-            Why Choose GhostLane?
+            Why Choose Noctra AI?
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">See how we compare to other privacy solutions in the market</p>
         </RevealOnScroll>
@@ -571,7 +538,7 @@ function ComparisonSection() {
                   <th className="text-left text-gray-300 font-semibold px-5 py-4 text-xs uppercase tracking-wider">Features</th>
                   <th className="text-center text-gray-500 font-semibold px-4 py-4 text-xs uppercase tracking-wider">Traditional</th>
                   <th className="text-center text-gray-500 font-semibold px-4 py-4 text-xs uppercase tracking-wider">Others</th>
-                  <th className="text-center text-[#0AF5D6] font-bold px-4 py-4 text-xs uppercase tracking-wider">GhostLane</th>
+                  <th className="text-center text-[#0AF5D6] font-bold px-4 py-4 text-xs uppercase tracking-wider">Noctra AI</th>
                 </tr>
               </thead>
               <tbody>
@@ -630,9 +597,9 @@ function FAQSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   const faqs = [
-    { q: 'How does GhostLane ensure complete privacy?', a: 'GhostLane uses advanced zero-knowledge proofs (zk-SNARKs), ring signatures, and multi-hop routing to ensure that no transaction can be traced back to its origin. We maintain zero logs and our decentralized infrastructure has no single point of failure.' },
-    { q: 'Is using a crypto mixer legal?', a: 'The legality of using crypto mixing services varies by jurisdiction. GhostLane is a privacy tool designed to protect users\' financial privacy, similar to using encrypted messaging or a VPN. We encourage all users to comply with their local laws and regulations.' },
-    { q: 'What fees does GhostLane charge?', a: 'GhostLane charges a small service fee that varies by asset and mixing complexity. Fees are transparently displayed before each transaction. Our competitive fee structure ensures privacy is accessible to everyone.' },
+    { q: 'How does Noctra AI ensure complete privacy?', a: 'Noctra AI uses advanced zero-knowledge proofs (zk-SNARKs), ring signatures, and multi-hop routing to ensure that no transaction can be traced back to its origin. We maintain zero logs and our decentralized infrastructure has no single point of failure.' },
+    { q: 'Is using a crypto mixer legal?', a: 'The legality of using crypto mixing services varies by jurisdiction. Noctra AI is a privacy tool designed to protect users\' financial privacy, similar to using encrypted messaging or a VPN. We encourage all users to comply with their local laws and regulations.' },
+    { q: 'What fees does Noctra AI charge?', a: 'Noctra AI charges a small service fee that varies by asset and mixing complexity. Fees are transparently displayed before each transaction. Our competitive fee structure ensures privacy is accessible to everyone.' },
     { q: 'How long does the mixing process take?', a: 'Standard mixing completes in seconds to minutes depending on the asset and privacy level selected. Users can also enable custom delays to further enhance anonymity by breaking temporal patterns.' },
     { q: 'What happens if there\'s a technical issue?', a: 'Our 24/7 support team is available via Telegram and email. Funds are always safe thanks to our multi-signature cold storage system and insurance fund. In the unlikely event of an issue, our redundant systems ensure zero loss of funds.' },
   ];
@@ -690,13 +657,13 @@ function CTASection() {
             Ready to Protect<br className="hidden sm:block" /> Your Privacy?
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-            Join thousands of users who trust GhostLane for their digital asset privacy needs
+            Join thousands of users who trust Noctra AI for their digital asset privacy needs
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link to={user ? '/app' : '/login'} className="bg-[#0AF5D6] hover:bg-[#08D4B8] text-black px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#0AF5D6]/20">
               Launch App <ArrowRight size={16} />
             </Link>
-            <a href="https://x.com/GhostLane_" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-2 px-6 py-4 transition-colors border border-white/[0.06] rounded-xl hover:border-white/10">
+            <a href="https://x.com/Noctra_xyz" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white font-semibold text-sm flex items-center gap-2 px-6 py-4 transition-colors border border-white/[0.06] rounded-xl hover:border-white/10">
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               Follow on X
             </a>
@@ -732,15 +699,21 @@ function FooterSection() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-14">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
-              <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
-              <span className="text-lg font-bold tracking-tight text-white">GhostLane</span>
+              <img src="/noctra-logo.png" alt="Noctra AI" className="w-8 h-8 rounded-lg object-cover" />
+              <span className="text-lg font-bold tracking-tight text-white">Noctra AI</span>
             </div>
             <p className="text-gray-500 text-xs leading-relaxed mb-4 max-w-xs">
               Complete financial privacy through advanced cryptocurrency mixing technology and zero-knowledge proofs.
             </p>
             <div className="flex items-center gap-3">
-              <a href="https://x.com/GhostLane_" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#0AF5D6] transition-colors">
+              <a href="https://x.com/Noctra_xyz" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#0AF5D6] transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href="https://t.me/Noctra_AI" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#0AF5D6] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+              </a>
+              <a href="https://github.com/Noctra-AI" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#0AF5D6] transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
               </a>
             </div>
           </div>
@@ -778,7 +751,7 @@ function FooterSection() {
         </div>
 
         <div className="border-t border-white/[0.04] pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <span className="text-gray-600 text-[11px]">&copy; 2026 GhostLane. All rights reserved. Your privacy is our priority.</span>
+          <span className="text-gray-600 text-[11px]">&copy; 2026 Noctra AI. All rights reserved. Your privacy is our priority.</span>
         </div>
       </div>
     </footer>

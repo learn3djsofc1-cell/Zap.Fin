@@ -8,7 +8,8 @@ const sections = [
   { id: 'mixer', title: 'Privacy Mixer', icon: <Lock size={16} /> },
   { id: 'messenger', title: 'Encrypted Messenger', icon: <MessageSquare size={16} /> },
   { id: 'bridge', title: 'Privacy Bridge', icon: <ArrowLeftRight size={16} /> },
-  { id: 'vpn', title: 'GhostLane VPN', icon: <Wifi size={16} /> },
+  { id: 'vpn', title: 'Privacy VPN', icon: <Wifi size={16} /> },
+  { id: 'shield', title: 'Privacy Shield', icon: <Shield size={16} /> },
   { id: 'ux402', title: 'Ux402 Protocol', icon: <Zap size={16} /> },
   { id: 'security', title: 'Security Framework', icon: <Shield size={16} /> },
   { id: 'sdk', title: 'SDK Reference', icon: <Code2 size={16} /> },
@@ -67,8 +68,8 @@ export default function DocsPage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-              <img src="/ghostlane-logo.png" alt="GhostLane" className="w-8 h-8 rounded-lg object-cover" />
-              <span className="text-xl font-bold tracking-tight text-white">GhostLane</span>
+              <img src="/noctra-logo.png" alt="Noctra AI" className="w-8 h-8 rounded-lg object-cover" />
+              <span className="text-xl font-bold tracking-tight text-white">Noctra AI</span>
             </Link>
             <ChevronRight size={14} className="text-gray-600 hidden sm:block" />
             <span className="text-gray-400 text-sm font-medium hidden sm:block">Documentation</span>
@@ -103,16 +104,16 @@ export default function DocsPage() {
         <main className="flex-1 min-w-0 py-8 pb-24">
           <div className="max-w-3xl">
             <div className="mb-12">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">GhostLane Documentation</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">Noctra AI Documentation</h1>
               <p className="text-gray-400 text-base sm:text-lg leading-relaxed">
-                Technical reference for the GhostLane privacy ecosystem. This guide covers all five core products, the Ux402 protocol, security architecture, SDK integration, and the complete API surface.
+                Technical reference for the Noctra AI privacy ecosystem. This guide covers all six core products, the Ux402 protocol, security architecture, SDK integration, and the complete API surface.
               </p>
             </div>
 
             {/* ── Platform Overview ── */}
             <Section id="overview" title="Platform Overview">
               <P>
-                GhostLane is a privacy-first cryptocurrency ecosystem that unifies five core products under a single platform: a cross-asset Privacy Mixer, an end-to-end Encrypted Messenger, a cross-chain Privacy Bridge, a military-grade VPN with private search, and the Ux402 Protocol for shielded cross-chain facilitation on Ethereum. Every component is engineered around zero-knowledge cryptography to ensure that no party — including GhostLane — can observe, correlate, or reconstruct user activity.
+                Noctra AI is a privacy-first cryptocurrency ecosystem that unifies six core products under a single platform: a cross-asset Privacy Mixer, an end-to-end Encrypted Messenger, a cross-chain Privacy Bridge, Privacy Shield for ZK-SNARK shielded transfers on EVM chains, a military-grade VPN with private search, and the Ux402 Protocol for shielded cross-chain facilitation on Ethereum. Every component is engineered around zero-knowledge cryptography to ensure that no party — including Noctra AI — can observe, correlate, or reconstruct user activity.
               </P>
               <H3>System Architecture</H3>
               <P>
@@ -125,7 +126,8 @@ export default function DocsPage() {
                   ['Privacy Mixer', 'Cross-asset swaps with broken transaction links', 'zk-SNARKs, CoinGecko rate oracle, anonymity pools'],
                   ['Encrypted Messenger', 'Private communication between wallet addresses', 'AES-256-GCM E2E encryption, self-destructing payloads'],
                   ['Privacy Bridge', 'Anonymous cross-chain asset transfers', 'Relay nodes, threshold signatures, 15+ chain support'],
-                  ['GhostLane VPN', 'Encrypted tunneling with private web search', 'WireGuard protocol, 24 global servers, SerpAPI proxy'],
+                  ['Privacy Shield', 'ZK-SNARK shielded transfers on EVM chains', 'Shield/Transfer/Unshield ops, Ethereum, Arbitrum, Polygon, BSC'],
+                  ['Privacy VPN', 'Encrypted tunneling with private web search', 'WireGuard protocol, 24 global servers, SerpAPI proxy'],
                   ['Ux402 Protocol', 'Shielded cross-chain facilitation on Ethereum', 'Multi-hop routing, privacy pools, x402 standard'],
                 ]}
               />
@@ -134,6 +136,7 @@ export default function DocsPage() {
                 <LI>Cross-asset mixing across 8 cryptocurrencies (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE) with live CoinGecko exchange rates</LI>
                 <LI>End-to-end encrypted messaging with configurable self-destruct timers and username-based identity</LI>
                 <LI>Cross-chain bridge transfers across 15+ blockchains with deposit tracking and status lifecycle</LI>
+                <LI>Privacy Shield for ZK-SNARK shielded transfers across 4 EVM chains (Ethereum, Arbitrum, Polygon, BSC)</LI>
                 <LI>VPN service spanning 24 servers across 6 global regions with kill switch, bandwidth monitoring, and dApp session tracking</LI>
                 <LI>Ux402 Protocol for untraceable cross-chain transactions using multi-hop privacy pool routing</LI>
                 <LI>Full developer SDK support in TypeScript, Python, and Rust</LI>
@@ -145,14 +148,14 @@ export default function DocsPage() {
             <Section id="getting-started" title="Getting Started">
               <H3>Installation</H3>
               <P>
-                The GhostLane SDK is available for three runtime environments. Select the package manager that corresponds to your development stack.
+                The Noctra AI SDK is available for three runtime environments. Select the package manager that corresponds to your development stack.
               </P>
-              <CodeBlock code={`# Node.js / TypeScript (requires Node.js 18+)\nnpm install @ghostlane/sdk\n\n# Python (requires Python 3.10+)\npip install ghostlane\n\n# Rust (add to Cargo.toml)\n[dependencies]\nghostlane = "0.9"`} />
+              <CodeBlock code={`# Node.js / TypeScript (requires Node.js 18+)\nnpm install @noctra/sdk\n\n# Python (requires Python 3.10+)\npip install noctra\n\n# Rust (add to Cargo.toml)\n[dependencies]\nnoctra = "0.9"`} />
               <H3>Client Initialization</H3>
               <P>
-                Instantiate the GhostLane client with an API key generated from your dashboard. API keys are environment-scoped: production keys carry the <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">gl_live_</code> prefix, while sandbox keys use <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">gl_test_</code>.
+                Instantiate the Noctra AI client with an API key generated from your dashboard. API keys are environment-scoped: production keys carry the <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">gl_live_</code> prefix, while sandbox keys use <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">gl_test_</code>.
               </P>
-              <CodeBlock code={`import { GhostLane } from '@ghostlane/sdk';\n\nconst client = new GhostLane({\n  apiKey: 'gl_live_your_api_key',\n  environment: 'production', // or 'sandbox'\n  timeout: 30_000,           // request timeout in ms\n});\n\n// Verify connectivity\nconst health = await client.health();\nconsole.log(health); // { ok: true, latency: '12ms', version: '2.4.1' }`} />
+              <CodeBlock code={`import { NoctraAI } from '@noctra/sdk';\n\nconst client = new NoctraAI({\n  apiKey: 'gl_live_your_api_key',\n  environment: 'production', // or 'sandbox'\n  timeout: 30_000,           // request timeout in ms\n});\n\n// Verify connectivity\nconst health = await client.health();\nconsole.log(health); // { ok: true, latency: '12ms', version: '2.4.1' }`} />
               <H3>Authentication Flow</H3>
               <P>
                 All API requests require a valid JWT token obtained through the authentication endpoint. The SDK handles token lifecycle automatically when initialized with an API key, including refresh on expiry. For direct REST integration, include the token in the <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Authorization: Bearer</code> header.
@@ -167,7 +170,7 @@ export default function DocsPage() {
             <Section id="mixer" title="Privacy Mixer">
               <H3>Cross-Asset Swap Mechanics</H3>
               <P>
-                The GhostLane Mixer enables cross-asset swaps that simultaneously exchange and anonymize cryptocurrency. Unlike single-asset tumblers, GhostLane allows users to deposit one asset (e.g., BTC) and withdraw a different asset (e.g., ETH), with the exchange rate derived from live CoinGecko price feeds. A 1.5% protocol fee is applied to each swap. The mixer uses zero-knowledge proofs to sever the on-chain link between the deposit and withdrawal addresses entirely.
+                The Noctra AI Mixer enables cross-asset swaps that simultaneously exchange and anonymize cryptocurrency. Unlike single-asset tumblers, Noctra AI allows users to deposit one asset (e.g., BTC) and withdraw a different asset (e.g., ETH), with the exchange rate derived from live CoinGecko price feeds. A 1.5% protocol fee is applied to each swap. The mixer uses zero-knowledge proofs to sever the on-chain link between the deposit and withdrawal addresses entirely.
               </P>
               <H3>Supported Assets</H3>
               <Table
@@ -209,7 +212,7 @@ export default function DocsPage() {
             <Section id="messenger" title="Encrypted Messenger">
               <H3>End-to-End Encryption Architecture</H3>
               <P>
-                The GhostLane Messenger provides fully encrypted communication between registered users identified by username. All message content is encrypted client-side using AES-256-GCM before transmission. The server stores only ciphertext — plaintext content never exists on GhostLane infrastructure. Conversations are initiated by searching for a recipient's username; no wallet addresses, phone numbers, or emails are required.
+                The Noctra AI Messenger provides fully encrypted communication between registered users identified by username. All message content is encrypted client-side using AES-256-GCM before transmission. The server stores only ciphertext — plaintext content never exists on Noctra AI infrastructure. Conversations are initiated by searching for a recipient's username; no wallet addresses, phone numbers, or emails are required.
               </P>
               <H3>Self-Destructing Messages</H3>
               <P>
@@ -227,7 +230,7 @@ export default function DocsPage() {
               />
               <H3>Zero Metadata Collection</H3>
               <P>
-                GhostLane does not collect, store, or process any messaging metadata. There are no read receipts, typing indicators, or online status signals. The server cannot determine who is communicating with whom, how frequently messages are exchanged, or the size of message payloads. All metadata fields are encrypted alongside content.
+                Noctra AI does not collect, store, or process any messaging metadata. There are no read receipts, typing indicators, or online status signals. The server cannot determine who is communicating with whom, how frequently messages are exchanged, or the size of message payloads. All metadata fields are encrypted alongside content.
               </P>
               <CodeBlock code={`// Search for a user by username\nconst results = await client.messenger.searchUsers('alice');\n\n// Create a new conversation with a user\nconst conversation = await client.messenger.create({\n  contactUserId: results[0].id,\n});\n\n// Send a self-destructing message\nconst msg = await client.messenger.send({\n  conversationId: conversation.id,\n  content: 'Transfer confirmed. Funds cleared.',\n  selfDestructSeconds: 300, // 5 minutes\n});\n\nconsole.log(msg.encrypted);  // true\nconsole.log(msg.expiresAt);  // '2025-03-24T12:10:00Z'`} />
             </Section>
@@ -271,11 +274,11 @@ export default function DocsPage() {
               <CodeBlock code={`const transfer = await client.bridge.create({\n  sourceChain: 'ethereum',\n  destChain: 'polygon',\n  token: 'USDC',\n  amount: '1000',\n  recipientAddress: '0xABC...DEF',\n});\n\nconsole.log(transfer.depositAddress); // 0x...unique_deposit\nconsole.log(transfer.status);         // 'initiated'\n\n// Poll for status updates\nconst updated = await client.bridge.status(transfer.id);\nconsole.log(updated.status);          // 'bridging' | 'complete'`} />
             </Section>
 
-            {/* ── GhostLane VPN ── */}
-            <Section id="vpn" title="GhostLane VPN">
+            {/* ── Noctra AI VPN ── */}
+            <Section id="vpn" title="Noctra AI VPN">
               <H3>Encrypted Tunnel Infrastructure</H3>
               <P>
-                GhostLane VPN provides military-grade encrypted tunneling through 24 server locations across 6 global regions (North America, Europe, Asia-Pacific, South America, Middle East, and Africa). All connections use the WireGuard protocol for minimal latency and maximum throughput. The service enforces a strict zero-log policy: no connection timestamps, IP addresses, bandwidth data, or DNS queries are retained after session termination.
+                Noctra AI VPN provides military-grade encrypted tunneling through 24 server locations across 6 global regions (North America, Europe, Asia-Pacific, South America, Middle East, and Africa). All connections use the WireGuard protocol for minimal latency and maximum throughput. The service enforces a strict zero-log policy: no connection timestamps, IP addresses, bandwidth data, or DNS queries are retained after session termination.
               </P>
               <H3>Server Regions</H3>
               <Table
@@ -295,17 +298,54 @@ export default function DocsPage() {
               </P>
               <H3>Private Search</H3>
               <P>
-                While connected to the VPN, users can perform web searches that are routed through the encrypted tunnel and proxied server-side via SerpAPI. Search queries never leave GhostLane infrastructure unencrypted, and results are returned without third-party tracking cookies, fingerprinting scripts, or personalization signals. Search history is associated with the VPN session and can be reviewed or cleared.
+                While connected to the VPN, users can perform web searches that are routed through the encrypted tunnel and proxied server-side via SerpAPI. Search queries never leave Noctra AI infrastructure unencrypted, and results are returned without third-party tracking cookies, fingerprinting scripts, or personalization signals. Search history is associated with the VPN session and can be reviewed or cleared.
               </P>
               <H3>dApp Session Tracking</H3>
               <P>
-                When a user opens a URL from search results, GhostLane creates a tracked dApp session that records the URL, a display title, and the duration of the browsing session. Active dApp sessions display a real-time duration counter. Users can manually close dApp sessions, and all active sessions are automatically terminated when the VPN disconnects or the VPN session is ended.
+                When a user opens a URL from search results, Noctra AI creates a tracked dApp session that records the URL, a display title, and the duration of the browsing session. Active dApp sessions display a real-time duration counter. Users can manually close dApp sessions, and all active sessions are automatically terminated when the VPN disconnects or the VPN session is ended.
               </P>
               <H3>Bandwidth Monitoring</H3>
               <P>
                 Real-time bandwidth statistics (upload and download) are displayed during an active VPN session. Bandwidth values update every second and accumulate over the session lifetime. Upon disconnection, final bandwidth figures are persisted to the session record for historical reference.
               </P>
-              <CodeBlock code={`// Connect to a VPN server\nconst session = await client.vpn.connect({ serverId: 'de-fra-1' });\nconsole.log(session.assignedIp);     // '10.8.42.137'\nconsole.log(session.fingerprintHash); // 'A3F2B8C1D4E5F607'\nconsole.log(session.relayNode);       // 'relay-charlie.ghostlane.net'\n\n// Enable kill switch\nawait client.vpn.toggleKillSwitch({ enabled: true });\n\n// Perform private search\nconst results = await client.vpn.search({ query: 'defi yield farming' });\nconsole.log(results.length);          // 10\n\n// Disconnect\nconst ended = await client.vpn.disconnect();\nconsole.log(ended.bytesUp);           // 2457600\nconsole.log(ended.bytesDown);         // 18432000`} />
+              <CodeBlock code={`// Connect to a VPN server\nconst session = await client.vpn.connect({ serverId: 'de-fra-1' });\nconsole.log(session.assignedIp);     // '10.8.42.137'\nconsole.log(session.fingerprintHash); // 'A3F2B8C1D4E5F607'\nconsole.log(session.relayNode);       // 'relay-charlie.usenoctra.xyz'\n\n// Enable kill switch\nawait client.vpn.toggleKillSwitch({ enabled: true });\n\n// Perform private search\nconst results = await client.vpn.search({ query: 'defi yield farming' });\nconsole.log(results.length);          // 10\n\n// Disconnect\nconst ended = await client.vpn.disconnect();\nconsole.log(ended.bytesUp);           // 2457600\nconsole.log(ended.bytesDown);         // 18432000`} />
+            </Section>
+
+            {/* ── Privacy Shield ── */}
+            <Section id="shield" title="Privacy Shield">
+              <H3>Overview</H3>
+              <P>
+                Privacy Shield enables ZK-SNARK powered shielded transfers across EVM-compatible blockchains. Users can shield tokens into a private balance, transfer them anonymously between shielded addresses, and unshield them back to a public address — all without revealing sender, recipient, or amount information on-chain.
+              </P>
+              <H3>Core Operations</H3>
+              <Table
+                headers={['Operation', 'Description', 'Privacy Guarantee']}
+                rows={[
+                  ['Shield', 'Deposit tokens from a public address into a shielded balance', 'Deposit amount visible; shielded balance is hidden'],
+                  ['Transfer', 'Move tokens between shielded balances', 'Sender, recipient, and amount are fully private'],
+                  ['Unshield', 'Withdraw tokens from a shielded balance to a public address', 'Withdrawal amount visible; source shielded balance is hidden'],
+                ]}
+              />
+              <H3>Supported Networks</H3>
+              <P>
+                Privacy Shield is deployed on four EVM-compatible networks. Each deployment maintains its own shielded balance pool and anonymity set.
+              </P>
+              <Table
+                headers={['Network', 'Status', 'Anonymity Set']}
+                rows={[
+                  ['Ethereum', 'Live', 'Large — highest liquidity and user base'],
+                  ['Arbitrum', 'Live', 'Growing — Layer 2 with low gas fees'],
+                  ['Polygon', 'Live', 'Growing — high throughput and low cost'],
+                  ['BSC', 'Live', 'Moderate — Binance Smart Chain ecosystem'],
+                ]}
+              />
+              <H3>Zero-Knowledge Proof Verification</H3>
+              <P>
+                Every Shield, Transfer, and Unshield operation generates a zk-SNARK proof client-side. The proof is verified on-chain by the Privacy Shield smart contract, ensuring that balances are correct and transfer rules are satisfied without revealing any private information. Proof generation uses the Groth16 proving system with a trusted setup ceremony.
+              </P>
+              <Callout type="info" title="Privacy Shield Status">
+                Privacy Shield is currently in development. The product page shows a Coming Soon status. Full functionality including SDK integration and API endpoints will be available in a future release.
+              </Callout>
             </Section>
 
             {/* ── Ux402 Protocol ── */}
@@ -325,7 +365,7 @@ export default function DocsPage() {
               <P>
                 Ux402 supports cross-chain transfers between 15+ blockchains including Ethereum, Bitcoin (via wrapped BTC), Polygon, Avalanche, Arbitrum, Optimism, Base, BSC, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chain integrations are deployed quarterly.
               </P>
-              <CodeBlock code={`import { Ux402Client } from '@ghostlane/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.ghostlane.net/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'polygon',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n  hops: 3,              // number of intermediate pools\n});\n\nconsole.log(transfer.proofHash);     // zk-SNARK proof identifier\nconsole.log(transfer.estimatedTime); // '~45 seconds'\nconsole.log(transfer.status);        // 'routing' -> 'complete'`} />
+              <CodeBlock code={`import { Ux402Client } from '@noctra/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.usenoctra.xyz/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'polygon',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n  hops: 3,              // number of intermediate pools\n});\n\nconsole.log(transfer.proofHash);     // zk-SNARK proof identifier\nconsole.log(transfer.estimatedTime); // '~45 seconds'\nconsole.log(transfer.status);        // 'routing' -> 'complete'`} />
               <Callout type="info" title="Liquidity Requirements">
                 Multi-hop routing requires sufficient liquidity in intermediate pools. For transfers exceeding $100,000 USD equivalent, the protocol may split the amount across multiple routing paths to maintain anonymity set density.
               </Callout>
@@ -335,11 +375,11 @@ export default function DocsPage() {
             <Section id="security" title="Security Framework">
               <H3>Zero-Knowledge Architecture</H3>
               <P>
-                All privacy-critical operations in GhostLane are secured by zero-knowledge proofs (zk-SNARKs). These proofs enable the platform to verify the validity of transactions — confirming that balances are correct, assets exist, and transfer rules are satisfied — without revealing any information about the sender, recipient, amount, or asset type. The proving system is non-interactive: proofs are generated client-side and verified on-chain in constant time.
+                All privacy-critical operations in Noctra AI are secured by zero-knowledge proofs (zk-SNARKs). These proofs enable the platform to verify the validity of transactions — confirming that balances are correct, assets exist, and transfer rules are satisfied — without revealing any information about the sender, recipient, amount, or asset type. The proving system is non-interactive: proofs are generated client-side and verified on-chain in constant time.
               </P>
               <H3>Encryption Standards</H3>
               <P>
-                All data in transit is protected by TLS 1.3. Data at rest uses AES-256-GCM authenticated encryption. Messaging payloads are encrypted end-to-end with per-message ephemeral keys derived from X25519 key exchange. VPN tunnels use WireGuard with ChaCha20-Poly1305. No plaintext user data exists on GhostLane servers at any time.
+                All data in transit is protected by TLS 1.3. Data at rest uses AES-256-GCM authenticated encryption. Messaging payloads are encrypted end-to-end with per-message ephemeral keys derived from X25519 key exchange. VPN tunnels use WireGuard with ChaCha20-Poly1305. No plaintext user data exists on Noctra AI servers at any time.
               </P>
               <H3>Security Measures</H3>
               <Table
@@ -358,7 +398,7 @@ export default function DocsPage() {
                 ]}
               />
               <Callout type="warning" title="Security Notice">
-                Never share your API keys or wallet private keys. GhostLane will never ask for your private keys through any communication channel. All mixing and bridge operations are non-custodial — you maintain full control of your assets throughout the entire process. Report any suspicious communications to security@ghostlane.net.
+                Never share your API keys or wallet private keys. Noctra AI will never ask for your private keys through any communication channel. All mixing and bridge operations are non-custodial — you maintain full control of your assets throughout the entire process. Report any suspicious communications to security@usenoctra.xyz.
               </Callout>
             </Section>
 
@@ -366,19 +406,19 @@ export default function DocsPage() {
             <Section id="sdk" title="SDK Reference">
               <H3>TypeScript SDK</H3>
               <P>
-                The TypeScript SDK provides a fully typed interface to all GhostLane operations. It supports ESM and CJS module systems, requires Node.js 18+, and includes built-in retry logic, request timeout configuration, and structured error types.
+                The TypeScript SDK provides a fully typed interface to all Noctra AI operations. It supports ESM and CJS module systems, requires Node.js 18+, and includes built-in retry logic, request timeout configuration, and structured error types.
               </P>
-              <CodeBlock code={`import { GhostLane, GhostLaneError } from '@ghostlane/sdk';\n\nconst gl = new GhostLane({ apiKey: 'gl_live_...' });\n\ntry {\n  // Mixer: cross-asset swap\n  const mix = await gl.mixer.create({\n    sendCoin: 'BTC',\n    receiveCoin: 'ETH',\n    sendAmount: '0.5',\n    recipientAddress: '0xABC...DEF',\n    privacyLevel: 'maximum',\n  });\n  console.log(mix.depositAddress, mix.receiveAmount);\n\n  // Bridge: cross-chain transfer\n  const bridge = await gl.bridge.create({\n    sourceChain: 'ethereum',\n    destChain: 'polygon',\n    token: 'USDC',\n    amount: '5000',\n    recipientAddress: '0xABC...DEF',\n  });\n\n  // Messenger: send encrypted message\n  const msg = await gl.messenger.send({\n    conversationId: 'conv_123',\n    content: 'Funds transferred.',\n    selfDestructSeconds: 3600,\n  });\n\n  // VPN: connect and search\n  const session = await gl.vpn.connect({ serverId: 'us-nyc-1' });\n  const results = await gl.vpn.search({ query: 'privacy coins' });\n} catch (err) {\n  if (err instanceof GhostLaneError) {\n    console.error(err.code, err.message, err.retryable);\n  }\n}`} />
+              <CodeBlock code={`import { NoctraAI, NoctraAIError } from '@noctra/sdk';\n\nconst gl = new NoctraAI({ apiKey: 'gl_live_...' });\n\ntry {\n  // Mixer: cross-asset swap\n  const mix = await gl.mixer.create({\n    sendCoin: 'BTC',\n    receiveCoin: 'ETH',\n    sendAmount: '0.5',\n    recipientAddress: '0xABC...DEF',\n    privacyLevel: 'maximum',\n  });\n  console.log(mix.depositAddress, mix.receiveAmount);\n\n  // Bridge: cross-chain transfer\n  const bridge = await gl.bridge.create({\n    sourceChain: 'ethereum',\n    destChain: 'polygon',\n    token: 'USDC',\n    amount: '5000',\n    recipientAddress: '0xABC...DEF',\n  });\n\n  // Messenger: send encrypted message\n  const msg = await gl.messenger.send({\n    conversationId: 'conv_123',\n    content: 'Funds transferred.',\n    selfDestructSeconds: 3600,\n  });\n\n  // VPN: connect and search\n  const session = await gl.vpn.connect({ serverId: 'us-nyc-1' });\n  const results = await gl.vpn.search({ query: 'privacy coins' });\n} catch (err) {\n  if (err instanceof NoctraAIError) {\n    console.error(err.code, err.message, err.retryable);\n  }\n}`} />
               <H3>Python SDK</H3>
               <P>
                 The Python SDK mirrors the TypeScript API surface with Pythonic naming conventions. It uses <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">async/await</code> for all I/O operations, supports Python 3.10+, and provides dataclass-based response models with full type annotations.
               </P>
-              <CodeBlock code={`from ghostlane import GhostLane, GhostLaneError\n\nasync def main():\n    gl = GhostLane(api_key="gl_live_...")\n\n    try:\n        mix = await gl.mixer.create(\n            send_coin="BTC",\n            receive_coin="ETH",\n            send_amount="0.5",\n            recipient_address="0xABC...DEF",\n            privacy_level="maximum",\n        )\n        print(f"Deposit to: {mix.deposit_address}")\n        print(f"Receive: {mix.receive_amount} ETH")\n\n        status = await gl.mixer.status(mix.id)\n        print(f"Status: {status.state}")\n    except GhostLaneError as e:\n        print(f"Error {e.code}: {e.message}")`} />
+              <CodeBlock code={`from noctra import NoctraAI, NoctraAIError\n\nasync def main():\n    gl = NoctraAI(api_key="gl_live_...")\n\n    try:\n        mix = await gl.mixer.create(\n            send_coin="BTC",\n            receive_coin="ETH",\n            send_amount="0.5",\n            recipient_address="0xABC...DEF",\n            privacy_level="maximum",\n        )\n        print(f"Deposit to: {mix.deposit_address}")\n        print(f"Receive: {mix.receive_amount} ETH")\n\n        status = await gl.mixer.status(mix.id)\n        print(f"Status: {status.state}")\n    except NoctraAIError as e:\n        print(f"Error {e.code}: {e.message}")`} />
               <H3>Rust SDK</H3>
               <P>
-                The Rust SDK offers zero-cost abstractions over the GhostLane API with compile-time type safety. It uses <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">tokio</code> for async runtime and <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">serde</code> for serialization. All response types implement <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Debug</code>, <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Clone</code>, and <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Serialize</code>.
+                The Rust SDK offers zero-cost abstractions over the Noctra AI API with compile-time type safety. It uses <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">tokio</code> for async runtime and <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">serde</code> for serialization. All response types implement <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Debug</code>, <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Clone</code>, and <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">Serialize</code>.
               </P>
-              <CodeBlock code={`use ghostlane::{Client, MixRequest, PrivacyLevel};\n\n#[tokio::main]\nasync fn main() -> Result<(), ghostlane::Error> {\n    let client = Client::new("gl_live_...")?;\n\n    let mix = client.mixer().create(MixRequest {\n        send_coin: "BTC".into(),\n        receive_coin: "ETH".into(),\n        send_amount: "0.5".into(),\n        recipient_address: "0xABC...DEF".into(),\n        privacy_level: PrivacyLevel::Maximum,\n    }).await?;\n\n    println!("Deposit: {}", mix.deposit_address);\n    println!("Receive: {} ETH", mix.receive_amount);\n    Ok(())\n}`} />
+              <CodeBlock code={`use noctra::{Client, MixRequest, PrivacyLevel};\n\n#[tokio::main]\nasync fn main() -> Result<(), noctra::Error> {\n    let client = Client::new("gl_live_...")?;\n\n    let mix = client.mixer().create(MixRequest {\n        send_coin: "BTC".into(),\n        receive_coin: "ETH".into(),\n        send_amount: "0.5".into(),\n        recipient_address: "0xABC...DEF".into(),\n        privacy_level: PrivacyLevel::Maximum,\n    }).await?;\n\n    println!("Deposit: {}", mix.deposit_address);\n    println!("Receive: {} ETH", mix.receive_amount);\n    Ok(())\n}`} />
               <H3>Error Codes</H3>
               <Table
                 headers={['Code', 'HTTP Status', 'Description', 'Resolution']}
@@ -492,16 +532,16 @@ export default function DocsPage() {
 
             {/* ── FAQ ── */}
             <Section id="faq" title="Frequently Asked Questions">
-              <FAQ q="What is GhostLane?" a="GhostLane is a privacy-first cryptocurrency ecosystem comprising five integrated products: a cross-asset Privacy Mixer, an end-to-end Encrypted Messenger, a cross-chain Privacy Bridge, a military-grade VPN with private search, and the Ux402 Protocol for shielded cross-chain facilitation. All components are built on zero-knowledge cryptography." />
-              <FAQ q="Is using GhostLane legal?" a="GhostLane is a privacy tool analogous to encrypted email, VPN services, or HTTPS. The legality of privacy tools varies by jurisdiction. Users are responsible for complying with applicable laws and regulations in their region. GhostLane does not facilitate or endorse any unlawful activity." />
+              <FAQ q="What is Noctra AI?" a="Noctra AI is a privacy-first cryptocurrency ecosystem comprising six integrated products: a cross-asset Privacy Mixer, an end-to-end Encrypted Messenger, a cross-chain Privacy Bridge, Privacy Shield for ZK-SNARK shielded transfers, a military-grade VPN with private search, and the Ux402 Protocol for shielded cross-chain facilitation. All components are built on zero-knowledge cryptography." />
+              <FAQ q="Is using Noctra AI legal?" a="Noctra AI is a privacy tool analogous to encrypted email, VPN services, or HTTPS. The legality of privacy tools varies by jurisdiction. Users are responsible for complying with applicable laws and regulations in their region. Noctra AI does not facilitate or endorse any unlawful activity." />
               <FAQ q="Which cryptocurrencies are supported for mixing?" a="The Privacy Mixer supports cross-asset swaps between eight cryptocurrencies: Bitcoin (BTC), Ethereum (ETH), Monero (XMR), Litecoin (LTC), Dash (DASH), Zcash (ZEC), Bitcoin Cash (BCH), and Dogecoin (DOGE). Exchange rates are sourced live from CoinGecko with a 1.5% protocol fee." />
               <FAQ q="How does the mixer ensure privacy?" a="The mixer uses zero-knowledge proofs (zk-SNARKs) to mathematically prove that a withdrawal is valid without revealing which deposit it corresponds to. Combined with large anonymity sets (up to 1,000+ participants at Maximum privacy level) and variable time delays, it is computationally infeasible to link deposits to withdrawals." />
               <FAQ q="What blockchains does the Privacy Bridge support?" a="The bridge supports 15+ blockchains including Ethereum, Polygon, Arbitrum, Avalanche, BSC, Optimism, Base, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chains are integrated quarterly." />
               <FAQ q="Is there a sandbox environment for testing?" a="Yes. Use API keys with the gl_test_ prefix to access the sandbox environment. Sandbox operations execute instantly without interacting with live blockchains or consuming real funds. Sandbox data is isolated and reset daily." />
-              <FAQ q="Does GhostLane store any user data?" a="GhostLane enforces a strict zero-log policy. No transaction data, IP addresses, session metadata, message content, or browsing activity is retained after the relevant operation completes. Messenger content is encrypted end-to-end — the server stores only ciphertext." />
-              <FAQ q="How does the VPN private search work?" a="When connected to the VPN, search queries are encrypted and routed through the VPN tunnel to GhostLane's server-side proxy, which executes the search via SerpAPI. Results are returned without third-party tracking cookies, fingerprinting, or personalization. Your query never reaches the search engine directly." />
+              <FAQ q="Does Noctra AI store any user data?" a="Noctra AI enforces a strict zero-log policy. No transaction data, IP addresses, session metadata, message content, or browsing activity is retained after the relevant operation completes. Messenger content is encrypted end-to-end — the server stores only ciphertext." />
+              <FAQ q="How does the VPN private search work?" a="When connected to the VPN, search queries are encrypted and routed through the VPN tunnel to Noctra AI's server-side proxy, which executes the search via SerpAPI. Results are returned without third-party tracking cookies, fingerprinting, or personalization. Your query never reaches the search engine directly." />
               <FAQ q="What happens if the VPN connection drops?" a="If the kill switch is enabled, all outbound network traffic is blocked immediately upon connection loss. This prevents your real IP address from being exposed. The kill switch state is persisted per session and remains active until you explicitly disable it or end the session." />
-              <FAQ q="Is GhostLane custodial?" a="No. GhostLane is fully non-custodial. Users retain control of their private keys at all times. Mixing and bridge operations generate unique deposit addresses, but private keys for those addresses are encrypted client-side and never accessible to GhostLane infrastructure." />
+              <FAQ q="Is Noctra AI custodial?" a="No. Noctra AI is fully non-custodial. Users retain control of their private keys at all times. Mixing and bridge operations generate unique deposit addresses, but private keys for those addresses are encrypted client-side and never accessible to Noctra AI infrastructure." />
             </Section>
           </div>
         </main>
@@ -509,7 +549,7 @@ export default function DocsPage() {
 
       <footer className="border-t border-white/[0.04] py-6">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-[11px] text-gray-600">
-          <span>&copy; 2026 GhostLane. All rights reserved.</span>
+          <span>&copy; 2026 Noctra AI. All rights reserved.</span>
           <Link to="/" className="text-gray-500 hover:text-white transition-colors text-xs">Back to Home</Link>
         </div>
       </footer>
