@@ -13,6 +13,8 @@ import { bridgeRouter } from './routes/bridge.js';
 import { vpnRouter } from './routes/vpn.js';
 import { settingsRouter } from './routes/settings.js';
 import { shieldRouter } from './routes/railgun.js';
+import { initializeRailgunEngine } from './railgun/engine.js';
+import { validateRpcConfig } from './railgun/provider.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
@@ -57,6 +59,20 @@ async function start() {
     await initializeDatabase();
     initLogoCache();
     setupWebSocket(server);
+
+    const rpcStatus = validateRpcConfig();
+    if (rpcStatus.available.length > 0) {
+      console.log(`[Railgun] RPC configured for: ${rpcStatus.available.join(', ')}`);
+      if (rpcStatus.missing.length > 0) {
+        console.warn(`[Railgun] Missing RPC for: ${rpcStatus.missing.join(', ')}`);
+      }
+      initializeRailgunEngine().catch(err => {
+        console.error('[Railgun] Engine initialization failed (non-fatal):', err);
+      });
+    } else {
+      console.warn('[Railgun] No RPC endpoints configured. Set RPC_ETHEREUM, RPC_ARBITRUM, RPC_POLYGON, and/or RPC_BSC environment variables to enable Privacy Shield.');
+    }
+
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`API server running on port ${PORT}`);
     });

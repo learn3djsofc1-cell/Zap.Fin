@@ -209,9 +209,15 @@ export interface ShieldOperation {
   shieldContract: string;
   status: 'pending' | 'proving' | 'confirmed' | 'complete' | 'failed';
   zkProofHash?: string;
-  zkProofStatus: 'generating' | 'verified' | 'failed';
+  txHash?: string;
   createdAt: string;
   completedAt?: string;
+}
+
+export interface ShieldWallet {
+  railgunAddress: string;
+  evmAddress: string;
+  createdAt: string;
 }
 
 export interface ShieldBalance {
@@ -384,6 +390,8 @@ export const api = {
   },
   shield: {
     networks: () => request<{ networks: ShieldNetwork[] }>('/railgun/networks'),
+    wallet: () => request<{ wallet: ShieldWallet | null; engineReady: boolean }>('/railgun/wallet'),
+    createWallet: () => request<{ wallet: ShieldWallet }>('/railgun/wallet/create', { method: 'POST' }),
     create: (body: Record<string, string>) =>
       request<{ operation: ShieldOperation }>('/railgun/shield', { method: 'POST', body: JSON.stringify(body) }),
     transfer: (body: Record<string, string>) =>
