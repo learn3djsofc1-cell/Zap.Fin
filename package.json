@@ -14,8 +14,6 @@
     "start": "node dist/index.cjs"
   },
   "dependencies": {
-    "@railgun-community/shared-models": "^8.0.1",
-    "@railgun-community/wallet": "^10.8.4",
     "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-react": "^5.2.0",
     "bcryptjs": "^3.0.3",
@@ -24,7 +22,6 @@
     "express": "^4.22.1",
     "framer-motion": "^12.38.0",
     "jsonwebtoken": "^9.0.3",
-    "level": "^8.0.1",
     "lucide-react": "^0.546.0",
     "pg": "^8.20.0",
     "react": "^19.2.4",

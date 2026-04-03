@@ -383,27 +383,6 @@ export async function initializeDatabase(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_railgun_operations_created_at ON railgun_operations(created_at)
     `);
 
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS user_wallets (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        railgun_wallet_id VARCHAR(255) NOT NULL,
-        railgun_address VARCHAR(255) NOT NULL,
-        evm_address VARCHAR(255) NOT NULL,
-        encrypted_mnemonic TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        UNIQUE(user_id)
-      )
-    `);
-
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_user_wallets_user_id ON user_wallets(user_id)
-    `);
-
-    await client.query(`
-      ALTER TABLE railgun_operations ADD COLUMN IF NOT EXISTS tx_hash VARCHAR(255)
-    `);
-
     await client.query('COMMIT');
     console.log('Database schema initialized successfully');
   } catch (err) {

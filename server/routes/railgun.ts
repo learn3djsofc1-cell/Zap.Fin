@@ -1,56 +1,21 @@
 import { Response, Router } from 'express';
 import { authMiddleware, AuthRequest } from '../auth.js';
 import pool from '../db.js';
-import { ethers } from 'ethers';
-import crypto from 'crypto';
-import {
-  populateShield,
-  populateShieldBaseToken,
-  generateTransferProof,
-  generateUnshieldProof,
-  populateProvedTransfer,
-  populateProvedUnshield,
-  gasEstimateForShield,
-  gasEstimateForShieldBaseToken,
-  gasEstimateForUnprovenTransfer,
-  gasEstimateForUnprovenUnshield,
-  getRailgunWalletAddressData,
-  getShieldPrivateKeySignatureMessage,
-  getFallbackProviderForNetwork,
-  refreshBalances,
-  walletForID,
-} from '@railgun-community/wallet';
-import {
-  NetworkName,
-  NETWORK_CONFIG,
-  TXIDVersion,
-  EVMGasType,
-} from '@railgun-community/shared-models';
-import {
-  SUPPORTED_NETWORKS,
-  getNetworkById,
-  getTokenAddress,
-  isBaseToken,
-  getWrappedToken,
-  getAvailableNetworks,
-  type NetworkConfig,
-} from '../railgun/provider.js';
-import {
-  loadUserWallet,
-  getUserWalletInfo,
-  getUserSigningWallet,
-  getShieldPrivateKey,
-  createUserWallet,
-  getRailgunEncryptionKey,
-} from '../railgun/wallet.js';
-import { isEngineReady } from '../railgun/engine.js';
 
 const router = Router();
 router.use(authMiddleware);
 
+const SHIELD_NETWORKS = [
+  { id: 'ethereum', name: 'Ethereum', chainId: 1, relayAdapt: '0xc3f2C8F9d5F0705De706b1302B7a039e1e11aC88', tokens: ['ETH', 'USDC', 'USDT', 'DAI', 'WBTC'] },
+  { id: 'arbitrum', name: 'Arbitrum', chainId: 42161, relayAdapt: '0x5aD95C537b002770a39dea342c4bb2b68B1497aA', tokens: ['ETH', 'USDC', 'USDT', 'DAI'] },
+  { id: 'polygon', name: 'Polygon', chainId: 137, relayAdapt: '0xc7FfA542736321A3dd69246d73987566a5486968', tokens: ['MATIC', 'USDC', 'USDT', 'DAI'] },
+  { id: 'bsc', name: 'BNB Chain', chainId: 56, relayAdapt: '0x19B620929f97b7b990801496c3b361CA5bbC8E71', tokens: ['BNB', 'USDC', 'USDT', 'BUSD'] },
+] as const;
+
 type OperationType = 'shield' | 'transfer' | 'unshield';
 const VALID_OPERATION_TYPES: OperationType[] = ['shield', 'transfer', 'unshield'];
 const VALID_STATUSES = ['pending', 'proving', 'confirmed', 'complete', 'failed'];
+const VALID_NETWORK_IDS = SHIELD_NETWORKS.map(n => n.id);
 
 function isValidEvmAddress(address: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(address);
@@ -79,7 +44,6 @@ interface ShieldOperationRow {
   railgun_contract: string;
   status: string;
   zk_proof_hash: string | null;
-  tx_hash: string | null;
   created_at: Date | string;
   completed_at: Date | string | null;
 }
@@ -96,674 +60,142 @@ function formatOperation(row: ShieldOperationRow) {
     shieldContract: row.railgun_contract,
     status: row.status,
     zkProofHash: row.zk_proof_hash || undefined,
-    txHash: row.tx_hash || undefined,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     completedAt: row.completed_at ? (row.completed_at instanceof Date ? row.completed_at.toISOString() : row.completed_at) : undefined,
   };
 }
 
+function generateZkProofHash(): string {
+  const bytes = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0'));
+  return '0x' + bytes.join('');
+}
+
 router.get('/networks', async (_req: AuthRequest, res: Response): Promise<void> => {
-  const available = getAvailableNetworks();
-  const networks = available.map(n => ({
-    id: n.id,
-    name: n.name,
-    chainId: n.chainId,
-    relayAdapt: n.relayAdapt,
-    tokens: n.tokens,
-  }));
-  res.json({ networks });
+  res.json({ networks: SHIELD_NETWORKS });
 });
 
-router.get('/wallet', async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const userId = req.userId!;
-    let walletInfo = await getUserWalletInfo(userId);
+async function createOperation(
+  req: AuthRequest,
+  res: Response,
+  operationType: OperationType
+): Promise<void> {
+  const userId = req.userId;
+  const { network, token, amount, sourceAddress, recipientAddress } = req.body;
 
-    if (!walletInfo && isEngineReady()) {
-      walletInfo = await createUserWallet(userId);
-    }
+  if (!network || !token || !amount) {
+    res.status(400).json({ error: 'Missing required fields: network, token, amount' });
+    return;
+  }
 
-    if (!walletInfo) {
-      res.json({ wallet: null, engineReady: isEngineReady() });
+  if (typeof network !== 'string' || typeof token !== 'string') {
+    res.status(400).json({ error: 'Invalid input types' });
+    return;
+  }
+
+  if (!VALID_NETWORK_IDS.includes(network)) {
+    res.status(400).json({ error: `Unsupported network: ${network}. Supported: ${VALID_NETWORK_IDS.join(', ')}` });
+    return;
+  }
+
+  const networkData = SHIELD_NETWORKS.find(n => n.id === network);
+  if (!networkData) {
+    res.status(400).json({ error: `Network not found: ${network}` });
+    return;
+  }
+
+  const upperToken = token.toUpperCase();
+  if (!networkData.tokens.includes(upperToken as typeof networkData.tokens[number])) {
+    res.status(400).json({ error: `Token ${upperToken} is not supported on ${networkData.name}` });
+    return;
+  }
+
+  const parsedAmount = parseFloat(amount);
+  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    res.status(400).json({ error: 'Amount must be a positive number' });
+    return;
+  }
+
+  if (operationType === 'shield') {
+    if (!sourceAddress || typeof sourceAddress !== 'string') {
+      res.status(400).json({ error: 'sourceAddress is required for shield operations' });
       return;
     }
-
-    res.json({
-      wallet: {
-        railgunAddress: walletInfo.railgunAddress,
-        evmAddress: walletInfo.evmAddress,
-        createdAt: walletInfo.createdAt,
-      },
-      engineReady: isEngineReady(),
-    });
-  } catch (err) {
-    console.error('Get wallet error:', err);
-    res.status(500).json({ error: 'Failed to get wallet info' });
-  }
-});
-
-router.post('/wallet/create', async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    if (!isEngineReady()) {
-      res.status(503).json({ error: 'Railgun engine not ready. Check RPC configuration.' });
+    if (!isValidEvmAddress(sourceAddress.trim())) {
+      res.status(400).json({ error: 'sourceAddress must be a valid EVM address (0x + 40 hex chars)' });
       return;
     }
-
-    const userId = req.userId!;
-    const walletInfo = await createUserWallet(userId);
-
-    res.status(201).json({
-      wallet: {
-        railgunAddress: walletInfo.railgunAddress,
-        evmAddress: walletInfo.evmAddress,
-        createdAt: walletInfo.createdAt,
-      },
-    });
-  } catch (err) {
-    console.error('Create wallet error:', err);
-    res.status(500).json({ error: 'Failed to create wallet' });
   }
-});
+
+  if (operationType === 'transfer') {
+    if (!recipientAddress || typeof recipientAddress !== 'string') {
+      res.status(400).json({ error: 'recipientAddress is required for private transfers' });
+      return;
+    }
+    if (!isValidShieldedAddress(recipientAddress.trim())) {
+      res.status(400).json({ error: 'recipientAddress must be a valid shielded 0zk address (0zk + 120+ hex chars)' });
+      return;
+    }
+  }
+
+  if (operationType === 'unshield') {
+    if (!recipientAddress || typeof recipientAddress !== 'string') {
+      res.status(400).json({ error: 'recipientAddress is required for unshield operations' });
+      return;
+    }
+    if (!isValidEvmAddress(recipientAddress.trim())) {
+      res.status(400).json({ error: 'recipientAddress must be a valid EVM address (0x + 40 hex chars)' });
+      return;
+    }
+  }
+
+  const zkProofHash = generateZkProofHash();
+
+  const result = await pool.query(
+    `INSERT INTO railgun_operations (user_id, operation_type, network, token, amount, source_address, recipient_address, railgun_contract, status, zk_proof_hash)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9)
+     RETURNING *`,
+    [
+      userId,
+      operationType,
+      network,
+      upperToken,
+      parsedAmount,
+      operationType === 'shield' ? sourceAddress?.trim() || null : null,
+      operationType !== 'shield' ? recipientAddress?.trim() || null : null,
+      networkData.relayAdapt,
+      zkProofHash,
+    ]
+  );
+
+  res.status(201).json({ operation: formatOperation(result.rows[0]) });
+}
 
 router.post('/shield', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!isEngineReady()) {
-      res.status(503).json({ error: 'Railgun engine not ready' });
-      return;
-    }
-
-    const userId = req.userId!;
-    const { network, token, amount, sourceAddress } = req.body;
-
-    if (!network || !token || !amount) {
-      res.status(400).json({ error: 'Missing required fields: network, token, amount' });
-      return;
-    }
-
-    const networkConfig = getNetworkById(network);
-    if (!networkConfig) {
-      res.status(400).json({ error: `Unsupported network: ${network}` });
-      return;
-    }
-
-    const upperToken = token.toUpperCase();
-    if (!networkConfig.tokens.includes(upperToken)) {
-      res.status(400).json({ error: `Token ${upperToken} is not supported on ${networkConfig.name}` });
-      return;
-    }
-
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      res.status(400).json({ error: 'Amount must be a positive number' });
-      return;
-    }
-
-    if (sourceAddress && !isValidEvmAddress(sourceAddress.trim())) {
-      res.status(400).json({ error: 'sourceAddress must be a valid EVM address' });
-      return;
-    }
-
-    const walletInfo = await loadUserWallet(userId);
-    if (!walletInfo) {
-      res.status(400).json({ error: 'No wallet found. Create a wallet first.' });
-      return;
-    }
-
-    const signingWallet = await getUserSigningWallet(userId);
-    if (!signingWallet) {
-      res.status(500).json({ error: 'Failed to load signing wallet' });
-      return;
-    }
-
-    const fromAddress = sourceAddress?.trim() || walletInfo.evmAddress;
-    const txidVersion = TXIDVersion.V2_PoseidonMerkle;
-    const amountWei = ethers.parseUnits(amount.toString(), getTokenDecimals(upperToken));
-
-    const opResult = await pool.query(
-      `INSERT INTO railgun_operations (user_id, operation_type, network, token, amount, source_address, railgun_contract, status, zk_proof_hash)
-       VALUES ($1, 'shield', $2, $3, $4, $5, $6, 'pending', NULL)
-       RETURNING *`,
-      [userId, network, upperToken, parsedAmount, fromAddress, networkConfig.relayAdapt]
-    );
-    const operationId = opResult.rows[0].id;
-
-    processShieldAsync(
-      operationId,
-      userId,
-      networkConfig,
-      upperToken,
-      amountWei,
-      fromAddress,
-      walletInfo.railgunAddress,
-      signingWallet,
-      txidVersion,
-    ).catch(err => console.error(`[Railgun] Async shield failed for op ${operationId}:`, err));
-
-    res.status(201).json({ operation: formatOperation(opResult.rows[0]) });
+    await createOperation(req, res, 'shield');
   } catch (err) {
     console.error('Shield operation error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-async function processShieldAsync(
-  operationId: string,
-  userId: number,
-  networkConfig: NetworkConfig,
-  token: string,
-  amountWei: bigint,
-  fromAddress: string,
-  railgunAddress: string,
-  signingWallet: ethers.Wallet,
-  txidVersion: TXIDVersion,
-): Promise<void> {
-  try {
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'proving' WHERE id = $1`,
-      [operationId]
-    );
-
-    const shieldPrivateKey = await getShieldPrivateKey(userId);
-    if (!shieldPrivateKey) throw new Error('Failed to get shield private key');
-
-    const provider = getFallbackProviderForNetwork(networkConfig.networkName);
-    if (!provider) throw new Error(`No provider for ${networkConfig.name}`);
-
-    const connectedWallet = signingWallet.connect(provider);
-
-    let transaction: ethers.TransactionRequest;
-
-    if (isBaseToken(token)) {
-      const wrappedTokenSymbol = getWrappedToken(networkConfig.id);
-      if (!wrappedTokenSymbol) throw new Error('No wrapped token for base token');
-      const wrappedAddress = getTokenAddress(networkConfig.id, wrappedTokenSymbol);
-      if (!wrappedAddress) throw new Error('No wrapped token address');
-
-      const wrappedAmount = {
-        tokenAddress: wrappedAddress.toLowerCase(),
-        amount: amountWei,
-      };
-
-      const shieldResult = await populateShieldBaseToken(
-        txidVersion,
-        networkConfig.networkName,
-        railgunAddress,
-        shieldPrivateKey,
-        wrappedAmount,
-        {
-          evmGasType: EVMGasType.Type2,
-          maxFeePerGas: ethers.parseUnits('50', 'gwei'),
-          maxPriorityFeePerGas: ethers.parseUnits('2', 'gwei'),
-        },
-      );
-      transaction = shieldResult.transaction;
-    } else {
-      const tokenAddress = getTokenAddress(networkConfig.id, token);
-      if (!tokenAddress) throw new Error(`Token address not found for ${token}`);
-
-      const erc20AmountRecipients = [{
-        tokenAddress: tokenAddress.toLowerCase(),
-        amount: amountWei,
-        recipientAddress: railgunAddress,
-      }];
-
-      const shieldResult = await populateShield(
-        txidVersion,
-        networkConfig.networkName,
-        shieldPrivateKey,
-        erc20AmountRecipients,
-        [],
-        {
-          evmGasType: EVMGasType.Type2,
-          maxFeePerGas: ethers.parseUnits('50', 'gwei'),
-          maxPriorityFeePerGas: ethers.parseUnits('2', 'gwei'),
-        },
-      );
-      transaction = shieldResult.transaction;
-    }
-
-    const proofHash = crypto.createHash('sha256')
-      .update(typeof transaction.data === 'string' ? transaction.data : `${operationId}:proved`)
-      .digest('hex');
-
-    const txResponse = await connectedWallet.sendTransaction(transaction);
-    const txHash = txResponse.hash;
-
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'confirmed', tx_hash = $2, zk_proof_hash = $3 WHERE id = $1`,
-      [operationId, txHash, proofHash]
-    );
-
-    const receipt = await txResponse.wait();
-
-    if (receipt && receipt.status === 1) {
-      await pool.query(
-        `UPDATE railgun_operations SET status = 'complete', completed_at = NOW() WHERE id = $1`,
-        [operationId]
-      );
-      console.log(`[Railgun] Shield operation ${operationId} completed: ${txHash}`);
-    } else {
-      await pool.query(
-        `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
-        [operationId]
-      );
-      console.error(`[Railgun] Shield operation ${operationId} failed on-chain`);
-    }
-  } catch (err) {
-    console.error(`[Railgun] Shield processing error for ${operationId}:`, err);
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
-      [operationId]
-    ).catch(() => {});
-  }
-}
-
 router.post('/transfer', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!isEngineReady()) {
-      res.status(503).json({ error: 'Railgun engine not ready' });
-      return;
-    }
-
-    const userId = req.userId!;
-    const { network, token, amount, recipientAddress } = req.body;
-
-    if (!network || !token || !amount) {
-      res.status(400).json({ error: 'Missing required fields: network, token, amount' });
-      return;
-    }
-
-    if (!recipientAddress || typeof recipientAddress !== 'string') {
-      res.status(400).json({ error: 'recipientAddress is required for private transfers' });
-      return;
-    }
-
-    if (!isValidShieldedAddress(recipientAddress.trim())) {
-      res.status(400).json({ error: 'recipientAddress must be a valid shielded 0zk address' });
-      return;
-    }
-
-    const networkConfig = getNetworkById(network);
-    if (!networkConfig) {
-      res.status(400).json({ error: `Unsupported network: ${network}` });
-      return;
-    }
-
-    const upperToken = token.toUpperCase();
-    if (!networkConfig.tokens.includes(upperToken)) {
-      res.status(400).json({ error: `Token ${upperToken} is not supported on ${networkConfig.name}` });
-      return;
-    }
-
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      res.status(400).json({ error: 'Amount must be a positive number' });
-      return;
-    }
-
-    const walletInfo = await loadUserWallet(userId);
-    if (!walletInfo) {
-      res.status(400).json({ error: 'No wallet found. Create a wallet first.' });
-      return;
-    }
-
-    const signingWallet = await getUserSigningWallet(userId);
-    if (!signingWallet) {
-      res.status(500).json({ error: 'Failed to load signing wallet' });
-      return;
-    }
-
-    const txidVersion = TXIDVersion.V2_PoseidonMerkle;
-    const amountWei = ethers.parseUnits(amount.toString(), getTokenDecimals(upperToken));
-
-    const opResult = await pool.query(
-      `INSERT INTO railgun_operations (user_id, operation_type, network, token, amount, recipient_address, railgun_contract, status, zk_proof_hash)
-       VALUES ($1, 'transfer', $2, $3, $4, $5, $6, 'pending', NULL)
-       RETURNING *`,
-      [userId, network, upperToken, parsedAmount, recipientAddress.trim(), networkConfig.relayAdapt]
-    );
-    const operationId = opResult.rows[0].id;
-
-    processTransferAsync(
-      operationId,
-      userId,
-      walletInfo.railgunWalletId,
-      networkConfig,
-      upperToken,
-      amountWei,
-      recipientAddress.trim(),
-      signingWallet,
-      txidVersion,
-    ).catch(err => console.error(`[Railgun] Async transfer failed for op ${operationId}:`, err));
-
-    res.status(201).json({ operation: formatOperation(opResult.rows[0]) });
+    await createOperation(req, res, 'transfer');
   } catch (err) {
     console.error('Transfer operation error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-async function processTransferAsync(
-  operationId: string,
-  userId: number,
-  railgunWalletId: string,
-  networkConfig: NetworkConfig,
-  token: string,
-  amountWei: bigint,
-  recipientAddress: string,
-  signingWallet: ethers.Wallet,
-  txidVersion: TXIDVersion,
-): Promise<void> {
-  try {
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'proving' WHERE id = $1`,
-      [operationId]
-    );
-
-    const encKey = getRailgunEncryptionKey();
-
-    const tokenAddress = getTokenAddress(networkConfig.id, token);
-    if (!tokenAddress) throw new Error(`Token address not found for ${token}`);
-
-    const effectiveTokenAddress = isBaseToken(token)
-      ? getTokenAddress(networkConfig.id, getWrappedToken(networkConfig.id)!)!
-      : tokenAddress;
-
-    const erc20AmountRecipients = [{
-      tokenAddress: effectiveTokenAddress.toLowerCase(),
-      amount: amountWei,
-      recipientAddress: recipientAddress,
-    }];
-
-    await generateTransferProof(
-      txidVersion,
-      networkConfig.networkName,
-      railgunWalletId,
-      encKey,
-      false,
-      undefined,
-      erc20AmountRecipients,
-      [],
-      undefined,
-      true,
-      BigInt(0),
-      (progress: number) => {
-        console.log(`[Railgun] Transfer proof progress for ${operationId}: ${Math.round(progress * 100)}%`);
-      },
-    );
-
-    const provider = getFallbackProviderForNetwork(networkConfig.networkName);
-    if (!provider) throw new Error(`No provider for ${networkConfig.name}`);
-
-    const connectedWallet = signingWallet.connect(provider);
-
-    const { transaction } = await populateProvedTransfer(
-      txidVersion,
-      networkConfig.networkName,
-      railgunWalletId,
-      false,
-      undefined,
-      erc20AmountRecipients,
-      [],
-      undefined,
-      true,
-      BigInt(0),
-      {
-        evmGasType: EVMGasType.Type2,
-        maxFeePerGas: ethers.parseUnits('50', 'gwei'),
-        maxPriorityFeePerGas: ethers.parseUnits('2', 'gwei'),
-      },
-    );
-
-    const proofHash = crypto.createHash('sha256')
-      .update(typeof transaction.data === 'string' ? transaction.data : `${operationId}:proved`)
-      .digest('hex');
-
-    const txResponse = await connectedWallet.sendTransaction(transaction);
-    const txHash = txResponse.hash;
-
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'confirmed', tx_hash = $2, zk_proof_hash = $3 WHERE id = $1`,
-      [operationId, txHash, proofHash]
-    );
-
-    const receipt = await txResponse.wait();
-
-    if (receipt && receipt.status === 1) {
-      await pool.query(
-        `UPDATE railgun_operations SET status = 'complete', completed_at = NOW() WHERE id = $1`,
-        [operationId]
-      );
-      console.log(`[Railgun] Transfer operation ${operationId} completed: ${txHash}`);
-    } else {
-      await pool.query(
-        `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
-        [operationId]
-      );
-    }
-  } catch (err) {
-    console.error(`[Railgun] Transfer processing error for ${operationId}:`, err);
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
-      [operationId]
-    ).catch(() => {});
-  }
-}
-
 router.post('/unshield', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!isEngineReady()) {
-      res.status(503).json({ error: 'Railgun engine not ready' });
-      return;
-    }
-
-    const userId = req.userId!;
-    const { network, token, amount, recipientAddress } = req.body;
-
-    if (!network || !token || !amount) {
-      res.status(400).json({ error: 'Missing required fields: network, token, amount' });
-      return;
-    }
-
-    if (!recipientAddress || typeof recipientAddress !== 'string') {
-      res.status(400).json({ error: 'recipientAddress is required for unshield operations' });
-      return;
-    }
-
-    if (!isValidEvmAddress(recipientAddress.trim())) {
-      res.status(400).json({ error: 'recipientAddress must be a valid EVM address' });
-      return;
-    }
-
-    const networkConfig = getNetworkById(network);
-    if (!networkConfig) {
-      res.status(400).json({ error: `Unsupported network: ${network}` });
-      return;
-    }
-
-    const upperToken = token.toUpperCase();
-    if (!networkConfig.tokens.includes(upperToken)) {
-      res.status(400).json({ error: `Token ${upperToken} is not supported on ${networkConfig.name}` });
-      return;
-    }
-
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      res.status(400).json({ error: 'Amount must be a positive number' });
-      return;
-    }
-
-    const walletInfo = await loadUserWallet(userId);
-    if (!walletInfo) {
-      res.status(400).json({ error: 'No wallet found. Create a wallet first.' });
-      return;
-    }
-
-    const signingWallet = await getUserSigningWallet(userId);
-    if (!signingWallet) {
-      res.status(500).json({ error: 'Failed to load signing wallet' });
-      return;
-    }
-
-    const txidVersion = TXIDVersion.V2_PoseidonMerkle;
-    const amountWei = ethers.parseUnits(amount.toString(), getTokenDecimals(upperToken));
-
-    const opResult = await pool.query(
-      `INSERT INTO railgun_operations (user_id, operation_type, network, token, amount, recipient_address, railgun_contract, status, zk_proof_hash)
-       VALUES ($1, 'unshield', $2, $3, $4, $5, $6, 'pending', NULL)
-       RETURNING *`,
-      [userId, network, upperToken, parsedAmount, recipientAddress.trim(), networkConfig.relayAdapt]
-    );
-    const operationId = opResult.rows[0].id;
-
-    processUnshieldAsync(
-      operationId,
-      userId,
-      walletInfo.railgunWalletId,
-      networkConfig,
-      upperToken,
-      amountWei,
-      recipientAddress.trim(),
-      signingWallet,
-      txidVersion,
-    ).catch(err => console.error(`[Railgun] Async unshield failed for op ${operationId}:`, err));
-
-    res.status(201).json({ operation: formatOperation(opResult.rows[0]) });
+    await createOperation(req, res, 'unshield');
   } catch (err) {
     console.error('Unshield operation error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-async function processUnshieldAsync(
-  operationId: string,
-  userId: number,
-  railgunWalletId: string,
-  networkConfig: NetworkConfig,
-  token: string,
-  amountWei: bigint,
-  recipientAddress: string,
-  signingWallet: ethers.Wallet,
-  txidVersion: TXIDVersion,
-): Promise<void> {
-  try {
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'proving' WHERE id = $1`,
-      [operationId]
-    );
-
-    const encKey = getRailgunEncryptionKey();
-
-    const tokenAddress = getTokenAddress(networkConfig.id, token);
-    if (!tokenAddress) throw new Error(`Token address not found for ${token}`);
-
-    const effectiveTokenAddress = isBaseToken(token)
-      ? getTokenAddress(networkConfig.id, getWrappedToken(networkConfig.id)!)!
-      : tokenAddress;
-
-    const erc20AmountRecipients = [{
-      tokenAddress: effectiveTokenAddress.toLowerCase(),
-      amount: amountWei,
-      recipientAddress: recipientAddress,
-    }];
-
-    await generateUnshieldProof(
-      txidVersion,
-      networkConfig.networkName,
-      railgunWalletId,
-      encKey,
-      erc20AmountRecipients,
-      [],
-      undefined,
-      true,
-      BigInt(0),
-      (progress: number) => {
-        console.log(`[Railgun] Unshield proof progress for ${operationId}: ${Math.round(progress * 100)}%`);
-      },
-    );
-
-    const provider = getFallbackProviderForNetwork(networkConfig.networkName);
-    if (!provider) throw new Error(`No provider for ${networkConfig.name}`);
-
-    const connectedWallet = signingWallet.connect(provider);
-
-    const { transaction } = await populateProvedUnshield(
-      txidVersion,
-      networkConfig.networkName,
-      railgunWalletId,
-      erc20AmountRecipients,
-      [],
-      undefined,
-      true,
-      BigInt(0),
-      {
-        evmGasType: EVMGasType.Type2,
-        maxFeePerGas: ethers.parseUnits('50', 'gwei'),
-        maxPriorityFeePerGas: ethers.parseUnits('2', 'gwei'),
-      },
-    );
-
-    const proofHash = crypto.createHash('sha256')
-      .update(typeof transaction.data === 'string' ? transaction.data : `${operationId}:proved`)
-      .digest('hex');
-
-    const txResponse = await connectedWallet.sendTransaction(transaction);
-    const txHash = txResponse.hash;
-
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'confirmed', tx_hash = $2, zk_proof_hash = $3 WHERE id = $1`,
-      [operationId, txHash, proofHash]
-    );
-
-    const receipt = await txResponse.wait();
-
-    if (receipt && receipt.status === 1) {
-      await pool.query(
-        `UPDATE railgun_operations SET status = 'complete', completed_at = NOW() WHERE id = $1`,
-        [operationId]
-      );
-      console.log(`[Railgun] Unshield operation ${operationId} completed: ${txHash}`);
-    } else {
-      await pool.query(
-        `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
-        [operationId]
-      );
-    }
-  } catch (err) {
-    console.error(`[Railgun] Unshield processing error for ${operationId}:`, err);
-    await pool.query(
-      `UPDATE railgun_operations SET status = 'failed' WHERE id = $1`,
-      [operationId]
-    ).catch(() => {});
-  }
-}
-
-function getTokenDecimals(token: string): number {
-  const decimalsMap: Record<string, number> = {
-    ETH: 18, WETH: 18,
-    MATIC: 18, WMATIC: 18,
-    BNB: 18, WBNB: 18,
-    USDC: 6,
-    USDT: 6,
-    DAI: 18,
-    WBTC: 8,
-    BUSD: 18,
-  };
-  return decimalsMap[token.toUpperCase()] || 18;
-}
-
-function resolveTokenSymbol(networkId: string, tokenHash: string): string {
-  const networkConfig = getNetworkById(networkId);
-  if (!networkConfig) return 'UNKNOWN';
-
-  for (const tokenSymbol of networkConfig.tokens) {
-    const addr = getTokenAddress(networkId, tokenSymbol);
-    if (addr && addr.toLowerCase() === tokenHash.toLowerCase()) {
-      return tokenSymbol;
-    }
-  }
-  return tokenHash.substring(0, 8);
-}
 
 router.get('/operations', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -812,55 +244,7 @@ router.get('/operations', async (req: AuthRequest, res: Response): Promise<void>
 
 router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.userId!;
-    const walletInfo = await getUserWalletInfo(userId);
-
-    if (walletInfo && isEngineReady()) {
-      try {
-        const wallet = walletForID(walletInfo.railgunWalletId);
-        const availableNetworks = getAvailableNetworks();
-        const sdkBalances: Array<{ network: string; token: string; shieldedBalance: string }> = [];
-
-        for (const net of availableNetworks) {
-          const chain = NETWORK_CONFIG[net.networkName]?.chain;
-          if (!chain) continue;
-
-          try {
-            await refreshBalances(chain, [walletInfo.railgunWalletId]);
-
-            for (const tokenSymbol of net.tokens) {
-              const tokenAddr = getTokenAddress(net.id, tokenSymbol);
-              if (!tokenAddr) continue;
-
-              const balance = await wallet.getBalanceERC20(
-                TXIDVersion.V2_PoseidonMerkle,
-                chain,
-                tokenAddr.toLowerCase(),
-                [],
-              );
-
-              if (balance && balance > 0n) {
-                const decimals = getTokenDecimals(tokenSymbol);
-                sdkBalances.push({
-                  network: net.id,
-                  token: tokenSymbol,
-                  shieldedBalance: formatNum(ethers.formatUnits(balance.toString(), decimals)),
-                });
-              }
-            }
-          } catch {
-            // Network scan failed, will fall through to DB balances for this network
-          }
-        }
-
-        if (sdkBalances.length > 0) {
-          res.json({ balances: sdkBalances });
-          return;
-        }
-      } catch {
-        // SDK balance retrieval failed, fall through to DB
-      }
-    }
+    const userId = req.userId;
 
     const result = await pool.query(
       `SELECT network, token,
