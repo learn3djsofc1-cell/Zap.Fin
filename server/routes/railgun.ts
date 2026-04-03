@@ -1,21 +1,34 @@
 import { Response, Router } from 'express';
+import crypto from 'crypto';
 import { authMiddleware, AuthRequest } from '../auth.js';
 import pool from '../db.js';
+import { isEngineReady } from '../railgun/engine.js';
+import { SUPPORTED_NETWORKS, getNetworkById, getAvailableNetworks, getTokenAddress, isBaseToken, getWrappedToken } from '../railgun/provider.js';
+import { createUserWallet, loadUserWallet, getUserWalletInfo, getShieldPrivateKey, getRailgunEncryptionKey } from '../railgun/wallet.js';
+import {
+  generateShieldProofBytes,
+  generateTransferProof,
+  generateUnshieldProof,
+  populateShield,
+  populateProvedTransfer,
+  populateProvedUnshield,
+  refreshBalances,
+  walletForID,
+} from '@railgun-community/wallet';
+import {
+  NetworkName,
+  EVMGasType,
+  RailgunERC20AmountRecipient,
+  NETWORK_CONFIG,
+} from '@railgun-community/shared-models';
+import { ethers } from 'ethers';
 
 const router = Router();
 router.use(authMiddleware);
 
-const SHIELD_NETWORKS = [
-  { id: 'ethereum', name: 'Ethereum', chainId: 1, relayAdapt: '0xc3f2C8F9d5F0705De706b1302B7a039e1e11aC88', tokens: ['ETH', 'USDC', 'USDT', 'DAI', 'WBTC'] },
-  { id: 'arbitrum', name: 'Arbitrum', chainId: 42161, relayAdapt: '0x5aD95C537b002770a39dea342c4bb2b68B1497aA', tokens: ['ETH', 'USDC', 'USDT', 'DAI'] },
-  { id: 'polygon', name: 'Polygon', chainId: 137, relayAdapt: '0xc7FfA542736321A3dd69246d73987566a5486968', tokens: ['MATIC', 'USDC', 'USDT', 'DAI'] },
-  { id: 'bsc', name: 'BNB Chain', chainId: 56, relayAdapt: '0x19B620929f97b7b990801496c3b361CA5bbC8E71', tokens: ['BNB', 'USDC', 'USDT', 'BUSD'] },
-] as const;
-
 type OperationType = 'shield' | 'transfer' | 'unshield';
 const VALID_OPERATION_TYPES: OperationType[] = ['shield', 'transfer', 'unshield'];
 const VALID_STATUSES = ['pending', 'proving', 'confirmed', 'complete', 'failed'];
-const VALID_NETWORK_IDS = SHIELD_NETWORKS.map(n => n.id);
 
 function isValidEvmAddress(address: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(address);
@@ -44,6 +57,8 @@ interface ShieldOperationRow {
   railgun_contract: string;
   status: string;
   zk_proof_hash: string | null;
+  zk_proof_status: string;
+  tx_hash: string | null;
   created_at: Date | string;
   completed_at: Date | string | null;
 }
@@ -60,18 +75,69 @@ function formatOperation(row: ShieldOperationRow) {
     shieldContract: row.railgun_contract,
     status: row.status,
     zkProofHash: row.zk_proof_hash || undefined,
+    zkProofStatus: row.zk_proof_status || 'generating',
+    txHash: row.tx_hash || undefined,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     completedAt: row.completed_at ? (row.completed_at instanceof Date ? row.completed_at.toISOString() : row.completed_at) : undefined,
   };
 }
 
-function generateZkProofHash(): string {
-  const bytes = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0'));
-  return '0x' + bytes.join('');
+function resolveTokenAddress(networkId: string, token: string): string | null {
+  if (isBaseToken(token)) {
+    const wrapped = getWrappedToken(networkId);
+    if (wrapped) {
+      return getTokenAddress(networkId, wrapped) || null;
+    }
+  }
+  return getTokenAddress(networkId, token) || null;
+}
+
+function getGasDetails() {
+  return {
+    evmGasType: EVMGasType.Type2,
+    maxFeePerGas: BigInt('50000000000'),
+    maxPriorityFeePerGas: BigInt('2000000000'),
+    gasLimit: BigInt('1500000'),
+  };
 }
 
 router.get('/networks', async (_req: AuthRequest, res: Response): Promise<void> => {
-  res.json({ networks: SHIELD_NETWORKS });
+  const networks = isEngineReady() ? getAvailableNetworks() : SUPPORTED_NETWORKS;
+  res.json({
+    networks: networks.map(n => ({
+      id: n.id,
+      name: n.name,
+      chainId: n.chainId,
+      relayAdapt: n.relayAdapt,
+      tokens: n.tokens,
+    })),
+  });
+});
+
+router.get('/wallet', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId!;
+    let wallet = await getUserWalletInfo(userId);
+
+    if (!wallet && isEngineReady()) {
+      wallet = await createUserWallet(userId);
+    }
+
+    if (wallet) {
+      res.json({
+        wallet: {
+          railgunAddress: wallet.railgunAddress,
+          evmAddress: wallet.evmAddress,
+          createdAt: wallet.createdAt,
+        },
+      });
+    } else {
+      res.json({ wallet: null });
+    }
+  } catch (err) {
+    console.error('Wallet fetch error:', err);
+    res.status(500).json({ error: 'Failed to load wallet' });
+  }
 });
 
 async function createOperation(
@@ -79,7 +145,7 @@ async function createOperation(
   res: Response,
   operationType: OperationType
 ): Promise<void> {
-  const userId = req.userId;
+  const userId = req.userId!;
   const { network, token, amount, sourceAddress, recipientAddress } = req.body;
 
   if (!network || !token || !amount) {
@@ -92,19 +158,14 @@ async function createOperation(
     return;
   }
 
-  if (!VALID_NETWORK_IDS.includes(network)) {
-    res.status(400).json({ error: `Unsupported network: ${network}. Supported: ${VALID_NETWORK_IDS.join(', ')}` });
-    return;
-  }
-
-  const networkData = SHIELD_NETWORKS.find(n => n.id === network);
+  const networkData = getNetworkById(network);
   if (!networkData) {
-    res.status(400).json({ error: `Network not found: ${network}` });
+    res.status(400).json({ error: `Unsupported network: ${network}` });
     return;
   }
 
   const upperToken = token.toUpperCase();
-  if (!networkData.tokens.includes(upperToken as typeof networkData.tokens[number])) {
+  if (!networkData.tokens.includes(upperToken)) {
     res.status(400).json({ error: `Token ${upperToken} is not supported on ${networkData.name}` });
     return;
   }
@@ -148,11 +209,20 @@ async function createOperation(
     }
   }
 
-  const zkProofHash = generateZkProofHash();
+  if (!isEngineReady()) {
+    res.status(503).json({ error: 'Privacy Shield engine is not ready. Please ensure RPC endpoints are configured.' });
+    return;
+  }
 
-  const result = await pool.query(
-    `INSERT INTO railgun_operations (user_id, operation_type, network, token, amount, source_address, recipient_address, railgun_contract, status, zk_proof_hash)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9)
+  const walletInfo = await loadUserWallet(userId);
+  if (!walletInfo) {
+    res.status(400).json({ error: 'No Railgun wallet found. Please create one first.' });
+    return;
+  }
+
+  const result = await pool.query<ShieldOperationRow>(
+    `INSERT INTO railgun_operations (user_id, operation_type, network, token, amount, source_address, recipient_address, railgun_contract, status, zk_proof_status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', 'generating')
      RETURNING *`,
     [
       userId,
@@ -163,11 +233,141 @@ async function createOperation(
       operationType === 'shield' ? sourceAddress?.trim() || null : null,
       operationType !== 'shield' ? recipientAddress?.trim() || null : null,
       networkData.relayAdapt,
-      zkProofHash,
     ]
   );
 
-  res.status(201).json({ operation: formatOperation(result.rows[0]) });
+  const opRow = result.rows[0];
+  res.status(201).json({ operation: formatOperation(opRow) });
+
+  processOperation(opRow, walletInfo.railgunWalletId, networkData.networkName).catch(err => {
+    console.error(`[Railgun] Background processing failed for op ${opRow.id}:`, err);
+    pool.query(
+      `UPDATE railgun_operations SET status = 'failed', zk_proof_status = 'failed' WHERE id = $1`,
+      [opRow.id]
+    ).catch(dbErr => console.error('[Railgun] DB update failed:', dbErr));
+  });
+}
+
+async function processOperation(
+  op: ShieldOperationRow,
+  railgunWalletId: string,
+  networkName: NetworkName
+): Promise<void> {
+  const tokenAddress = resolveTokenAddress(op.network, op.token);
+  if (!tokenAddress) {
+    throw new Error(`Cannot resolve token address for ${op.token} on ${op.network}`);
+  }
+
+  const decimals = ['USDC', 'USDT'].includes(op.token.toUpperCase()) ? 6 : 18;
+  const amountBigInt = ethers.parseUnits(String(op.amount), decimals);
+  const encryptionKey = getRailgunEncryptionKey();
+
+  await pool.query(
+    `UPDATE railgun_operations SET status = 'proving' WHERE id = $1`,
+    [op.id]
+  );
+
+  let proofCalldata: string | undefined;
+
+  if (op.operation_type === 'shield') {
+    const shieldPrivateKey = await getShieldPrivateKey(op.user_id);
+    if (!shieldPrivateKey) throw new Error('No shield private key');
+
+    const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [{
+      tokenAddress,
+      amount: amountBigInt,
+      recipientAddress: walletForID(railgunWalletId).getAddress(),
+    }];
+
+    await generateShieldProofBytes(
+      networkName,
+      railgunWalletId,
+      encryptionKey,
+      erc20AmountRecipients,
+      [],
+    );
+
+    const populated = await populateShield(
+      networkName,
+      shieldPrivateKey,
+      erc20AmountRecipients,
+      [],
+      getGasDetails(),
+    );
+
+    proofCalldata = populated.transaction.data || '';
+  } else if (op.operation_type === 'transfer') {
+    const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [{
+      tokenAddress,
+      amount: amountBigInt,
+      recipientAddress: op.recipient_address!,
+    }];
+
+    await generateTransferProof(
+      networkName,
+      railgunWalletId,
+      encryptionKey,
+      false,
+      [],
+      erc20AmountRecipients,
+      [],
+      undefined,
+      () => {},
+    );
+
+    const populated = await populateProvedTransfer(
+      networkName,
+      railgunWalletId,
+      false,
+      [],
+      erc20AmountRecipients,
+      [],
+      undefined,
+      false,
+      getGasDetails(),
+    );
+
+    proofCalldata = populated.transaction.data || '';
+  } else if (op.operation_type === 'unshield') {
+    const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [{
+      tokenAddress,
+      amount: amountBigInt,
+      recipientAddress: op.recipient_address!,
+    }];
+
+    await generateUnshieldProof(
+      networkName,
+      railgunWalletId,
+      encryptionKey,
+      false,
+      [],
+      erc20AmountRecipients,
+      [],
+      undefined,
+      () => {},
+    );
+
+    const populated = await populateProvedUnshield(
+      networkName,
+      railgunWalletId,
+      false,
+      [],
+      erc20AmountRecipients,
+      [],
+      undefined,
+      false,
+      getGasDetails(),
+    );
+
+    proofCalldata = populated.transaction.data || '';
+  }
+
+  const zkProofHash = crypto.createHash('sha256').update(proofCalldata || '').digest('hex');
+
+  await pool.query(
+    `UPDATE railgun_operations SET status = 'confirmed', zk_proof_hash = $2, zk_proof_status = 'verified' WHERE id = $1`,
+    [op.id, '0x' + zkProofHash]
+  );
 }
 
 router.post('/shield', async (req: AuthRequest, res: Response): Promise<void> => {
@@ -233,7 +433,7 @@ router.get('/operations', async (req: AuthRequest, res: Response): Promise<void>
     ]);
 
     res.json({
-      operations: result.rows.map(formatOperation),
+      operations: result.rows.map((r: ShieldOperationRow) => formatOperation(r)),
       total: parseInt(countResult.rows[0].count),
     });
   } catch (err) {
@@ -244,7 +444,17 @@ router.get('/operations', async (req: AuthRequest, res: Response): Promise<void>
 
 router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.userId;
+    const userId = req.userId!;
+
+    const walletInfo = await getUserWalletInfo(userId);
+    if (walletInfo && isEngineReady()) {
+      try {
+        const net = SUPPORTED_NETWORKS[0];
+        await refreshBalances(net.networkName, walletInfo.railgunWalletId);
+      } catch {
+        // fall through to DB aggregation
+      }
+    }
 
     const result = await pool.query(
       `SELECT network, token,
@@ -262,7 +472,7 @@ router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> =
       [userId]
     );
 
-    const balances = result.rows.map(row => ({
+    const balances = result.rows.map((row: { network: string; token: string; shielded_balance: string | number }) => ({
       network: row.network,
       token: row.token,
       shieldedBalance: formatNum(row.shielded_balance),

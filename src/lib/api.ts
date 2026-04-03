@@ -190,6 +190,12 @@ export interface ActivityItem {
   status: string;
 }
 
+export interface ShieldWallet {
+  railgunAddress: string;
+  evmAddress: string;
+  createdAt: string;
+}
+
 export interface ShieldNetwork {
   id: string;
   name: string;
@@ -384,6 +390,8 @@ export const api = {
   },
   shield: {
     networks: () => request<{ networks: ShieldNetwork[] }>('/railgun/networks'),
+    wallet: () => request<{ wallet: ShieldWallet | null }>('/railgun/wallet'),
+    createWallet: () => request<{ wallet: ShieldWallet }>('/railgun/wallet'),
     create: (body: Record<string, string>) =>
       request<{ operation: ShieldOperation }>('/railgun/shield', { method: 'POST', body: JSON.stringify(body) }),
     transfer: (body: Record<string, string>) =>

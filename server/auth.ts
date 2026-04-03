@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Router } from 'express';
 import pool from './db.js';
+import { createUserWallet } from './railgun/wallet.js';
+import { isEngineReady } from './railgun/engine.js';
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
@@ -91,6 +93,12 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     const user = result.rows[0];
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+    if (isEngineReady()) {
+      createUserWallet(user.id).catch(err => {
+        console.error(`[Railgun] Async wallet creation failed for user ${user.id}:`, err);
+      });
+    }
 
     res.status(201).json({
       user: { id: user.id, email: user.email, name: user.name, createdAt: user.created_at },

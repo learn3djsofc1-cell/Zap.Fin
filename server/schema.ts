@@ -347,6 +347,22 @@ export async function initializeDatabase(): Promise<void> {
     `);
 
     await client.query(`
+      CREATE TABLE IF NOT EXISTS user_wallets (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        railgun_wallet_id VARCHAR(255) NOT NULL,
+        railgun_address VARCHAR(255) NOT NULL,
+        evm_address VARCHAR(255) NOT NULL,
+        encrypted_mnemonic TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_user_wallets_user_id ON user_wallets(user_id)
+    `);
+
+    await client.query(`
       CREATE TABLE IF NOT EXISTS railgun_operations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -360,12 +376,14 @@ export async function initializeDatabase(): Promise<void> {
         status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'proving', 'confirmed', 'complete', 'failed')),
         zk_proof_hash VARCHAR(255),
         zk_proof_status VARCHAR(20) NOT NULL DEFAULT 'generating' CHECK (zk_proof_status IN ('generating', 'verified', 'failed')),
+        tx_hash VARCHAR(255),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         completed_at TIMESTAMP WITH TIME ZONE
       )
     `);
 
     await client.query(`ALTER TABLE railgun_operations ADD COLUMN IF NOT EXISTS zk_proof_status VARCHAR(20) NOT NULL DEFAULT 'generating'`);
+    await client.query(`ALTER TABLE railgun_operations ADD COLUMN IF NOT EXISTS tx_hash VARCHAR(255)`);
 
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_railgun_operations_user_id ON railgun_operations(user_id)
