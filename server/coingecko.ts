@@ -27,6 +27,7 @@ const CHAIN_COINGECKO_IDS: Record<string, string> = {
   dash: 'dash',
   dogecoin: 'dogecoin',
   fantom: 'fantom',
+  solana: 'solana',
 };
 
 const TOKEN_COINGECKO_IDS: Record<string, string> = {
@@ -46,6 +47,7 @@ const TOKEN_COINGECKO_IDS: Record<string, string> = {
   FTM: 'fantom',
   ARB: 'arbitrum',
   OP: 'optimism',
+  SOL: 'solana',
 };
 
 const LOGO_CACHE_DIR = path.join(process.cwd(), 'public');

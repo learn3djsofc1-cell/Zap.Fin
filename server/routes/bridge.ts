@@ -25,6 +25,7 @@ const CHAINS = [
   { id: 'dash', name: 'Dash', icon: 'dash', tokens: ['DASH'] },
   { id: 'dogecoin', name: 'Dogecoin', icon: 'doge', tokens: ['DOGE'] },
   { id: 'fantom', name: 'Fantom', icon: 'ftm', tokens: ['FTM'] },
+  { id: 'solana', name: 'Solana', icon: 'sol', tokens: ['SOL', 'USDC'] },
 ];
 
 const VALID_CHAIN_IDS = CHAINS.map(c => c.id);

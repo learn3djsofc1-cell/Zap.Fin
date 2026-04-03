@@ -345,6 +345,8 @@ const BRIDGE_CHAIN_TOKEN_MAP: Record<string, string> = {
   'litecoin:LTC': 'LTC',
   'zcash:ZEC': 'ZEC',
   'dash:DASH': 'DASH',
+  'solana:SOL': 'SOL',
+  'solana:USDC': 'SOL',
   'dogecoin:DOGE': 'DOGE',
   'fantom:FTM': 'FTM',
 };
@@ -361,6 +363,12 @@ const BRIDGE_ADDRESS_VALIDATORS: Record<string, (address: string) => { valid: bo
   AVAX: (address: string) => ADDRESS_VALIDATORS.ETH(address),
   BNB: (address: string) => ADDRESS_VALIDATORS.ETH(address),
   FTM: (address: string) => ADDRESS_VALIDATORS.ETH(address),
+  SOL: (address: string) => {
+    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
+      return { valid: false, error: 'Invalid Solana address format' };
+    }
+    return { valid: true };
+  },
 };
 
 const BRIDGE_ADDRESS_GENERATORS: Record<string, () => DepositAddressResult> = {
@@ -375,6 +383,7 @@ const BRIDGE_ADDRESS_GENERATORS: Record<string, () => DepositAddressResult> = {
   AVAX: () => generateEthLikeAddress(),
   BNB: () => generateEthLikeAddress(),
   FTM: () => generateEthLikeAddress(),
+  SOL: () => generateBase58Address([]),
 };
 
 export function getBridgeNativeCoin(chainId: string, token: string): string | null {
