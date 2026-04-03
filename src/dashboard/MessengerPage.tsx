@@ -52,6 +52,12 @@ export default function MessengerPage() {
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     api.messenger.conversations()
       .then((data) => setConversations(data.conversations))
       .catch(() => toast('error', 'Failed to load conversations'))

@@ -21,7 +21,7 @@ router.get('/conversations', async (req: AuthRequest, res: Response): Promise<vo
   try {
     const userId = req.userId;
     const result = await pool.query(
-      `SELECT c.id, c.contact_user_id, u.name AS contact_name,
+      `SELECT c.id, c.contact_user_id, COALESCE(u.name, c.contact_address, 'Unknown') AS contact_name,
               c.last_message, c.last_message_at, c.created_at
        FROM conversations c
        LEFT JOIN users u ON u.id = c.contact_user_id
