@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Check, Shield, Zap, Globe, Menu, X, Eye, EyeOff, Code2, Lock, Layers, Terminal, ChevronRight, ChevronDown, Shuffle, MessageSquare, ArrowLeftRight, Wifi } from 'lucide-react';
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './lib/AuthContext';
@@ -84,12 +84,9 @@ function Navbar() {
 
 function HeroSection() {
   const { user } = useAuth();
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] });
-  const floatY = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
   return (
-    <section ref={containerRef} className="relative overflow-hidden bg-[#000000]">
+    <section className="relative overflow-hidden bg-[#000000]">
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[900px] bg-gradient-radial from-[#0AF5D6]/20 via-[#0AF5D6]/5 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#0AF5D6]/12 rounded-full blur-3xl" />
@@ -121,7 +118,7 @@ function HeroSection() {
             </Link>
           </motion.div>
 
-          <motion.div style={{ y: floatY }} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
             {[
               { label: 'Zero-Knowledge', icon: <Lock size={16} /> },
               { label: 'Encryption', icon: <Shield size={16} /> },

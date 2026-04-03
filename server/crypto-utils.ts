@@ -171,7 +171,7 @@ function getEncryptionKeyString(): string {
   if (!key && process.env.NODE_ENV === 'production') {
     throw new Error('DEPOSIT_KEY_SECRET must be set in production');
   }
-  return key || 'ghostlane-dev-encryption-key-32b';
+  return key || 'noctra-dev-encryption-key-32bytes';
 }
 
 function getEncryptionKey(): Buffer {

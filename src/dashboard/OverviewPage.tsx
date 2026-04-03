@@ -181,7 +181,7 @@ export default function OverviewPage() {
             <span className="text-white text-sm font-bold">Privacy Score</span>
           </div>
           <PrivacyScoreRing score={stats?.privacyScore ?? 0} loading={loading} />
-          <p className="text-gray-500 text-xs mt-4 text-center">Use more GhostLane products to increase your score</p>
+          <p className="text-gray-500 text-xs mt-4 text-center">Use more Noctra AI products to increase your score</p>
         </motion.div>
 
         <motion.div
@@ -268,7 +268,7 @@ export default function OverviewPage() {
           <EmptyState
             icon={<Shield size={28} />}
             title="No activity yet"
-            description="Start using GhostLane products and your activity will appear here."
+            description="Start using Noctra AI products and your activity will appear here."
           />
         ) : (
           <div className="divide-y divide-white/[0.03] max-h-[340px] overflow-y-auto">

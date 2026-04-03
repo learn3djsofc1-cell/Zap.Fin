@@ -43,12 +43,12 @@ const VPN_SERVERS: VpnServerDef[] = [
 ];
 
 const RELAY_NODES = [
-  'relay-alpha.ghostlane.net',
-  'relay-bravo.ghostlane.net',
-  'relay-charlie.ghostlane.net',
-  'relay-delta.ghostlane.net',
-  'relay-echo.ghostlane.net',
-  'relay-foxtrot.ghostlane.net',
+  'relay-alpha.usenoctra.xyz',
+  'relay-bravo.usenoctra.xyz',
+  'relay-charlie.usenoctra.xyz',
+  'relay-delta.usenoctra.xyz',
+  'relay-echo.usenoctra.xyz',
+  'relay-foxtrot.usenoctra.xyz',
 ];
 
 function generateVpnIp(): string {

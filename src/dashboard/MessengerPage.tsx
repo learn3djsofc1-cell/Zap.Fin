@@ -520,7 +520,7 @@ export default function MessengerPage() {
 
           <div className="bg-blue-500/5 border border-blue-500/15 rounded-xl p-3 flex items-start gap-2">
             <Lock size={14} className="text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-gray-400 text-xs leading-relaxed">All messages are end-to-end encrypted using 256-bit encryption. GhostLane cannot read your messages.</p>
+            <p className="text-gray-400 text-xs leading-relaxed">All messages are end-to-end encrypted using 256-bit encryption. Noctra AI cannot read your messages.</p>
           </div>
           <button
             type="submit"
