@@ -17,6 +17,8 @@ import {
   getRailgunWalletAddressData,
   getShieldPrivateKeySignatureMessage,
   getFallbackProviderForNetwork,
+  refreshBalances,
+  walletForID,
 } from '@railgun-community/wallet';
 import {
   NetworkName,
@@ -269,7 +271,7 @@ async function processShieldAsync(
 
     const connectedWallet = signingWallet.connect(provider);
 
-    let transaction: any;
+    let transaction: ethers.TransactionRequest;
 
     if (isBaseToken(token)) {
       const wrappedTokenSymbol = getWrappedToken(networkConfig.id);
@@ -738,6 +740,19 @@ function getTokenDecimals(token: string): number {
   return decimalsMap[token.toUpperCase()] || 18;
 }
 
+function resolveTokenSymbol(networkId: string, tokenHash: string): string {
+  const networkConfig = getNetworkById(networkId);
+  if (!networkConfig) return 'UNKNOWN';
+
+  for (const tokenSymbol of networkConfig.tokens) {
+    const addr = getTokenAddress(networkId, tokenSymbol);
+    if (addr && addr.toLowerCase() === tokenHash.toLowerCase()) {
+      return tokenSymbol;
+    }
+  }
+  return tokenHash.substring(0, 8);
+}
+
 router.get('/operations', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
@@ -785,7 +800,55 @@ router.get('/operations', async (req: AuthRequest, res: Response): Promise<void>
 
 router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.userId;
+    const userId = req.userId!;
+    const walletInfo = await getUserWalletInfo(userId);
+
+    if (walletInfo && isEngineReady()) {
+      try {
+        const wallet = walletForID(walletInfo.railgunWalletId);
+        const availableNetworks = getAvailableNetworks();
+        const sdkBalances: Array<{ network: string; token: string; shieldedBalance: string }> = [];
+
+        for (const net of availableNetworks) {
+          const chain = NETWORK_CONFIG[net.networkName]?.chain;
+          if (!chain) continue;
+
+          try {
+            await refreshBalances(chain, [walletInfo.railgunWalletId]);
+
+            for (const tokenSymbol of net.tokens) {
+              const tokenAddr = getTokenAddress(net.id, tokenSymbol);
+              if (!tokenAddr) continue;
+
+              const balance = await wallet.getBalanceERC20(
+                TXIDVersion.V2_PoseidonMerkle,
+                chain,
+                tokenAddr.toLowerCase(),
+                [],
+              );
+
+              if (balance && balance > 0n) {
+                const decimals = getTokenDecimals(tokenSymbol);
+                sdkBalances.push({
+                  network: net.id,
+                  token: tokenSymbol,
+                  shieldedBalance: formatNum(ethers.formatUnits(balance.toString(), decimals)),
+                });
+              }
+            }
+          } catch {
+            // Network scan failed, will fall through to DB balances for this network
+          }
+        }
+
+        if (sdkBalances.length > 0) {
+          res.json({ balances: sdkBalances });
+          return;
+        }
+      } catch {
+        // SDK balance retrieval failed, fall through to DB
+      }
+    }
 
     const result = await pool.query(
       `SELECT network, token,

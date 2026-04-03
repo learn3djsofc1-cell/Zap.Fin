@@ -13,6 +13,7 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { getRpcConfig, SUPPORTED_NETWORKS } from './provider.js';
+import pool from '../db.js';
 
 const DB_PATH = path.resolve(process.cwd(), '.railgun-db');
 const ARTIFACTS_PATH = path.resolve(process.cwd(), '.railgun-artifacts');
@@ -54,9 +55,17 @@ function createFileArtifactStore(): ArtifactStore {
   );
 }
 
-function createLevelDatabase() {
+interface LevelDBAdapter {
+  get: (namespace: string[], key: string) => Promise<string | undefined>;
+  put: (namespace: string[], key: string, value: string) => Promise<void>;
+  del: (namespace: string[], key: string) => Promise<void>;
+  batch: (ops: Array<{ type: 'put' | 'del'; namespace: string[]; key: string; value?: string }>) => Promise<void>;
+}
+
+async function createLevelDatabase(): Promise<LevelDBAdapter> {
   ensureDirectory(DB_PATH);
-  const Level = require('level').Level;
+  const levelModule = await import('level');
+  const Level = levelModule.Level;
   const db = new Level(DB_PATH);
 
   return {
@@ -64,8 +73,9 @@ function createLevelDatabase() {
       const fullKey = [...namespace, key].join(':');
       try {
         return await db.get(fullKey);
-      } catch (err: any) {
-        if (err.code === 'LEVEL_NOT_FOUND' || err.notFound) return undefined;
+      } catch (err: unknown) {
+        const levelErr = err as { code?: string; notFound?: boolean };
+        if (levelErr.code === 'LEVEL_NOT_FOUND' || levelErr.notFound) return undefined;
         throw err;
       }
     },
@@ -77,8 +87,9 @@ function createLevelDatabase() {
       const fullKey = [...namespace, key].join(':');
       try {
         await db.del(fullKey);
-      } catch (err: any) {
-        if (err.code === 'LEVEL_NOT_FOUND' || err.notFound) return;
+      } catch (err: unknown) {
+        const levelErr = err as { code?: string; notFound?: boolean };
+        if (levelErr.code === 'LEVEL_NOT_FOUND' || levelErr.notFound) return;
         throw err;
       }
     },
@@ -107,7 +118,7 @@ export async function initializeRailgunEngine(): Promise<void> {
   ensureDirectory(DB_PATH);
   ensureDirectory(ARTIFACTS_PATH);
 
-  const db = createLevelDatabase();
+  const db = await createLevelDatabase();
   const artifactStore = createFileArtifactStore();
   setArtifactStore(artifactStore);
 
@@ -131,6 +142,7 @@ export async function initializeRailgunEngine(): Promise<void> {
   console.log('[Railgun] Engine initialized successfully');
 
   await loadNetworkProviders();
+  await recoverPendingOperations();
 }
 
 async function loadNetworkProviders(): Promise<void> {
@@ -162,6 +174,34 @@ async function loadNetworkProviders(): Promise<void> {
     } catch (err) {
       console.error(`[Railgun] Failed to load provider for ${network.name}:`, err);
     }
+  }
+}
+
+async function recoverPendingOperations(): Promise<void> {
+  try {
+    const staleResult = await pool.query(
+      `UPDATE railgun_operations SET status = 'failed'
+       WHERE status IN ('pending', 'proving') AND created_at < NOW() - INTERVAL '10 minutes'
+       RETURNING id`
+    );
+    if (staleResult.rowCount && staleResult.rowCount > 0) {
+      console.log(`[Railgun] Recovered ${staleResult.rowCount} stale operations → failed`);
+    }
+
+    const confirmedResult = await pool.query(
+      `SELECT id, tx_hash FROM railgun_operations WHERE status = 'confirmed'`
+    );
+    if (confirmedResult.rows.length > 0) {
+      console.log(`[Railgun] Found ${confirmedResult.rows.length} confirmed-but-incomplete operations — marking complete`);
+      for (const row of confirmedResult.rows) {
+        await pool.query(
+          `UPDATE railgun_operations SET status = 'complete', completed_at = NOW() WHERE id = $1`,
+          [row.id]
+        );
+      }
+    }
+  } catch (err) {
+    console.error('[Railgun] Operation recovery error:', err);
   }
 }
 
