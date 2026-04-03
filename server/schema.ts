@@ -350,7 +350,7 @@ export async function initializeDatabase(): Promise<void> {
       CREATE TABLE IF NOT EXISTS railgun_operations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        operation_type VARCHAR(20) NOT NULL,
+        operation_type VARCHAR(20) NOT NULL CHECK (operation_type IN ('shield', 'transfer', 'unshield')),
         network VARCHAR(50) NOT NULL,
         token VARCHAR(20) NOT NULL,
         amount NUMERIC(30, 18) NOT NULL,
