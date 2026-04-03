@@ -12,7 +12,7 @@ import { messengerRouter } from './routes/messenger.js';
 import { bridgeRouter } from './routes/bridge.js';
 import { vpnRouter } from './routes/vpn.js';
 import { settingsRouter } from './routes/settings.js';
-import { railgunRouter } from './routes/railgun.js';
+import { shieldRouter } from './routes/railgun.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
@@ -34,7 +34,7 @@ app.use('/api/mixer', mixerRouter);
 app.use('/api/messenger', messengerRouter);
 app.use('/api/bridge', bridgeRouter);
 app.use('/api/vpn', vpnRouter);
-app.use('/api/railgun', railgunRouter);
+app.use('/api/railgun', shieldRouter);
 app.use('/api/settings', settingsRouter);
 
 app.use('/api', (err: Error, _req: Request, res: Response, _next: NextFunction) => {

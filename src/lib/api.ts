@@ -181,14 +181,14 @@ export interface OverviewStats {
 
 export interface ActivityItem {
   id: string;
-  type: 'mix' | 'bridge' | 'message' | 'railgun' | 'vpn';
+  type: 'mix' | 'bridge' | 'message' | 'shield' | 'vpn';
   title: string;
   description: string;
   timestamp: string;
   status: string;
 }
 
-export interface RailgunNetwork {
+export interface ShieldNetwork {
   id: string;
   name: string;
   chainId: number;
@@ -196,7 +196,7 @@ export interface RailgunNetwork {
   tokens: string[];
 }
 
-export interface RailgunOperation {
+export interface ShieldOperation {
   id: string;
   operationType: 'shield' | 'transfer' | 'unshield';
   network: string;
@@ -204,7 +204,7 @@ export interface RailgunOperation {
   amount: string;
   sourceAddress?: string;
   recipientAddress?: string;
-  railgunContract: string;
+  shieldContract: string;
   status: 'pending' | 'proving' | 'confirmed' | 'complete' | 'failed';
   zkProofHash?: string;
   zkProofStatus: 'generating' | 'verified' | 'failed';
@@ -212,13 +212,13 @@ export interface RailgunOperation {
   completedAt?: string;
 }
 
-export interface RailgunBalance {
+export interface ShieldBalance {
   network: string;
   token: string;
   shieldedBalance: string;
 }
 
-export interface RailgunStats {
+export interface ShieldStats {
   totalOperations: number;
   totalShielded: number;
   totalPrivateTransfers: number;
@@ -380,14 +380,14 @@ export const api = {
       return request<{ dapps: VpnDappSession[] }>(`/vpn/dapps${qs ? `?${qs}` : ''}`);
     },
   },
-  railgun: {
-    networks: () => request<{ networks: RailgunNetwork[] }>('/railgun/networks'),
-    shield: (body: Record<string, string>) =>
-      request<{ operation: RailgunOperation }>('/railgun/shield', { method: 'POST', body: JSON.stringify(body) }),
+  shield: {
+    networks: () => request<{ networks: ShieldNetwork[] }>('/railgun/networks'),
+    create: (body: Record<string, string>) =>
+      request<{ operation: ShieldOperation }>('/railgun/shield', { method: 'POST', body: JSON.stringify(body) }),
     transfer: (body: Record<string, string>) =>
-      request<{ operation: RailgunOperation }>('/railgun/transfer', { method: 'POST', body: JSON.stringify(body) }),
+      request<{ operation: ShieldOperation }>('/railgun/transfer', { method: 'POST', body: JSON.stringify(body) }),
     unshield: (body: Record<string, string>) =>
-      request<{ operation: RailgunOperation }>('/railgun/unshield', { method: 'POST', body: JSON.stringify(body) }),
+      request<{ operation: ShieldOperation }>('/railgun/unshield', { method: 'POST', body: JSON.stringify(body) }),
     operations: (params?: { type?: string; status?: string; limit?: number; offset?: number }) => {
       const query = new URLSearchParams();
       if (params?.type) query.set('type', params.type);
@@ -395,10 +395,10 @@ export const api = {
       if (params?.limit) query.set('limit', String(params.limit));
       if (params?.offset) query.set('offset', String(params.offset));
       const qs = query.toString();
-      return request<{ operations: RailgunOperation[]; total: number }>(`/railgun/operations${qs ? `?${qs}` : ''}`);
+      return request<{ operations: ShieldOperation[]; total: number }>(`/railgun/operations${qs ? `?${qs}` : ''}`);
     },
-    balances: () => request<{ balances: RailgunBalance[] }>('/railgun/balances'),
-    stats: () => request<{ stats: RailgunStats }>('/railgun/stats'),
+    balances: () => request<{ balances: ShieldBalance[] }>('/railgun/balances'),
+    stats: () => request<{ stats: ShieldStats }>('/railgun/stats'),
   },
   settings: {
     profile: () => request<{ profile: UserProfile }>('/settings/profile'),

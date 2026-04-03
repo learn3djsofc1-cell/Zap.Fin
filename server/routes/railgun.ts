@@ -5,7 +5,7 @@ import pool from '../db.js';
 const router = Router();
 router.use(authMiddleware);
 
-const RAILGUN_NETWORKS = [
+const SHIELD_NETWORKS = [
   { id: 'ethereum', name: 'Ethereum', chainId: 1, relayAdapt: '0xc3f2C8F9d5F0705De706b1302B7a039e1e11aC88', tokens: ['ETH', 'USDC', 'USDT', 'DAI', 'WBTC'] },
   { id: 'arbitrum', name: 'Arbitrum', chainId: 42161, relayAdapt: '0x5aD95C537b002770a39dea342c4bb2b68B1497aA', tokens: ['ETH', 'USDC', 'USDT', 'DAI'] },
   { id: 'polygon', name: 'Polygon', chainId: 137, relayAdapt: '0xc7FfA542736321A3dd69246d73987566a5486968', tokens: ['MATIC', 'USDC', 'USDT', 'DAI'] },
@@ -15,13 +15,13 @@ const RAILGUN_NETWORKS = [
 type OperationType = 'shield' | 'transfer' | 'unshield';
 const VALID_OPERATION_TYPES: OperationType[] = ['shield', 'transfer', 'unshield'];
 const VALID_STATUSES = ['pending', 'proving', 'confirmed', 'complete', 'failed'];
-const VALID_NETWORK_IDS = RAILGUN_NETWORKS.map(n => n.id);
+const VALID_NETWORK_IDS = SHIELD_NETWORKS.map(n => n.id);
 
 function isValidEvmAddress(address: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(address);
 }
 
-function isValidRailgunAddress(address: string): boolean {
+function isValidShieldedAddress(address: string): boolean {
   return /^0zk[0-9a-fA-F]{120,}$/.test(address);
 }
 
@@ -32,7 +32,7 @@ function formatNum(val: string | number): string {
   return n.toString().replace(/\.?0+$/, '');
 }
 
-interface RailgunRow {
+interface ShieldOperationRow {
   id: string;
   user_id: number;
   operation_type: string;
@@ -44,12 +44,11 @@ interface RailgunRow {
   railgun_contract: string;
   status: string;
   zk_proof_hash: string | null;
-  zk_proof_status: string;
   created_at: Date | string;
   completed_at: Date | string | null;
 }
 
-function formatOperation(row: RailgunRow) {
+function formatOperation(row: ShieldOperationRow) {
   return {
     id: row.id,
     operationType: row.operation_type,
@@ -58,10 +57,9 @@ function formatOperation(row: RailgunRow) {
     amount: formatNum(row.amount),
     sourceAddress: row.source_address || undefined,
     recipientAddress: row.recipient_address || undefined,
-    railgunContract: row.railgun_contract,
+    shieldContract: row.railgun_contract,
     status: row.status,
     zkProofHash: row.zk_proof_hash || undefined,
-    zkProofStatus: row.zk_proof_status,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     completedAt: row.completed_at ? (row.completed_at instanceof Date ? row.completed_at.toISOString() : row.completed_at) : undefined,
   };
@@ -72,25 +70,8 @@ function generateZkProofHash(): string {
   return '0x' + bytes.join('');
 }
 
-async function advanceOperationStatus(operationId: string): Promise<void> {
-  const statusTimeline: { status: string; zkProofStatus: string; delayMs: number }[] = [
-    { status: 'proving', zkProofStatus: 'generating', delayMs: 2000 },
-    { status: 'confirmed', zkProofStatus: 'verified', delayMs: 3000 },
-    { status: 'complete', zkProofStatus: 'verified', delayMs: 2000 },
-  ];
-
-  for (const step of statusTimeline) {
-    await new Promise(resolve => setTimeout(resolve, step.delayMs));
-    const completedAt = step.status === 'complete' ? 'NOW()' : 'NULL';
-    await pool.query(
-      `UPDATE railgun_operations SET status = $1, zk_proof_status = $2, completed_at = ${completedAt} WHERE id = $3`,
-      [step.status, step.zkProofStatus, operationId]
-    );
-  }
-}
-
 router.get('/networks', async (_req: AuthRequest, res: Response): Promise<void> => {
-  res.json({ networks: RAILGUN_NETWORKS });
+  res.json({ networks: SHIELD_NETWORKS });
 });
 
 async function createOperation(
@@ -116,7 +97,7 @@ async function createOperation(
     return;
   }
 
-  const networkData = RAILGUN_NETWORKS.find(n => n.id === network);
+  const networkData = SHIELD_NETWORKS.find(n => n.id === network);
   if (!networkData) {
     res.status(400).json({ error: `Network not found: ${network}` });
     return;
@@ -129,11 +110,10 @@ async function createOperation(
   }
 
   const parsedAmount = parseFloat(amount);
-  if (isNaN(parsedAmount) || !isFinite(parsedAmount) || parsedAmount <= 0) {
-    res.status(400).json({ error: 'Amount must be a finite positive number' });
+  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    res.status(400).json({ error: 'Amount must be a positive number' });
     return;
   }
-  const amountStr = String(amount).trim();
 
   if (operationType === 'shield') {
     if (!sourceAddress || typeof sourceAddress !== 'string') {
@@ -151,8 +131,8 @@ async function createOperation(
       res.status(400).json({ error: 'recipientAddress is required for private transfers' });
       return;
     }
-    if (!isValidRailgunAddress(recipientAddress.trim())) {
-      res.status(400).json({ error: 'recipientAddress must be a valid Railgun 0zk address (0zk + 120+ hex chars)' });
+    if (!isValidShieldedAddress(recipientAddress.trim())) {
+      res.status(400).json({ error: 'recipientAddress must be a valid shielded 0zk address (0zk + 120+ hex chars)' });
       return;
     }
   }
@@ -179,7 +159,7 @@ async function createOperation(
       operationType,
       network,
       upperToken,
-      amountStr,
+      parsedAmount,
       operationType === 'shield' ? sourceAddress?.trim() || null : null,
       operationType !== 'shield' ? recipientAddress?.trim() || null : null,
       networkData.relayAdapt,
@@ -187,19 +167,14 @@ async function createOperation(
     ]
   );
 
-  const op = result.rows[0];
-  res.status(201).json({ operation: formatOperation(op) });
-
-  advanceOperationStatus(op.id).catch(err =>
-    console.error('Railgun status progression error:', err)
-  );
+  res.status(201).json({ operation: formatOperation(result.rows[0]) });
 }
 
 router.post('/shield', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     await createOperation(req, res, 'shield');
   } catch (err) {
-    console.error('Railgun shield error:', err);
+    console.error('Shield operation error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -208,7 +183,7 @@ router.post('/transfer', async (req: AuthRequest, res: Response): Promise<void> 
   try {
     await createOperation(req, res, 'transfer');
   } catch (err) {
-    console.error('Railgun transfer error:', err);
+    console.error('Transfer operation error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -217,7 +192,7 @@ router.post('/unshield', async (req: AuthRequest, res: Response): Promise<void> 
   try {
     await createOperation(req, res, 'unshield');
   } catch (err) {
-    console.error('Railgun unshield error:', err);
+    console.error('Unshield operation error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -227,10 +202,8 @@ router.get('/operations', async (req: AuthRequest, res: Response): Promise<void>
     const userId = req.userId;
     const opType = req.query.type as string | undefined;
     const status = req.query.status as string | undefined;
-    const rawLimit = parseInt(req.query.limit as string);
-    const rawOffset = parseInt(req.query.offset as string);
-    const limit = Math.min(Math.max(isNaN(rawLimit) ? 50 : rawLimit, 1), 100);
-    const offset = Math.max(isNaN(rawOffset) ? 0 : rawOffset, 0);
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+    const offset = parseInt(req.query.offset as string) || 0;
 
     let query = 'SELECT * FROM railgun_operations WHERE user_id = $1';
     const params: (string | number)[] = [userId!];
@@ -264,7 +237,7 @@ router.get('/operations', async (req: AuthRequest, res: Response): Promise<void>
       total: parseInt(countResult.rows[0].count),
     });
   } catch (err) {
-    console.error('Railgun operations list error:', err);
+    console.error('Shield operations list error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -297,7 +270,7 @@ router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> =
 
     res.json({ balances });
   } catch (err) {
-    console.error('Railgun balances error:', err);
+    console.error('Shield balances error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -339,9 +312,9 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
       },
     });
   } catch (err) {
-    console.error('Railgun stats error:', err);
+    console.error('Shield stats error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-export const railgunRouter = router;
+export const shieldRouter = router;

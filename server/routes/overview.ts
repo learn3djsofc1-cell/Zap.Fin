@@ -180,7 +180,7 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
 
     const railgunActivity = railgunResult.rows.map((row: { id: string; operation_type: string; network: string; token: string; amount: string | number; status: string; created_at: Date | string }) => ({
       id: row.id,
-      type: 'railgun' as const,
+      type: 'shield' as const,
       title: `${row.operation_type.charAt(0).toUpperCase() + row.operation_type.slice(1)} ${formatNum(row.amount)} ${row.token}`,
       description: `${row.operation_type === 'shield' ? 'Public → Private' : row.operation_type === 'transfer' ? 'Private → Private' : 'Private → Public'} on ${row.network}`,
       timestamp: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,

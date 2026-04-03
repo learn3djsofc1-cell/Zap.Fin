@@ -52,7 +52,7 @@ const productCards = [
   {
     icon: Shield,
     title: 'Privacy Shield',
-    description: 'ZK-SNARK shielded transfers via Railgun',
+    description: 'ZK-SNARK shielded private transfers',
     to: '/app/privacy',
     color: 'text-[#0AF5D6]',
     bg: 'bg-[#0AF5D6]/10',
@@ -116,7 +116,7 @@ const activityTypeIcon: Record<string, typeof Shuffle> = {
   mix: Shuffle,
   bridge: ArrowLeftRight,
   message: MessageSquare,
-  railgun: Shield,
+  shield: Shield,
   vpn: Wifi,
 };
 
@@ -124,7 +124,7 @@ const activityTypeColor: Record<string, string> = {
   mix: 'text-purple-400 bg-purple-500/10',
   bridge: 'text-green-400 bg-green-500/10',
   message: 'text-blue-400 bg-blue-500/10',
-  railgun: 'text-[#0AF5D6] bg-[#0AF5D6]/10',
+  shield: 'text-[#0AF5D6] bg-[#0AF5D6]/10',
   vpn: 'text-orange-400 bg-orange-500/10',
 };
 
