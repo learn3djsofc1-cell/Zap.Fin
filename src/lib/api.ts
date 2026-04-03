@@ -175,6 +175,8 @@ export interface OverviewStats {
   activeBridges: number;
   messagesEncrypted: number;
   vpnUptime: string;
+  totalShielded: number;
+  completedShielded: number;
 }
 
 export interface ActivityItem {
@@ -205,6 +207,7 @@ export interface RailgunOperation {
   railgunContract: string;
   status: 'pending' | 'proving' | 'confirmed' | 'complete' | 'failed';
   zkProofHash?: string;
+  zkProofStatus: 'generating' | 'verified' | 'failed';
   createdAt: string;
   completedAt?: string;
 }

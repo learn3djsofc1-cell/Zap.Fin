@@ -44,6 +44,7 @@ interface RailgunRow {
   railgun_contract: string;
   status: string;
   zk_proof_hash: string | null;
+  zk_proof_status: string;
   created_at: Date | string;
   completed_at: Date | string | null;
 }
@@ -60,6 +61,7 @@ function formatOperation(row: RailgunRow) {
     railgunContract: row.railgun_contract,
     status: row.status,
     zkProofHash: row.zk_proof_hash || undefined,
+    zkProofStatus: row.zk_proof_status,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     completedAt: row.completed_at ? (row.completed_at instanceof Date ? row.completed_at.toISOString() : row.completed_at) : undefined,
   };
@@ -68,6 +70,23 @@ function formatOperation(row: RailgunRow) {
 function generateZkProofHash(): string {
   const bytes = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0'));
   return '0x' + bytes.join('');
+}
+
+async function advanceOperationStatus(operationId: string): Promise<void> {
+  const statusTimeline: { status: string; zkProofStatus: string; delayMs: number }[] = [
+    { status: 'proving', zkProofStatus: 'generating', delayMs: 2000 },
+    { status: 'confirmed', zkProofStatus: 'verified', delayMs: 3000 },
+    { status: 'complete', zkProofStatus: 'verified', delayMs: 2000 },
+  ];
+
+  for (const step of statusTimeline) {
+    await new Promise(resolve => setTimeout(resolve, step.delayMs));
+    const completedAt = step.status === 'complete' ? 'NOW()' : 'NULL';
+    await pool.query(
+      `UPDATE railgun_operations SET status = $1, zk_proof_status = $2, completed_at = ${completedAt} WHERE id = $3`,
+      [step.status, step.zkProofStatus, operationId]
+    );
+  }
 }
 
 router.get('/networks', async (_req: AuthRequest, res: Response): Promise<void> => {
@@ -168,7 +187,12 @@ async function createOperation(
     ]
   );
 
-  res.status(201).json({ operation: formatOperation(result.rows[0]) });
+  const op = result.rows[0];
+  res.status(201).json({ operation: formatOperation(op) });
+
+  advanceOperationStatus(op.id).catch(err =>
+    console.error('Railgun status progression error:', err)
+  );
 }
 
 router.post('/shield', async (req: AuthRequest, res: Response): Promise<void> => {

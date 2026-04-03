@@ -357,12 +357,15 @@ export async function initializeDatabase(): Promise<void> {
         source_address VARCHAR(255),
         recipient_address VARCHAR(255),
         railgun_contract VARCHAR(255) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'proving', 'confirmed', 'complete', 'failed')),
         zk_proof_hash VARCHAR(255),
+        zk_proof_status VARCHAR(20) NOT NULL DEFAULT 'generating' CHECK (zk_proof_status IN ('generating', 'verified', 'failed')),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         completed_at TIMESTAMP WITH TIME ZONE
       )
     `);
+
+    await client.query(`ALTER TABLE railgun_operations ADD COLUMN IF NOT EXISTS zk_proof_status VARCHAR(20) NOT NULL DEFAULT 'generating'`);
 
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_railgun_operations_user_id ON railgun_operations(user_id)

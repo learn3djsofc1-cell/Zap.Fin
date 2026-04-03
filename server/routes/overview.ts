@@ -9,7 +9,7 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
 
-    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult, bridgeCountResult, activeBridgeResult, vpnUptimeResult, vpnActiveResult] = await Promise.all([
+    const [mixCountResult, completedMixResult, recentMixResult, messageCountResult, recentMessageResult, bridgeCountResult, activeBridgeResult, vpnUptimeResult, vpnActiveResult, railgunCountResult, railgunCompleteResult] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM mix_operations WHERE user_id = $1', [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND status = 'complete'", [userId]),
       pool.query("SELECT COUNT(*) FROM mix_operations WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'", [userId]),
@@ -26,6 +26,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
         [userId]
       ),
       pool.query("SELECT COUNT(*) FROM vpn_sessions WHERE user_id = $1 AND status = 'active'", [userId]),
+      pool.query('SELECT COUNT(*) FROM railgun_operations WHERE user_id = $1', [userId]),
+      pool.query("SELECT COUNT(*) FROM railgun_operations WHERE user_id = $1 AND status = 'complete'", [userId]),
     ]);
 
     const totalMixes = parseInt(mixCountResult.rows[0].count);
@@ -37,6 +39,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
     const activeBridges = parseInt(activeBridgeResult.rows[0].count);
     const vpnTotalSeconds = parseFloat(vpnUptimeResult.rows[0].total_seconds) || 0;
     const vpnActive = parseInt(vpnActiveResult.rows[0].count) > 0;
+    const totalShielded = parseInt(railgunCountResult.rows[0].count);
+    const completedShielded = parseInt(railgunCompleteResult.rows[0].count);
 
     const vpnHours = Math.floor(vpnTotalSeconds / 3600);
     const vpnMins = Math.floor((vpnTotalSeconds % 3600) / 60);
@@ -61,7 +65,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
     const msgRecency = Math.min(recentMessages * 1, 15);
     const bridgeBase = Math.min(totalBridges * 3, 10);
     const vpnScore = vpnActive ? 10 : Math.min(Math.floor(vpnHours), 5);
-    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency + bridgeBase + vpnScore, 100);
+    const railgunBase = Math.min(totalShielded * 4, 15);
+    privacyScore = Math.min(mixBase + mixCompletion + mixRecency + msgBase + msgRecency + bridgeBase + vpnScore + railgunBase, 100);
 
     res.json({
       stats: {
@@ -71,6 +76,8 @@ router.get('/stats', async (req: AuthRequest, res: Response): Promise<void> => {
         messagesEncrypted,
         vpnUptime,
         vpnActive,
+        totalShielded,
+        completedShielded,
       },
     });
   } catch (err) {
@@ -90,7 +97,7 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
   try {
     const userId = req.userId;
 
-    const [mixResult, msgResult, bridgeResult, vpnResult] = await Promise.all([
+    const [mixResult, msgResult, bridgeResult, vpnResult, railgunResult] = await Promise.all([
       pool.query(
         `SELECT id, send_coin, receive_coin, send_amount, receive_amount, status, created_at, recipient_address, privacy_level
          FROM mix_operations
@@ -122,6 +129,14 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
          FROM vpn_sessions
          WHERE user_id = $1
          ORDER BY connected_at DESC
+         LIMIT 15`,
+        [userId]
+      ),
+      pool.query(
+        `SELECT id, operation_type, network, token, amount, status, created_at
+         FROM railgun_operations
+         WHERE user_id = $1
+         ORDER BY created_at DESC
          LIMIT 15`,
         [userId]
       ),
@@ -163,7 +178,16 @@ router.get('/activity', async (req: AuthRequest, res: Response): Promise<void> =
       status: row.status === 'active' ? 'active' : 'complete',
     }));
 
-    const activity = [...mixActivity, ...msgActivity, ...bridgeActivity, ...vpnActivity]
+    const railgunActivity = railgunResult.rows.map((row: { id: string; operation_type: string; network: string; token: string; amount: string | number; status: string; created_at: Date | string }) => ({
+      id: row.id,
+      type: 'railgun' as const,
+      title: `${row.operation_type.charAt(0).toUpperCase() + row.operation_type.slice(1)} ${formatNum(row.amount)} ${row.token}`,
+      description: `${row.operation_type === 'shield' ? 'Public → Private' : row.operation_type === 'transfer' ? 'Private → Private' : 'Private → Public'} on ${row.network}`,
+      timestamp: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+      status: row.status,
+    }));
+
+    const activity = [...mixActivity, ...msgActivity, ...bridgeActivity, ...vpnActivity, ...railgunActivity]
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 20);
 

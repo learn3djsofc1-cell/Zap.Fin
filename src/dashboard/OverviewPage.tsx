@@ -149,6 +149,7 @@ export default function OverviewPage() {
 
   const statCards = [
     { label: 'Total Mixes', value: stats?.totalMixes ?? 0, icon: Shuffle, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/10' },
+    { label: 'Shielded Ops', value: stats?.totalShielded ?? 0, icon: Shield, color: 'text-[#0AF5D6]', bg: 'bg-[#0AF5D6]/10', border: 'border-[#0AF5D6]/10' },
     { label: 'Active Bridges', value: stats?.activeBridges ?? 0, icon: ArrowLeftRight, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/10' },
     { label: 'Messages Encrypted', value: stats?.messagesEncrypted ?? 0, icon: MessageSquare, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/10' },
     { label: 'VPN Uptime', value: stats?.vpnUptime ?? '0h', icon: Wifi, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/10' },
