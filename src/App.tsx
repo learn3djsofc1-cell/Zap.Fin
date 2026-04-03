@@ -159,8 +159,8 @@ function ProductsSection() {
         </RevealOnScroll>
 
         <StaggerWrap className="grid grid-cols-1 sm:grid-cols-2 gap-5" gap={0.08}>
-          {products.map((p) => (
-            <motion.div key={p.title} variants={cardReveal} className="group bg-[#0A0A0A] rounded-2xl p-7 border border-white/[0.04] hover:border-[#0AF5D6]/15 transition-all duration-300 hover:shadow-lg hover:shadow-[#0AF5D6]/[0.03]">
+          {products.map((p, i) => (
+            <motion.div key={p.title} variants={cardReveal} className={`group bg-[#0A0A0A] rounded-2xl p-7 border border-white/[0.04] hover:border-[#0AF5D6]/15 transition-all duration-300 hover:shadow-lg hover:shadow-[#0AF5D6]/[0.03]${products.length % 2 === 1 && i === products.length - 1 ? ' sm:col-span-2 sm:max-w-[calc(50%-10px)] sm:mx-auto' : ''}`}>
               <div className="flex items-center justify-between mb-5">
                 <div className="w-12 h-12 bg-[#0AF5D6]/8 rounded-xl flex items-center justify-center text-[#0AF5D6] group-hover:bg-[#0AF5D6] group-hover:text-black transition-all duration-300">{p.icon}</div>
                 <div className="text-right">
