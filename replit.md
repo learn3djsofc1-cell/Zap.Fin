@@ -32,7 +32,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 2. **Encrypted Messenger** — E2E encrypted messaging with disappearing messages and zero metadata collection.
 3. **Privacy Bridge** — Cross-chain asset transfers across 15+ chains with complete anonymity.
 4. **VPN** — Military-grade VPN with no-logs policy, kill switch, 24 global servers, SerpAPI-powered private search, session history with DB persistence.
-5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Solana (developer SDK).
+5. **Ux402 Protocol** — Shielded Cross-Chain Facilitator on Ethereum (developer SDK).
 
 ## Project Structure
 
@@ -54,7 +54,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 │   │   ├── Modal.tsx       # Reusable modal dialog
 │   │   ├── ConfirmDialog.tsx # Delete confirmation dialog
 │   │   ├── Skeleton.tsx    # Loading skeleton components
-│   │   ├── CurrencyBadge.tsx # Currency display with logos (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE, SOL, USDC, USDT)
+│   │   ├── CurrencyBadge.tsx # Currency display with logos (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE, USDC, USDT)
 │   │   ├── DepositPendingModal.tsx # Animated deposit pending modal with SVG orbital spinner (Framer Motion)
 │   │   ├── ErrorBoundary.tsx # Error boundary component
 │   │   └── EmptyState.tsx  # Empty state placeholder
@@ -120,7 +120,7 @@ Privacy-focused cryptocurrency ecosystem platform built with React, Vite, TypeSc
 - `GET /api/mixer/pools` Pool sizes
 - `GET /api/mixer/:id` Get mix details
 - `GET /api/messenger/conversations` List conversations (DB-backed, per user)
-- `POST /api/messenger/conversations` Create conversation (Solana address validation, no contact name)
+- `POST /api/messenger/conversations` Create conversation (Ethereum address validation, no contact name)
 - `GET /api/messenger/conversations/:id/messages` Get messages (DB-backed, ownership verified)
 - `POST /api/messenger/conversations/:id/messages` Send message (DB-backed, updates conversation last_message)
 - `GET /api/messenger/contacts` List contacts (derived from conversations)
@@ -187,12 +187,13 @@ The landing page uses scroll-triggered animations built on Framer Motion:
 - `DEPOSIT_KEY_SECRET` - AES-256 encryption key for deposit private keys (defaults to a dev fallback if not set)
 - `COINGECKO_API_KEY` - CoinGecko API key for live cryptocurrency price feeds (used by mixer cross-asset swap rates)
 - `SERPAPI_KEY` - SerpAPI key for VPN private search feature (server-side proxied Google search)
+- `HELIUS_API_KEY` - Helius API key for Solana RPC (used by sweep-wallet utility script)
 
 ## Database Tables
 
 - `users` - User accounts (email, password_hash, name)
 - `mix_operations` - Cross-asset swap operations (send_coin, receive_coin, send_amount, receive_amount, exchange_rate, fee_percent, recipient_address, privacy_level, delay_minutes, status, deposit_address, deposit_private_key_enc, tx_hash)
-- `conversations` - Messenger conversations per user (contact_address as Solana address, last_message, last_message_at, UNIQUE per user+address)
+- `conversations` - Messenger conversations per user (contact_address as Ethereum address, last_message, last_message_at, UNIQUE per user+address)
 - `messages` - Messenger messages (conversation_id FK, user_id FK, content, sender, self_destruct_seconds)
 - `bridge_transfers` - Cross-chain bridge transfers (source_chain, dest_chain, token, amount, recipient_address, status, deposit_address)
 - `vpn_sessions` - VPN session records (server_id, server_name, server_country, server_city, assigned_ip, fingerprint_hash, relay_node, bytes_up, bytes_down, kill_switch, status, connected_at, disconnected_at)

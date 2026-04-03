@@ -13,7 +13,6 @@ import { getChainLogoUrl, getTokenLogoUrl } from '../coingecko';
 const CHAINS = [
   { id: 'ethereum', name: 'Ethereum', icon: 'eth', tokens: ['ETH', 'USDC', 'USDT'] },
   { id: 'bitcoin', name: 'Bitcoin', icon: 'btc', tokens: ['BTC'] },
-  { id: 'solana', name: 'Solana', icon: 'sol', tokens: ['SOL', 'USDC'] },
   { id: 'polygon', name: 'Polygon', icon: 'matic', tokens: ['MATIC', 'USDC', 'USDT'] },
   { id: 'avalanche', name: 'Avalanche', icon: 'avax', tokens: ['AVAX', 'USDC'] },
   { id: 'bsc', name: 'BNB Chain', icon: 'bnb', tokens: ['BNB', 'USDT'] },

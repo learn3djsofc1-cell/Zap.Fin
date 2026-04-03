@@ -1,5 +1,4 @@
 const CURRENCY_LOGOS: Record<string, string> = {
-  SOL: '/crypto-solana.png',
   USDC: '/crypto-usd-coin.png',
   USDT: '/crypto-tether.png',
   BTC: '/crypto-bitcoin.png',
@@ -21,7 +20,6 @@ const CURRENCY_LOGOS: Record<string, string> = {
 export const CHAIN_LOGOS: Record<string, string> = {
   ethereum: '/crypto-ethereum.png',
   bitcoin: '/crypto-bitcoin.png',
-  solana: '/crypto-solana.png',
   polygon: '/crypto-matic-network.png',
   avalanche: '/crypto-avalanche-2.png',
   bsc: '/crypto-binancecoin.png',
@@ -79,7 +77,7 @@ interface CurrencySelectProps {
   className?: string;
 }
 
-export function CurrencySelect({ value, onChange, currencies = ['USDC', 'SOL', 'ETH', 'USDT'], className = '' }: CurrencySelectProps) {
+export function CurrencySelect({ value, onChange, currencies = ['USDC', 'ETH', 'BTC', 'USDT'], className = '' }: CurrencySelectProps) {
   return (
     <div className={`flex gap-2 ${className}`}>
       {currencies.map((c) => {
@@ -110,7 +108,7 @@ interface CurrencyToggleProps {
   currencies?: string[];
 }
 
-export function CurrencyToggle({ selected, onChange, currencies = ['USDC', 'SOL', 'ETH', 'USDT'] }: CurrencyToggleProps) {
+export function CurrencyToggle({ selected, onChange, currencies = ['USDC', 'ETH', 'BTC', 'USDT'] }: CurrencyToggleProps) {
   const toggle = (c: string) => {
     if (selected.includes(c)) {
       if (selected.length > 1) onChange(selected.filter(x => x !== c));

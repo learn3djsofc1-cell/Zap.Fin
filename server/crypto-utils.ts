@@ -328,8 +328,6 @@ const BRIDGE_CHAIN_TOKEN_MAP: Record<string, string> = {
   'ethereum:USDC': 'ETH',
   'ethereum:USDT': 'ETH',
   'bitcoin:BTC': 'BTC',
-  'solana:SOL': 'SOL',
-  'solana:USDC': 'SOL',
   'polygon:MATIC': 'MATIC',
   'polygon:USDC': 'MATIC',
   'polygon:USDT': 'MATIC',
@@ -359,15 +357,6 @@ const BRIDGE_ADDRESS_VALIDATORS: Record<string, (address: string) => { valid: bo
   DASH: ADDRESS_VALIDATORS.DASH,
   ZEC: ADDRESS_VALIDATORS.ZEC,
   DOGE: ADDRESS_VALIDATORS.DOGE,
-  SOL: (address: string) => {
-    if (address.length < 32 || address.length > 44) {
-      return { valid: false, error: 'SOL address must be 32-44 characters' };
-    }
-    if (!isBase58(address)) {
-      return { valid: false, error: 'Invalid Base58 characters in SOL address' };
-    }
-    return { valid: true };
-  },
   MATIC: (address: string) => ADDRESS_VALIDATORS.ETH(address),
   AVAX: (address: string) => ADDRESS_VALIDATORS.ETH(address),
   BNB: (address: string) => ADDRESS_VALIDATORS.ETH(address),
@@ -396,7 +385,6 @@ const BRIDGE_ADDRESS_GENERATORS: Record<string, () => DepositAddressResult> = {
   DASH: () => generateBase58Address([0x4C]),
   ZEC: () => generateBase58Address([0x1C, 0xB8]),
   DOGE: () => generateBase58Address([0x1E]),
-  SOL: () => generateSolAddress(),
   MATIC: () => generateEthLikeAddress(),
   AVAX: () => generateEthLikeAddress(),
   BNB: () => generateEthLikeAddress(),

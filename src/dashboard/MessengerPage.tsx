@@ -20,11 +20,10 @@ function truncateAddress(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-const SOLANA_BASE58 = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
+const ETH_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 
-function isValidSolanaAddress(address: string): boolean {
-  if (!address || address.length < 32 || address.length > 44) return false;
-  return SOLANA_BASE58.test(address);
+function isValidEthereumAddress(address: string): boolean {
+  return ETH_ADDRESS_RE.test(address);
 }
 
 const SELF_DESTRUCT_OPTIONS = [
@@ -102,17 +101,17 @@ export default function MessengerPage() {
     }
   }
 
-  const addressValid = newContactAddress.trim().length > 0 && isValidSolanaAddress(newContactAddress.trim());
+  const addressValid = newContactAddress.trim().length > 0 && isValidEthereumAddress(newContactAddress.trim());
   const showAddressError = addressTouched && newContactAddress.trim().length > 0 && !addressValid;
 
   async function handleNewChat(e: React.FormEvent) {
     e.preventDefault();
     if (!newContactAddress.trim()) {
-      toast('error', 'Solana address is required');
+      toast('error', 'Ethereum address is required');
       return;
     }
     if (!addressValid) {
-      toast('error', 'Invalid Solana address');
+      toast('error', 'Invalid Ethereum address');
       return;
     }
     try {
@@ -371,13 +370,13 @@ export default function MessengerPage() {
       <Modal open={showNewChat} onClose={() => { setShowNewChat(false); setNewContactAddress(''); setAddressTouched(false); }} title="New Encrypted Chat">
         <form onSubmit={handleNewChat} className="space-y-5">
           <div>
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Solana Address</label>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Ethereum Address</label>
             <input
               type="text"
               value={newContactAddress}
               onChange={(e) => { setNewContactAddress(e.target.value); setAddressTouched(true); }}
               onBlur={() => setAddressTouched(true)}
-              placeholder="Enter Solana wallet address"
+              placeholder="Enter Ethereum wallet address (0x...)"
               className={`w-full bg-[#111111] border rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all font-mono text-xs ${
                 showAddressError
                   ? 'border-red-500/50 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20'
@@ -389,7 +388,7 @@ export default function MessengerPage() {
             {showAddressError && (
               <div className="flex items-center gap-1.5 mt-2">
                 <AlertCircle size={12} className="text-red-400 shrink-0" />
-                <span className="text-red-400 text-[11px]">Invalid Solana address. Must be 32-44 base58 characters.</span>
+                <span className="text-red-400 text-[11px]">Invalid Ethereum address. Must start with 0x followed by 40 hex characters.</span>
               </div>
             )}
             {addressValid && (
@@ -397,7 +396,7 @@ export default function MessengerPage() {
                 <div className="w-3 h-3 rounded-full bg-[#0AF5D6]/20 flex items-center justify-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0AF5D6]" />
                 </div>
-                <span className="text-[#0AF5D6] text-[11px]">Valid Solana address</span>
+                <span className="text-[#0AF5D6] text-[11px]">Valid Ethereum address</span>
               </div>
             )}
           </div>

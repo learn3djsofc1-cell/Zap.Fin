@@ -112,7 +112,7 @@ export default function DocsPage() {
             {/* ── Platform Overview ── */}
             <Section id="overview" title="Platform Overview">
               <P>
-                GhostLane is a privacy-first cryptocurrency ecosystem that unifies five core products under a single platform: a cross-asset Privacy Mixer, an end-to-end Encrypted Messenger, a cross-chain Privacy Bridge, a military-grade VPN with private search, and the Ux402 Protocol for shielded cross-chain facilitation on Solana. Every component is engineered around zero-knowledge cryptography to ensure that no party — including GhostLane — can observe, correlate, or reconstruct user activity.
+                GhostLane is a privacy-first cryptocurrency ecosystem that unifies five core products under a single platform: a cross-asset Privacy Mixer, an end-to-end Encrypted Messenger, a cross-chain Privacy Bridge, a military-grade VPN with private search, and the Ux402 Protocol for shielded cross-chain facilitation on Ethereum. Every component is engineered around zero-knowledge cryptography to ensure that no party — including GhostLane — can observe, correlate, or reconstruct user activity.
               </P>
               <H3>System Architecture</H3>
               <P>
@@ -126,13 +126,13 @@ export default function DocsPage() {
                   ['Encrypted Messenger', 'Private communication between wallet addresses', 'AES-256-GCM E2E encryption, self-destructing payloads'],
                   ['Privacy Bridge', 'Anonymous cross-chain asset transfers', 'Relay nodes, threshold signatures, 15+ chain support'],
                   ['GhostLane VPN', 'Encrypted tunneling with private web search', 'WireGuard protocol, 24 global servers, SerpAPI proxy'],
-                  ['Ux402 Protocol', 'Shielded cross-chain facilitation on Solana', 'Multi-hop routing, privacy pools, x402 standard'],
+                  ['Ux402 Protocol', 'Shielded cross-chain facilitation on Ethereum', 'Multi-hop routing, privacy pools, x402 standard'],
                 ]}
               />
               <H3>Key Capabilities</H3>
               <UL>
                 <LI>Cross-asset mixing across 8 cryptocurrencies (BTC, ETH, XMR, LTC, DASH, ZEC, BCH, DOGE) with live CoinGecko exchange rates</LI>
-                <LI>End-to-end encrypted messaging with configurable self-destruct timers and Solana address-based identity</LI>
+                <LI>End-to-end encrypted messaging with configurable self-destruct timers and Ethereum address-based identity</LI>
                 <LI>Cross-chain bridge transfers across 15+ blockchains with deposit tracking and status lifecycle</LI>
                 <LI>VPN service spanning 24 servers across 6 global regions with kill switch, bandwidth monitoring, and dApp session tracking</LI>
                 <LI>Ux402 Protocol for untraceable cross-chain transactions using multi-hop privacy pool routing</LI>
@@ -209,7 +209,7 @@ export default function DocsPage() {
             <Section id="messenger" title="Encrypted Messenger">
               <H3>End-to-End Encryption Architecture</H3>
               <P>
-                The GhostLane Messenger provides fully encrypted communication between users identified by Solana wallet addresses. All message content is encrypted client-side using AES-256-GCM before transmission. The server stores only ciphertext — plaintext content never exists on GhostLane infrastructure. Conversations are initiated by specifying the recipient's Solana address; no phone numbers, emails, or usernames are required.
+                The GhostLane Messenger provides fully encrypted communication between users identified by Ethereum wallet addresses. All message content is encrypted client-side using AES-256-GCM before transmission. The server stores only ciphertext — plaintext content never exists on GhostLane infrastructure. Conversations are initiated by specifying the recipient's Ethereum address; no phone numbers, emails, or usernames are required.
               </P>
               <H3>Self-Destructing Messages</H3>
               <P>
@@ -229,7 +229,7 @@ export default function DocsPage() {
               <P>
                 GhostLane does not collect, store, or process any messaging metadata. There are no read receipts, typing indicators, or online status signals. The server cannot determine who is communicating with whom, how frequently messages are exchanged, or the size of message payloads. All metadata fields are encrypted alongside content.
               </P>
-              <CodeBlock code={`// Create a new conversation with a Solana address\nconst conversation = await client.messenger.create({\n  contactAddress: 'Gh0sT...SolanaAddress',\n});\n\n// Send a self-destructing message\nconst msg = await client.messenger.send({\n  conversationId: conversation.id,\n  content: 'Transfer confirmed. Funds cleared.',\n  selfDestructSeconds: 300, // 5 minutes\n});\n\nconsole.log(msg.encrypted);  // true\nconsole.log(msg.expiresAt);  // '2025-03-24T12:10:00Z'`} />
+              <CodeBlock code={`// Create a new conversation with an Ethereum address\nconst conversation = await client.messenger.create({\n  contactAddress: '0xABC...DEF',\n});\n\n// Send a self-destructing message\nconst msg = await client.messenger.send({\n  conversationId: conversation.id,\n  content: 'Transfer confirmed. Funds cleared.',\n  selfDestructSeconds: 300, // 5 minutes\n});\n\nconsole.log(msg.encrypted);  // true\nconsole.log(msg.expiresAt);  // '2025-03-24T12:10:00Z'`} />
             </Section>
 
             {/* ── Privacy Bridge ── */}
@@ -243,7 +243,6 @@ export default function DocsPage() {
                 headers={['Chain', 'Tokens', 'Confirmation Time']}
                 rows={[
                   ['Ethereum', 'ETH, USDC, USDT, WBTC', '~2 minutes'],
-                  ['Solana', 'SOL, USDC, USDT', '~30 seconds'],
                   ['Polygon', 'MATIC, USDC, USDT', '~1 minute'],
                   ['Arbitrum', 'ETH, USDC, ARB', '~1 minute'],
                   ['Avalanche', 'AVAX, USDC, USDT', '~1 minute'],
@@ -269,7 +268,7 @@ export default function DocsPage() {
                   ['failed', 'Transfer could not be completed; funds returned to source'],
                 ]}
               />
-              <CodeBlock code={`const transfer = await client.bridge.create({\n  sourceChain: 'ethereum',\n  destChain: 'solana',\n  token: 'USDC',\n  amount: '1000',\n  recipientAddress: 'Gh0sT...SolanaAddress',\n});\n\nconsole.log(transfer.depositAddress); // 0x...unique_deposit\nconsole.log(transfer.status);         // 'initiated'\n\n// Poll for status updates\nconst updated = await client.bridge.status(transfer.id);\nconsole.log(updated.status);          // 'bridging' | 'complete'`} />
+              <CodeBlock code={`const transfer = await client.bridge.create({\n  sourceChain: 'ethereum',\n  destChain: 'polygon',\n  token: 'USDC',\n  amount: '1000',\n  recipientAddress: '0xABC...DEF',\n});\n\nconsole.log(transfer.depositAddress); // 0x...unique_deposit\nconsole.log(transfer.status);         // 'initiated'\n\n// Poll for status updates\nconst updated = await client.bridge.status(transfer.id);\nconsole.log(updated.status);          // 'bridging' | 'complete'`} />
             </Section>
 
             {/* ── GhostLane VPN ── */}
@@ -313,7 +312,7 @@ export default function DocsPage() {
             <Section id="ux402" title="Ux402 Protocol">
               <H3>Shielded Cross-Chain Facilitator</H3>
               <P>
-                The Ux402 Protocol is the first implementation of the x402 standard for untraceable cross-chain transactions. Built on Solana for sub-second finality and minimal gas costs, Ux402 routes transfers through a series of privacy pools using multi-hop obfuscation. Each hop re-encrypts the transaction payload and shuffles it with other in-flight transfers, making it computationally infeasible to correlate the source and destination.
+                The Ux402 Protocol is the first implementation of the x402 standard for untraceable cross-chain transactions. Built on Ethereum for robust security and deep liquidity, Ux402 routes transfers through a series of privacy pools using multi-hop obfuscation. Each hop re-encrypts the transaction payload and shuffles it with other in-flight transfers, making it computationally infeasible to correlate the source and destination.
               </P>
               <H3>Protocol Flow</H3>
               <UL>
@@ -324,9 +323,9 @@ export default function DocsPage() {
               </UL>
               <H3>Supported Chains</H3>
               <P>
-                Ux402 supports cross-chain transfers between 15+ blockchains including Ethereum, Solana, Bitcoin (via wrapped BTC), Polygon, Avalanche, Arbitrum, Optimism, Base, BSC, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chain integrations are deployed quarterly.
+                Ux402 supports cross-chain transfers between 15+ blockchains including Ethereum, Bitcoin (via wrapped BTC), Polygon, Avalanche, Arbitrum, Optimism, Base, BSC, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chain integrations are deployed quarterly.
               </P>
-              <CodeBlock code={`import { Ux402Client } from '@ghostlane/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.ghostlane.net/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'solana',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n  hops: 3,              // number of intermediate pools\n});\n\nconsole.log(transfer.proofHash);     // zk-SNARK proof identifier\nconsole.log(transfer.estimatedTime); // '~45 seconds'\nconsole.log(transfer.status);        // 'routing' -> 'complete'`} />
+              <CodeBlock code={`import { Ux402Client } from '@ghostlane/ux402-sdk';\n\nconst ux402 = new Ux402Client({\n  network: 'mainnet',\n  rpcUrl: 'https://api.ghostlane.net/ux402',\n});\n\nconst transfer = await ux402.createTransfer({\n  sourceChain: 'ethereum',\n  destChain: 'polygon',\n  amount: '1.5',\n  token: 'ETH',\n  privacyLevel: 'maximum',\n  hops: 3,              // number of intermediate pools\n});\n\nconsole.log(transfer.proofHash);     // zk-SNARK proof identifier\nconsole.log(transfer.estimatedTime); // '~45 seconds'\nconsole.log(transfer.status);        // 'routing' -> 'complete'`} />
               <Callout type="info" title="Liquidity Requirements">
                 Multi-hop routing requires sufficient liquidity in intermediate pools. For transfers exceeding $100,000 USD equivalent, the protocol may split the amount across multiple routing paths to maintain anonymity set density.
               </Callout>
@@ -369,7 +368,7 @@ export default function DocsPage() {
               <P>
                 The TypeScript SDK provides a fully typed interface to all GhostLane operations. It supports ESM and CJS module systems, requires Node.js 18+, and includes built-in retry logic, request timeout configuration, and structured error types.
               </P>
-              <CodeBlock code={`import { GhostLane, GhostLaneError } from '@ghostlane/sdk';\n\nconst gl = new GhostLane({ apiKey: 'gl_live_...' });\n\ntry {\n  // Mixer: cross-asset swap\n  const mix = await gl.mixer.create({\n    sendCoin: 'BTC',\n    receiveCoin: 'ETH',\n    sendAmount: '0.5',\n    recipientAddress: '0xABC...DEF',\n    privacyLevel: 'maximum',\n  });\n  console.log(mix.depositAddress, mix.receiveAmount);\n\n  // Bridge: cross-chain transfer\n  const bridge = await gl.bridge.create({\n    sourceChain: 'ethereum',\n    destChain: 'solana',\n    token: 'USDC',\n    amount: '5000',\n    recipientAddress: 'Gh0sT...addr',\n  });\n\n  // Messenger: send encrypted message\n  const msg = await gl.messenger.send({\n    conversationId: 'conv_123',\n    content: 'Funds transferred.',\n    selfDestructSeconds: 3600,\n  });\n\n  // VPN: connect and search\n  const session = await gl.vpn.connect({ serverId: 'us-nyc-1' });\n  const results = await gl.vpn.search({ query: 'privacy coins' });\n} catch (err) {\n  if (err instanceof GhostLaneError) {\n    console.error(err.code, err.message, err.retryable);\n  }\n}`} />
+              <CodeBlock code={`import { GhostLane, GhostLaneError } from '@ghostlane/sdk';\n\nconst gl = new GhostLane({ apiKey: 'gl_live_...' });\n\ntry {\n  // Mixer: cross-asset swap\n  const mix = await gl.mixer.create({\n    sendCoin: 'BTC',\n    receiveCoin: 'ETH',\n    sendAmount: '0.5',\n    recipientAddress: '0xABC...DEF',\n    privacyLevel: 'maximum',\n  });\n  console.log(mix.depositAddress, mix.receiveAmount);\n\n  // Bridge: cross-chain transfer\n  const bridge = await gl.bridge.create({\n    sourceChain: 'ethereum',\n    destChain: 'polygon',\n    token: 'USDC',\n    amount: '5000',\n    recipientAddress: '0xABC...DEF',\n  });\n\n  // Messenger: send encrypted message\n  const msg = await gl.messenger.send({\n    conversationId: 'conv_123',\n    content: 'Funds transferred.',\n    selfDestructSeconds: 3600,\n  });\n\n  // VPN: connect and search\n  const session = await gl.vpn.connect({ serverId: 'us-nyc-1' });\n  const results = await gl.vpn.search({ query: 'privacy coins' });\n} catch (err) {\n  if (err instanceof GhostLaneError) {\n    console.error(err.code, err.message, err.retryable);\n  }\n}`} />
               <H3>Python SDK</H3>
               <P>
                 The Python SDK mirrors the TypeScript API surface with Pythonic naming conventions. It uses <code className="text-[#0AF5D6] bg-[#0AF5D6]/5 px-1.5 py-0.5 rounded text-xs">async/await</code> for all I/O operations, supports Python 3.10+, and provides dataclass-based response models with full type annotations.
@@ -439,7 +438,7 @@ export default function DocsPage() {
                 headers={['Method', 'Endpoint', 'Description']}
                 rows={[
                   ['GET', '/api/messenger/conversations', 'List all conversations for the authenticated user'],
-                  ['POST', '/api/messenger/conversations', 'Create a new conversation by Solana address'],
+                  ['POST', '/api/messenger/conversations', 'Create a new conversation by Ethereum address'],
                   ['GET', '/api/messenger/conversations/:id/messages', 'Retrieve messages in a conversation'],
                   ['POST', '/api/messenger/conversations/:id/messages', 'Send an encrypted message (supports selfDestructSeconds)'],
                   ['GET', '/api/messenger/contacts', 'List contacts derived from conversation history'],
@@ -496,7 +495,7 @@ export default function DocsPage() {
               <FAQ q="Is using GhostLane legal?" a="GhostLane is a privacy tool analogous to encrypted email, VPN services, or HTTPS. The legality of privacy tools varies by jurisdiction. Users are responsible for complying with applicable laws and regulations in their region. GhostLane does not facilitate or endorse any unlawful activity." />
               <FAQ q="Which cryptocurrencies are supported for mixing?" a="The Privacy Mixer supports cross-asset swaps between eight cryptocurrencies: Bitcoin (BTC), Ethereum (ETH), Monero (XMR), Litecoin (LTC), Dash (DASH), Zcash (ZEC), Bitcoin Cash (BCH), and Dogecoin (DOGE). Exchange rates are sourced live from CoinGecko with a 1.5% protocol fee." />
               <FAQ q="How does the mixer ensure privacy?" a="The mixer uses zero-knowledge proofs (zk-SNARKs) to mathematically prove that a withdrawal is valid without revealing which deposit it corresponds to. Combined with large anonymity sets (up to 1,000+ participants at Maximum privacy level) and variable time delays, it is computationally infeasible to link deposits to withdrawals." />
-              <FAQ q="What blockchains does the Privacy Bridge support?" a="The bridge supports 15+ blockchains including Ethereum, Solana, Polygon, Arbitrum, Avalanche, BSC, Optimism, Base, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chains are integrated quarterly." />
+              <FAQ q="What blockchains does the Privacy Bridge support?" a="The bridge supports 15+ blockchains including Ethereum, Polygon, Arbitrum, Avalanche, BSC, Optimism, Base, Fantom, zkSync, Starknet, Celo, Moonbeam, and Gnosis. New chains are integrated quarterly." />
               <FAQ q="Is there a sandbox environment for testing?" a="Yes. Use API keys with the gl_test_ prefix to access the sandbox environment. Sandbox operations execute instantly without interacting with live blockchains or consuming real funds. Sandbox data is isolated and reset daily." />
               <FAQ q="Does GhostLane store any user data?" a="GhostLane enforces a strict zero-log policy. No transaction data, IP addresses, session metadata, message content, or browsing activity is retained after the relevant operation completes. Messenger content is encrypted end-to-end — the server stores only ciphertext." />
               <FAQ q="How does the VPN private search work?" a="When connected to the VPN, search queries are encrypted and routed through the VPN tunnel to GhostLane's server-side proxy, which executes the search via SerpAPI. Results are returned without third-party tracking cookies, fingerprinting, or personalization. Your query never reaches the search engine directly." />

@@ -15,7 +15,6 @@ const COINGECKO_IDS: Record<string, string> = {
 const CHAIN_COINGECKO_IDS: Record<string, string> = {
   ethereum: 'ethereum',
   bitcoin: 'bitcoin',
-  solana: 'solana',
   polygon: 'matic-network',
   avalanche: 'avalanche-2',
   bsc: 'binancecoin',
@@ -33,7 +32,6 @@ const CHAIN_COINGECKO_IDS: Record<string, string> = {
 const TOKEN_COINGECKO_IDS: Record<string, string> = {
   BTC: 'bitcoin',
   ETH: 'ethereum',
-  SOL: 'solana',
   USDC: 'usd-coin',
   USDT: 'tether',
   XMR: 'monero',
@@ -171,12 +169,10 @@ const MIXER_FEE_PERCENT = 1.5;
 
 async function fetchPricesFromApi(): Promise<Record<string, number>> {
   const apiKey = process.env.COINGECKO_API_KEY;
-  if (!apiKey) {
-    throw new Error('COINGECKO_API_KEY is not configured');
-  }
-
   const ids = Object.values(COINGECKO_IDS).join(',');
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&x_cg_demo_api_key=${apiKey}`;
+  const url = apiKey
+    ? `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&x_cg_demo_api_key=${apiKey}`
+    : `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
 
   const response = await fetch(url, {
     headers: {

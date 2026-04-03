@@ -5,11 +5,10 @@ import pool from '../db.js';
 const router = Router();
 router.use(authMiddleware);
 
-const SOLANA_BASE58 = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
+const ETH_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 
-function isValidSolanaAddress(address: string): boolean {
-  if (!address || address.length < 32 || address.length > 44) return false;
-  return SOLANA_BASE58.test(address);
+function isValidEthereumAddress(address: string): boolean {
+  return ETH_ADDRESS_RE.test(address);
 }
 
 router.get('/conversations', async (req: AuthRequest, res: Response): Promise<void> => {
@@ -45,13 +44,13 @@ router.post('/conversations', async (req: AuthRequest, res: Response): Promise<v
     const { contactAddress } = req.body;
 
     if (!contactAddress) {
-      res.status(400).json({ error: 'Solana address is required' });
+      res.status(400).json({ error: 'Ethereum address is required' });
       return;
     }
 
     const trimmed = contactAddress.trim();
-    if (!isValidSolanaAddress(trimmed)) {
-      res.status(400).json({ error: 'Invalid Solana address. Must be 32-44 base58 characters (no 0, O, I, l).' });
+    if (!isValidEthereumAddress(trimmed)) {
+      res.status(400).json({ error: 'Invalid Ethereum address. Must start with 0x followed by 40 hex characters.' });
       return;
     }
 

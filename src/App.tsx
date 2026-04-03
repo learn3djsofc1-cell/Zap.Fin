@@ -234,10 +234,10 @@ function Ux402Section() {
       "// Initiate private cross-chain transfer",
       "const transfer = await client.createTransfer({",
       "  sourceChain: 'ethereum',",
-      "  destChain: 'solana',",
+      "  destChain: 'polygon',",
       "  amount: '1.5',",
       "  token: 'ETH',",
-      "  recipientAddress: 'Sol1abc...xyz',",
+      "  recipientAddress: '0xABC...DEF',",
       "  privacyLevel: 'maximum',",
       "});",
       "",
@@ -256,10 +256,10 @@ function Ux402Section() {
       "# Initiate private cross-chain transfer",
       "transfer = await client.create_transfer(",
       "    source_chain='ethereum',",
-      "    dest_chain='solana',",
+      "    dest_chain='polygon',",
       "    amount='1.5',",
       "    token='ETH',",
-      "    recipient_address='Sol1abc...xyz',",
+      "    recipient_address='0xABC...DEF',",
       "    privacy_level='maximum',",
       ")",
       "",
@@ -279,10 +279,10 @@ function Ux402Section() {
       "let transfer = client.create_transfer(",
       "    TransferParams {",
       "        source_chain: \"ethereum\",",
-      "        dest_chain: \"solana\",",
+      "        dest_chain: \"polygon\",",
       "        amount: \"1.5\",",
       "        token: \"ETH\",",
-      "        recipient: \"Sol1abc...xyz\",",
+      "        recipient: \"0xABC...DEF\",",
       "        privacy_level: PrivacyLevel::Maximum,",
       "    }",
       ").await?;",
@@ -294,7 +294,7 @@ function Ux402Section() {
   const features = [
     { icon: <Shield size={18} />, title: 'Zero-Knowledge Proofs', desc: 'Advanced zk-SNARKs implementation hiding transaction details while maintaining verifiability' },
     { icon: <ArrowLeftRight size={18} />, title: 'Cross-Chain Privacy', desc: 'Seamlessly transfer assets between chains while maintaining complete anonymity' },
-    { icon: <Zap size={18} />, title: 'Solana Speed', desc: 'Leverages Solana\'s high throughput for instant private transactions at minimal cost' },
+    { icon: <Zap size={18} />, title: 'Ethereum Speed', desc: 'Leverages Ethereum\'s robust network for secure private transactions with minimal cost' },
     { icon: <Shuffle size={18} />, title: 'Untraceable Routing', desc: 'Multi-hop routing through privacy pools making transaction paths impossible to trace' },
   ];
 
@@ -309,7 +309,7 @@ function Ux402Section() {
             Ux402 Protocol
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-3xl mx-auto leading-relaxed">
-            Shielded Cross-Chain Facilitator on Solana. The world's first untraceable x402 implementation for complete transaction privacy across blockchains.
+            Shielded Cross-Chain Facilitator on Ethereum. The world's first untraceable x402 implementation for complete transaction privacy across blockchains.
           </p>
         </RevealOnScroll>
 
